@@ -225,7 +225,7 @@
      the document. For example, if I wanted to create a link to my github page, 
      I could do something like: {https://github.com/theabm}[my github]. 
      However, if I wanted to repeat it, I would have to retype everything. 
-     
+
      On the other hand, with anchors, I can just define the anchor *once* /anywhere/ 
      and then resue the same word enclosed by brackets anywhere else! An example 
      be:
@@ -239,12 +239,12 @@
      Linking to another `norg` file works exactly the same as inline linking 
      except that we must wrap the path in `:` specifier.
 
-     For example this is a link to an {:../neorg/newnote:}[An external file].
+     For example this is a link to an {:newnote:}[An external file].
 
      To link to a location inside another `norg` file, we use the same 
      syntax, and append the location after the second `:` specifier:
 
-     - {:../neorg/newnote:# Some Heading I Want To Link To}[A location in an external file]
+     - {:newnote:# Some Heading I Want To Link To}[A location in an external file]
 
      Link fixing in this case works in the same exact way. 
 
@@ -255,8 +255,8 @@
      - {*** Link targets} Inline link to a level 3 heading
      - {**** Pure links} Inline link to a level 4 heading
      - {# What Is Neorg?} Using the magic char. to link
-     - {:../neorg/newnote:}[A link to an external file]
-     - {:../neorg/newnote:# Some Heading I Want To Link To}[A link to a location in an external file]
+     - {:newnote:}[A link to an external file]
+     - {:newnote:# Some Heading I Want To Link To}[A link to a location in an external file]
      - {https://github.com/theabm}[A link to a url]
      - An [anchor]{https://github.com/theabm} link
 **** (!) Note
@@ -312,12 +312,15 @@
     after anything that has a modifier, for example, in the header above!
 
     So we can basically keep track of all of these! 
-**** Cycling between states
-     Simply write (x)
-     - (x) Bread 
+**** Key bindings
+     - *`<Ctrl-Space>`*: To cycle between states
+     - *`<LocalLeader>td`*: To set to done
+     - *`<LocalLeader>tu`*: To set to undone
+     - *`<LocalLeader>tp`*: To set to pending
+     - And analogously for all types
 
-     Alternatively, we can use *<Ctl-Space>* which is the default key-binding which 
-     cycles the status of an item through "done", "undone", and "pending".
+     Note that we can use these keybindings to just create a to-do item!
+
 *** Types 
     - ( ) Undone -> not done yet
     - (x) Done -> done with that
@@ -341,6 +344,7 @@
     Similarly, if one of the sub-items are changed, the top parent item gets changed. 
     So basically, all the items interact with each other to give a powerful framework 
     for management/tracking.
+* Automation
 * Wiki 
   The [wiki]{https://github.com/nvim-neorg/neorg/wiki} section has information 
   about all the modules to supercharge Neorg.
@@ -354,6 +358,19 @@
    Some notable examples are:
    - [Dirman module]{https://github.com/nvim-neorg/neorg/wiki/Dirman}
    - [Concealer module]{https://github.com/nvim-neorg/neorg/wiki/Concealer}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
