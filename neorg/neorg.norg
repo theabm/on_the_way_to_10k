@@ -1,0 +1,360 @@
+* What is Neorg?
+  [Neorg]{https://github.com/nvim-neorg/neorg} is a powerful interface for a plaintext markup 
+  language called norg. 
+  It is very embdeddable and lightweight which makes it a great substitute 
+  for Markdown.
+
+  Neorg is an ecosystem on top of norg and it supercharges the workflow. 
+* Installing 
+  The github page has the required information. An important thing of note is the 
+  *:Neorg sync-parsers* command, which ensures that the Treesitter parser for norg files 
+  is on sync with the neorg version being used. 
+* Modules 
+  From the packer command to install neorg, we can see that the setup call initializes 
+  neorg with a lua table. 
+
+  In this table we load some modules which are subplugins that run 
+  inside of neorg and build up the entire functionality. 
+
+  This is much like Unix phylosophy. This is useful because in the future, 
+  when neorg will be extended, knowledge of these modules will be needed. 
+  The Wiki section contains a detailed description of all the modules available 
+  for Neorg. 
+
+  We will now discuss three of these. 
+** *core.defaults* module
+   A meta module that loads default modules. More information can be found here{link}
+** *core.norg.concealer* module
+   It converts some markdown elements in documents into nice icons (hides stars, dashes etc)
+** *core.norg.dirman* module
+   Assigns the name of a workspace to an actual location. This data is then used in other modules 
+   to figure out where your norg files are stored.
+
+   With the default config, there is a single workspace called "notes" and it is 
+   located at "~/notes".
+
+   Neorg will automatically create this directory for you the first time you 
+   actually need it. 
+
+*** Configuration [link]
+    The default workspace is the defaul workspace whenever neovim starts. It is 
+    set to "nil" by default. 
+
+    If we set it to one of the workspaces we defined, then every time neovim starts 
+    neorg will be set automatically to that workspace. 
+
+    We verify this by running *:Neorg workspace* without any arguments and observing 
+    that the output is the default workspace. 
+
+    This is especially useful if we combine it with the *:Neorg index* command 
+    since this takes us current workspace, which is the default one, unless we 
+    have changed it.
+
+    The workflow can be further supercharged with *:Neorg return* command which 
+    closes all neorg buffers and returns to where we were.
+* Commands
+  *:Neorg* exposes the API of modules in neorg. This is the starting place for anythig 
+  that neorg can do. 
+** *:Neorg workspace* command
+   *:Neorg workspace* - Shows the workspaces available. You always see at least `default`
+   workspace and with the default config the *notes* workspace.
+
+   Selecting a workspace and hitting enter brings you into the *index.norg* file for the workspace. 
+
+   The index file is the entry point of the workspace. It is like a table of contents for the whole 
+   directory. So you can create notes and links to other files from here (in case you want to create a 
+   wiki or track a journal). 
+
+   If we have many workspaces, this makes it super easy to enter different areas of focus using a single 
+   command! (Note that the workspaces can be in different locations of our directory)
+*** Options for the command
+    *:Neorg workspace default* - Shows the default workspace. Using the default config, this will 
+    just be "notes"
+    *:Neorg workspace notes* - The notes workspace we have made available with the default config.
+    Note that we can define many workspaces! However, with the default config, we only see these two. 
+** *<LocalLeader> nn* command
+   Creates a new note. It creates a prompt to insert a note name. This will create a note 
+   in the directory workspace. 
+** *:Neorg index* command 
+   Jumps to the index file of the workspace workspace we are currently in. This 
+   is useful to always go back to a specific entry point. 
+** *:Neorg return* command 
+   This command closes all neorg buffers that are currently open and returns to 
+   the buffer prior to running neorg. 
+
+   This is combined super well with a workflow where we are coding, we open the 
+   index on some workspace, we open a few buffers to verify something, we write a 
+   new note, and when we are done, we simply type out the command above to return 
+   to our coding session! 
+* Norg Syntax
+  Text in neorg is in interpreted as text. 
+** Headings
+   Headings are created by prepending with asterisk.
+
+   Level 1 headings are made by *
+   Level 2 headings are made by **
+   And so on...
+
+   You will see that the concealer module kicks in and makes the asterisk nice.
+*** Indentation reversion
+    Suppose we have the following heading:
+**** fourth level heading 
+     This text belongs to the fourth level heading.
+***** fifth level heading 
+      This text belongs to the fifth level. 
+      ---
+     Using 2 or more `_` signs, not followed by anything, moves the text one 
+     level backwards 
+     The same can be done with the `=` sign, however, this closes all headings and 
+     takes us to the root level.
+** Horizontal Lines
+   We can place horizontal lines with 2 or more `_` symbols:
+   ___
+** Lists
+*** Unordered lists
+    We can create unodered lists with the - symbol:
+    - This
+    - Is 
+    - A 
+    -- List 
+    --- I 
+    - Created
+*** Ordered lists
+    We can create an ordered list with the ~ symbol:
+    ~ Ordered list level 1
+    ~~ Ordered list level 2
+    ~~ Ordered list level 2
+    ~~~ Ordered list level 3
+    ~~~ Ordered list level 3
+    ~~~~ Ordered list level 4
+    ~~~~~ Ordered list level 5
+    ~~~~~~ Ordered list level 6
+    ~ Ordered list level 1
+
+** Formatting
+   Pressing == will indent it properly
+
+   Alternatively, you can highlight and press =. 
+** Folding
+   *za* toggles fold on current heading
+** Text Styling
+   - *bold*
+   - /italic/
+   - _underline_
+   - -strikethrough-
+   -  !spoiler!
+   - `inline code`
+   - ^superscript^  (when nested into `subscript`, will highlight as an error)
+   - ,subscript,  (when nested into `superscript`, will highlight as an error)
+   - $f(x) = y$ (see also {# Math})
+   - &variable& (see also {# Variables})
+   - %inline comment%
+
+   You can also combine them to create a mix. 
+** Quotes
+   > level 1 quote
+   >> level 2 quote
+** Definitions
+   Two kinds of definitions
+*** Single-paragraph definitions
+    $ Term
+    The definition of the object in a single paragraph.
+
+    This is not considered part of the definition.
+*** Multi-paragraph definitions
+    $$ Object to be defined
+    Here, I can place any number of paragraphs or other format objects.
+
+    Even a code example:
+    @code lua
+    print("Hello world!")
+    @end
+    $$
+
+    This is no longer part of the definition because the `$$` on the previous line marked its end.
+** Footnotes
+   There are also two kinds of footnotes:
+*** Single-paragraph footnotes
+    ^ This is the title of my footnote. I can use this as a link target.
+    This is the actual footnote content.
+
+    This is no longer part of the {^ This is the title of my footnote. I can use this as a link
+    target}[footnote].
+*** Multi-paragraph footnotes
+    ^^ This is a multi-paragraph footnote.
+    Here go the actual contents...
+
+    ... which I can even continue down here.
+    ^^
+
+    Now, the footnote has ended.
+** Links
+   Links are created by inserting `target` inside curly brackets and colons.
+   Clicking in the link takes you to it.
+*** Link targets
+    The following things can be used as link /targets/:
+    - `* Heading1`: Defines a link to a heading of a specific level.
+    - `^ Footnote`: A link to a footnote.
+    - `$ Definition`: A link to a definition.
+    - `# magic`: The magic symbol is used to match any of the above.
+    - `:path:# target`: The target is in another norg file at a given path.
+    - `:path:`: Another norg file at a given path without specific target.
+    - `/path`: A non-norg file at a given path.
+    - `https://github.com`: Some URL.
+    - `file:///some/path`: Any file, opened via `(xdg-)open`
+*** How to specify paths
+    Any of the paths used in `:path:` or `/path` can be formatted as:
+    - `:path/to/norg/file:` relative to the file which contains this link
+    - `:/path/from/root:` absolute w.r.t. the entire filesystem 
+*** How to specify links
+    There are seveal ways to specify links:
+**** Pure inline links
+     A inline link to {*** How to specify links}
+
+     Inline links are case and whitespace insensitive. However, they are punctuation 
+     sensitive. 
+
+     Note that if we want to link to headings, we must specify the correct number of 
+     asterisks. This can be avoided by using the magic character which matches 
+     any of the targets types. 
+**** Custom inline link text
+     An inline {*** How to specify links}[link] with custom text is achieved by 
+     appending square bracks with the placeholder text after the link.
+**** Anchors
+     Anchors are similar to custom links, however, they can be reused throughout 
+     the document. For example, if I wanted to create a link to my github page, 
+     I could do something like: {https://github.com/theabm}[my github]. 
+     However, if I wanted to repeat it, I would have to retype everything. 
+     
+     On the other hand, with anchors, I can just define the anchor *once* /anywhere/ 
+     and then resue the same word enclosed by brackets anywhere else! An example 
+     be:
+
+     A link to [my github].
+     Take a look at [my github]{https://github.com/theabm}
+
+     In the first line, we have an *anchor declaration*.
+     It requires an *anchor definition*, which is the second line.
+**** Linking to a location inside another norg file
+     Linking to another `norg` file works exactly the same as inline linking 
+     except that we must wrap the path in `:` specifier.
+
+     For example this is a link to an {:../neorg/newnote:}[An external file].
+
+     To link to a location inside another `norg` file, we use the same 
+     syntax, and append the location after the second `:` specifier:
+
+     - {:../neorg/newnote:# Some Heading I Want To Link To}[A location in an external file]
+
+     Link fixing in this case works in the same exact way. 
+
+     To move back to the previous file, we can use the `<Ctrl-o>` key binding.
+**** Examples
+     - {* Norg Syntax} Inline link to a level 1 heading
+     - {** Links} Inline link to a level 2 heading
+     - {*** Link targets} Inline link to a level 3 heading
+     - {**** Pure links} Inline link to a level 4 heading
+     - {# What Is Neorg?} Using the magic char. to link
+     - {:../neorg/newnote:}[A link to an external file]
+     - {:../neorg/newnote:# Some Heading I Want To Link To}[A link to a location in an external file]
+     - {https://github.com/theabm}[A link to a url]
+     - An [anchor]{https://github.com/theabm} link
+**** (!) Note
+     If we are linking to a type which is marked with to-do modifiers, we omit 
+     the parenthesis!
+     So if we have some heading with a to-do modifier:
+***** (x) Some heading 
+      ---
+     And we want to link to it, we simply write:
+     {*****  Some heading}
+*** Fixing links
+    If a link isn't found, neorg will propose to fix the link. Two options are 
+    available:
+**** `f` - attempt to fix the link
+     This attempts to fix the link with the current target type it has. 
+
+     Therefore, if it doesnt find a link to a level one heading, it will look 
+     through all level one headings and find the best match. 
+
+     However, if we made a mistake and specified the wrong type, this will not 
+     successfully fix the mistake. 
+**** `F` - attempt to fix the link (loose fuzzing)
+     This will look for the best fix also among other types. 
+**** (!) Important note
+     If have a broken link with of type # (magic char.), fixing with `f`, will 
+     look for the best fix everywhere, since the magic char. matches with all 
+     types.
+     After the fix, the type of the link will still be the magic char. 
+
+     However, if we fix with `F`, after the fix, the link type will be changed 
+     to the type of the best match it found.
+
+     Since the fixing algorithm is very powerful, we can take advantage of the 
+     second feature to automatically construct links with less typing. 
+** To-Do Items
+   Neorg allows us to create a very flexible to-do list which can help us 
+   to do some task management.
+
+   The items in a to-do list can have various statuses. Some examples are:
+   - undone: not done.
+   - done: completed.
+   - on hold/pending: not needed at the moment, but will be needed later on.
+   - canceled: not needed anymore. 
+*** (x) Syntax
+    A to do list can be created with:
+    - (-) Bread (This symbol means pending)
+    - ( ) Butter (Undone)
+    - (x) Milk (Done)
+
+    Unordered lists with to-do modifiers are called tasks.
+
+    Note however, that to-do items are not only for lists. You can put them 
+    after anything that has a modifier, for example, in the header above!
+
+    So we can basically keep track of all of these! 
+**** Cycling between states
+     Simply write (x)
+     - (x) Bread 
+
+     Alternatively, we can use *<Ctl-Space>* which is the default key-binding which 
+     cycles the status of an item through "done", "undone", and "pending".
+*** Types 
+    - ( ) Undone -> not done yet
+    - (x) Done -> done with that
+    - (?) Needs further input
+
+    - (!) Urgent -> high priority task
+    - (+) Recurring task with children
+
+    - (-) Pending -> currently in progress
+    - (=) Task put on hold
+    - (_) Task cancelled (put down)
+*** Nesting
+    Imagine we have a nested list:
+    - ( ) Shopping 
+    -- ( ) Bread 
+    -- ( ) Butter
+    -- ( ) Milk
+
+    If we mark shopping to `done`, all the sub items get marked as `done` as well. 
+
+    Similarly, if one of the sub-items are changed, the top parent item gets changed. 
+    So basically, all the items interact with each other to give a powerful framework 
+    for management/tracking.
+* Wiki 
+  The [wiki]{https://github.com/nvim-neorg/neorg/wiki} section has information 
+  about all the modules to supercharge Neorg.
+** Default Modules
+   The [`core.neorg.defaults]{https://github.com/nvim-neorg/neorg/wiki/Defaults}` meta-module automatically loads all the core 
+   packages that Neorg needs to have basic functionality. 
+
+** Other Modules 
+   Other modules are not included by default and must be loaded manually to 
+   extend the functionality of Neorg. 
+   Some notable examples are:
+   - [Dirman module]{https://github.com/nvim-neorg/neorg/wiki/Dirman}
+   - [Concealer module]{https://github.com/nvim-neorg/neorg/wiki/Concealer}
+
+
+
+
