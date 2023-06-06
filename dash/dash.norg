@@ -361,6 +361,55 @@
         app.run_server(port=8000)
    @end
 
+   As we can see, for the second row, we have two columns that collectively have 
+   a size of 12.
+
+** The dbc.Row component
+   This will contain all the columns we have defined. 
+
+   By default, some spacing will be inserted between the columns. If we want 
+   to remove this, we can change the class name as follows:
+   - `className="g-0",`
+* Dash Callback
+  The callback mechanism is perhaps the most defining feature of Dash. 
+  So far, all the apps we have created are static and do not offer any 
+  real interaction. 
+
+  All interaction is defined through the callback decorator. 
+
+  The idea behind the call back is that we define some inputs and outputs which 
+  the function will continuously watch. Any changes in the input will be 
+  processed by the function to produce a corresponding change in the output.
+
+  The syntax is as follows:
+  @code python
+    from dash import Dash, dcc, html, Output, Input
+    import dash_bootstrap_components as dbc
+
+    app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+
+    my_dropdown = dcc.Dropdown(
+        options = ["SF", "LA"],
+        value = "SF"
+    )
+    @app.callback(
+        Input(my_dropdown, "value")
+    )
+    def print_travel_destination(dropdown_value):
+        if value = "SF":
+            print(f"I love traveling to {dropdown_value}") 
+        elif value = "LA":
+            print(f"I love traveling to {dropdown_value}") 
+
+  @end
+  We can see from the example that everytime that we change the value of the 
+  menu, the callback function gets called.
+
+  Of course, usually, the output will be another component. 
+
+  Lets look at a final example!
+
+
 
 
 
