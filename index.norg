@@ -15,7 +15,7 @@
 * Table of contents
 ** Neovim
 ** Kmonad
-** Dash
+** {:dash/dash:}[Dash]
 ** Rust
 ** Lua 
 ** {:neorg/neorg:}[Neorg] 

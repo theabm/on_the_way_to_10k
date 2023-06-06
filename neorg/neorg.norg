@@ -206,6 +206,10 @@
     Any of the paths used in `:path:` or `/path` can be formatted as:
     - `:path/to/norg/file:` relative to the file which contains this link
     - `:/path/from/root:` absolute w.r.t. the entire filesystem 
+    - `:~/path/from/user/home:` relative to the user's home directory (e.g. `/home/user` on Linux machines)
+    - `:../path/to/norg/file:` these paths also understand `../`
+    - `:$/path/from/current/workspace:` relative to current workspace root
+    - `:$gtd/path/in/gtd/workspace:` relative to the root of the workspace called `gtd`.
 *** How to specify links
     There are seveal ways to specify links:
 **** Pure inline links

@@ -1,0 +1,172 @@
+* What is Dash?
+
+  Dash is a a framework for building web interactive web applications for 
+  visualization.
+
+* Main building blocks of Dash
+
+  Dash relies on three foundational concepts that interact with one another 
+  to produce an interactive web app.
+** Dash Components
+   These are all the things we observe and interact with in the web app. 
+   Some examples are:
+   - Drop-down menus
+   - Sliders
+   - Titles
+   - Figures
+
+   And so on. 
+
+   Basically, anything that is visible, is a component in our app.
+** Dash Layout
+
+   The dash layout determines the look and feel of the application as well as 
+   how the components will be placed in the window of visualization. 
+
+   It acts as a sort of container for all our components and also enables us to 
+   specify some additional aspects, such as themes, margins, etc.
+** Dash Call Back
+
+   The Call Back functionality in Dash is the foundational concept that enables 
+   interaction of any sort. 
+
+   Without this aspect, the app would be completely static. 
+
+* Hello World Of Dash
+
+  Below we show how to start a very basic Dash application. 
+
+  #tangle app1.py
+  @code python 
+    from dash import Dash, dcc
+    import dash_bootstrap_components as dbc
+
+    # Instantiate your app 
+    app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+    # Build your components
+    hello_world = dcc.Markdown(children="# Hello World !")
+
+    # Customize your own Layout
+    app.layout = dbc.Container([hello_world])
+
+    # Run the app on port 8000
+    if __name__=='__main__':
+        app.run_server(port=8000)
+  @end
+
+  In the above example, we use the dash bootstrap components. This is an extenal 
+  library that enables extremely easy and intuitive customization if youre not 
+  familiar with html.
+
+  To run this example, it is important to ensure that dash and 
+  dash_bootstrap_components are installed in your system. Both can be installed 
+  via `pip`.
+
+  Finally, a last important note, is that to use the dash bootstrap components, 
+  one *must* use a bootstrap theme in the instantiation of the app. Otherwise 
+  an error will occur.
+
+* Dash Components
+
+  We now discuss some dash components in more detail.
+
+  As we saw before, these can be accessed using the following module:
+
+  @code python
+    from dash import dcc
+  @end
+
+** The Dropdown Menu
+
+   Dropdown menus are a very common aspect of Dash apps, as they enable 
+   a user to select among a few options which in turn change the visualization 
+   present. 
+
+   The syntax is as follows:
+   @code python
+    from dash import Dash, dcc
+    import dash_bootstrap_components as dbc
+
+    # Instantiate your app 
+    app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+    my_dropdown = dcc.Dropdown(
+
+    # The id allows me to later specify this component in the callback.
+    # Therefore, I dont necessarily need to create a variable.
+    # For sake of simplicity, we do it.
+    id="goal_position",
+
+    # The options of my dropdown menu
+
+    # Options can be declared in various ways.
+
+    # Way 1: As a list
+
+    # options = ["New York", "San Francisco", "Los Angeles"]
+
+    # In this way, we are simply using a list where the value
+    # and label are the same. 
+
+    # Way 2: As a dictionary
+
+    # options = {
+    #   "NY": "New York",
+    #   "SF": "San Francisco",
+    #   "LA": "Los Angeles"
+    # }
+
+    # In this way, we have a dictionary, where the keys are the labels 
+    # we see in the dropdown, while the values are the values we use 
+    # internally.
+    # However, in this way, the ordering of the keys is random.
+
+    # Way 3: As a list of dictionaries
+
+    options=[
+        # Disabling makes that option not available for selection
+        {"label": "NY", "value": "New York", "disabled": False},
+        {"label": "SF", "value": "San Francisco"},
+        {"label": "LA", "value": "Los Angeles"},
+    ],
+
+    # In this way, we are ensuring the ordering is exactly as we specify it.
+
+    # We now can set other attributes:
+
+    # The value attribute is the initial value that the dropdown will have 
+    # upon startup of the app.
+    value="New York",
+
+    # The multi keyword specifies if multiple values can be selected at once.
+    multi=False,
+
+    # The clearable attribute specifies whether the dropdown can be empty 
+    # at any given time.
+
+    clearable=False,
+
+    # The searchable attribute specifies whether the user can search within 
+    # the dropdown. This is especially useful when the drop down is very big.
+
+    searchable=True,
+
+    # The placeholder attribute specifies what text the user sees when the menu 
+    # is empty, e.g. "Select a city..."
+    
+    # placeholder="Select a city"
+
+    # The persistence_type attribute specifies the length of time that the 
+    # menu will remember a users choice.
+    # It can be: 'local', 'session' or 'memory'
+    # local: reset on page refresh
+    # session: reset after browser quits
+    # memory: data is kept even after browser quits
+    persistence_type="local",
+    )
+  @end
+   Note that options accepts many other types, such as numpy and pandas arrays, 
+   as well as other dash components. More info can be found
+   {https://dash.plotly.com/dash-core-components/dropdown}[here].
+
