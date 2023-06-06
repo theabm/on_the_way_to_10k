@@ -36,23 +36,23 @@
 
   Below we show how to start a very basic Dash application. 
 
-  #tangle app1.py
+  #tangle helloworld.py
   @code python 
-    from dash import Dash, dcc
-    import dash_bootstrap_components as dbc
+  from dash import Dash, dcc
+  import dash_bootstrap_components as dbc
 
-    # Instantiate your app 
-    app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+  # Instantiate your app 
+  app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-    # Build your components
-    hello_world = dcc.Markdown(children="# Hello World !")
+  # Build your components
+  hello_world = dcc.Markdown(children="# Hello World !")
 
-    # Customize your own Layout
-    app.layout = dbc.Container([hello_world])
+  # Customize your own Layout
+  app.layout = dbc.Container([hello_world])
 
-    # Run the app on port 8000
-    if __name__=='__main__':
-        app.run_server(port=8000)
+  # Run the app on port 8000
+  if __name__=='__main__':
+      app.run_server(port=8000)
   @end
 
   In the above example, we use the dash bootstrap components. This is an extenal 
@@ -77,6 +77,31 @@
   from dash import dcc
   @end
 
+** The Graph
+
+   The graph component stores some plotly figure I am interested in displaying. 
+
+   The syntax is as follows:
+
+   #tangle emptygraph.py
+   @code python
+   from dash import Dash, dcc
+   import dash_bootstrap_components as dbc
+
+   # Instantiate your app 
+   app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+   my_figure = dcc.Graph(id = "fig0", figure = {})
+   app.layout = dbc.Container([my_figure])
+
+   # Run the app on port 8000
+   if __name__=='__main__':
+       app.run_server(port=8000)
+   @end
+
+   In this case, we are creating an empty figure. However, this can be updated 
+   with the callback mechanism to produce many types of figures.
+
+
 ** The Dropdown Menu
 
    Dropdown menus are a very common aspect of Dash apps, as they enable 
@@ -84,6 +109,8 @@
    present. 
 
    The syntax is as follows:
+
+   #tangle dropdown.py
    @code python
    from dash import Dash, dcc
    import dash_bootstrap_components as dbc
@@ -168,9 +195,9 @@
 
    app.layout = dbc.Container([my_dropdown])
 
-    # Run the app on port 8000
-    if __name__=='__main__':
-        app.run_server(port=8000)
+   # Run the app on port 8000
+   if __name__=='__main__':
+       app.run_server(port=8000)
    @end
 
    Note that options accepts many other types, such as numpy and pandas arrays, 
@@ -182,30 +209,31 @@
    The slider is another popular feature of Dash as it features a slider which 
    can be moved to set some options.
 
+   #tangle slider.py
    @code python
-    from dash import Dash, dcc
-    import dash_bootstrap_components as dbc
+   from dash import Dash, dcc
+   import dash_bootstrap_components as dbc
 
-    # Instantiate your app 
-    app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+   # Instantiate your app 
+   app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
-    my_slider = dcc.Slider(
-        id='my-slider',
-        # The minimum value of the slider
-        min=0,
-        # The maximum value of the slider
-        max=20,
-        # The steps that the slider takes (this determines the values)
-        step=5,
-        # The initial value of the slider
-        value=10,
-    ),
+   my_slider = dcc.Slider(
+       id='my-slider',
+       # The minimum value of the slider
+       min=0,
+       # The maximum value of the slider
+       max=20,
+       # The steps that the slider takes (this determines the values)
+       step=5,
+       # The initial value of the slider
+       value=10,
+   )
 
-    app.layout = dbc.Container([my_slider])
+   app.layout = dbc.Container([my_slider])
 
-    # Run the app on port 8000
-    if __name__=='__main__':
-        app.run_server(port=8000)
+   # Run the app on port 8000
+   if __name__=='__main__':
+       app.run_server(port=8000, debug = True)
    @end
 
    As we can see, the slider works very similarly to the `range` function in 
@@ -257,51 +285,52 @@
    Below we show the basic syntax of the container:
 
    @code python
-    from dash import Dash, dcc
-    import dash_bootstrap_components as dbc
+   from dash import Dash, dcc
+   import dash_bootstrap_components as dbc
 
-    # Instantiate your app 
-    app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+   # Instantiate your app 
+   app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
-    app.layout = dbc.Container(
-        [
-            # A first Row
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            # Some components...
-                        ]
-                    ),
-                    dbc.Col(
-                        [
-                            # Some other components...
-                        ]
-                    )
-                    # Possibly more columns
-                ]
-            ),
+   app.layout = dbc.Container(
+       [
+           # A first Row
+           dbc.Row(
+               [
+                   dbc.Col(
+                       [
+                           # Some components...
+                       ]
+                   ),
+                   dbc.Col(
+                       [
+                           # Some other components...
+                       ]
+                   )
+                   # Possibly more columns
+               ]
+           ),
 
-            # Another Row
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            # Some components here
-                        ]
-                    ),
-                    # Possibly more columns
+           # Another Row
+           dbc.Row(
+               [
+                   dbc.Col(
+                       [
+                           # Some components here
+                       ]
+                   ),
+                   # Possibly more columns
 
-                ]
-            )
-            # Possibly more Rows
+               ]
+           )
+           # Possibly more Rows
 
-        ]
-        # This options gets rid of the margins that are added by default.
-        # It enables content to be resized fluidly.
-        fluid = True
-    )
+       ]
+       # This options gets rid of the margins that are added by default.
+       # It enables content to be resized fluidly.
+       fluid = True
+   )
    @end
+
 ** The dbc.Col component
    This is where we will place all the components we have defined. 
 
@@ -315,62 +344,87 @@
          to 12 at most.
 
    Let's look at a simple example:
+
+   #tangle layout.py
    @code python
-    from dash import Dash, dcc
-    import dash_bootstrap_components as dbc
-    
-    # Instantiate your app 
-    app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+   from dash import Dash, dcc, html
+   import dash_bootstrap_components as dbc
 
-    app.layout = dbc.Container(
-        [
-            dbc.Row(
-                dbc.Col(
-                    html.H1(
-                        "My Main Title",
-                        style={"textAlign": "center", "color": "white"},
-                    ),
-                    # The width attribute sets the width of the column.
-                    # size: determines the width
-                    # offset: where it should start creating the column
-                    # order: the other of the column w.r.t others in the 
-                    # same row
-                    width={"size": 12, "offset": 0, "order": 1},
-                ),
-            ),
-            dbc.Row(
-                dbc.Col(
-                    html.H2(
-                        "My second subtitle",
-                        style={"textAlign": "center", "color": "white"},
-                    ),
-                    width={"size": 6, "offset": 0, "order": 1},
-                ),
-                dbc.Col(
-                    html.H2(
-                        "My third subtitle",
-                        style={"textAlign": "center", "color": "white"},
-                    ),
-                    width={"size": 6, "offset": 0, "order": 1},
-                ),
-            ),
-        ]
-    )
+   # Instantiate your app 
+   app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
-    if __name__=='__main__':
-        app.run_server(port=8000)
+   app.layout = dbc.Container(
+       [
+           dbc.Row(
+               [
+                   dbc.Col(
+                       [
+                           html.H1(
+                               "My Main Title",
+                               style={"textAlign": "center", "color": "white"},
+                           ),
+                           # The width attribute sets the width of the column.
+                           # size: determines the width
+                           # offset: where it should start creating the column
+                           # order: the other of the column w.r.t others in the 
+                           # same row
+                       ],
+                       width={"size": 12, "offset": 0, "order": 1},
+                   ),
+               ]
+           ),
+           dbc.Row(
+               [
+                   dbc.Col(
+                       [
+                           html.H1(
+                               "My Second Title",
+                               style={"textAlign": "center", "color": "white"},
+                           ),
+                           # The width attribute sets the width of the column.
+                           # size: determines the width
+                           # offset: where it should start creating the column
+                           # order: the other of the column w.r.t others in the 
+                           # same row
+                       ],
+                       width={"size": 6, "offset": 0, "order": 1},
+                   ),
+                   dbc.Col(
+                       [
+                           html.H1(
+                               "My Third Title",
+                               style={"textAlign": "center", "color": "white"},
+                           ),
+                           # The width attribute sets the width of the column.
+                           # size: determines the width
+                           # offset: where it should start creating the column
+                           # order: the other of the column w.r.t others in the 
+                           # same row
+                       ],
+                       width={"size": 6, "offset": 0, "order": 1},
+                   ),
+               ]
+           ),
+       ]
+   )
+
+   if __name__=='__main__':
+       app.run_server(port=8000)
    @end
 
    As we can see, for the second row, we have two columns that collectively have 
    a size of 12.
 
 ** The dbc.Row component
+
    This will contain all the columns we have defined. 
 
    By default, some spacing will be inserted between the columns. If we want 
    to remove this, we can change the class name as follows:
    - `className="g-0",`
+
 * Dash Callback
+
   The callback mechanism is perhaps the most defining feature of Dash. 
   So far, all the apps we have created are static and do not offer any 
   real interaction. 
@@ -382,26 +436,58 @@
   processed by the function to produce a corresponding change in the output.
 
   The syntax is as follows:
+
+  #tangle callback.py
   @code python
-    from dash import Dash, dcc, html, Output, Input
-    import dash_bootstrap_components as dbc
+  from dash import Dash, dcc, html, Input, Output
+  import dash_bootstrap_components as dbc
+  import plotly.express as px
 
-    app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+  import pandas as pd
 
-    my_dropdown = dcc.Dropdown(
-        options = ["SF", "LA"],
-        value = "SF"
-    )
-    @app.callback(
-        Input(my_dropdown, "value")
-    )
-    def print_travel_destination(dropdown_value):
-        if value = "SF":
-            print(f"I love traveling to {dropdown_value}") 
-        elif value = "LA":
-            print(f"I love traveling to {dropdown_value}") 
+  df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv')
 
+  app = Dash(__name__)
+
+  app.layout = dbc.Container([
+      dbc.Row([
+          dbc.Col([
+              dcc.Graph(id='graph-with-slider'),
+          ])
+      ]),
+      dbc.Row([
+          dbc.Col([
+              dcc.Slider(
+                  df['year'].min(),
+                  df['year'].max(),
+                  step=None,
+                  value=df['year'].min(),
+                  marks={str(year): str(year) for year in df['year'].unique()},
+                  id='year-slider'
+              )
+          ])
+      ])
+  ])
+
+  @app.callback(
+      Output('graph-with-slider', 'figure'),
+      Input('year-slider', 'value'))
+  def update_figure(selected_year):
+      filtered_df = df[df.year == selected_year]
+
+      fig = px.scatter(filtered_df, x="gdpPercap", y="lifeExp",
+                       size="pop", color="continent", hover_name="country",
+                       log_x=True, size_max=55)
+
+      fig.update_layout(transition_duration=500)
+
+      return fig
+
+
+  if __name__=='__main__':
+      app.run_server(port=8000,debug = True)
   @end
+
   We can see from the example that everytime that we change the value of the 
   menu, the callback function gets called.
 
