@@ -233,6 +233,27 @@
    directly inside the container and then reference them by their `id` in the 
    callback.
 
+   The container is a wrapper that centers your app content in the screen. 
+
+   It is organized as a grid with: 
+   - 12 columns - Exceeding this amount will cause unexpected results in the 
+     placement of components.
+
+   It relies heavily on {# the dbc.Row}[`dbc.Rows`] and 
+   {# the dbc.Col}[`dbc.Col`]. These are not to be confused with our 
+   usual conception of rows and columns which have one element. 
+
+   For example a column could have multiple dropdown menus, one stacked above 
+   the other, that visually form two rows in the app. However, these are still 
+   in a single row!
+
+   Some important rules: 
+   - The `dbc.Col` component must always be an immediate child of the `dbc.Row`
+     component. We will place our actual components here.
+   - Only use `dbc.Col` and `dbc.Row` inside the container.
+   - Set the attribute `fluid=True` if you wish to remove the default margins 
+     of the container and allow content to be fluidly resized.
+
    Below we show the basic syntax of the container:
 
    @code python
@@ -276,16 +297,71 @@
             # Possibly more Rows
 
         ]
+        # This options gets rid of the margins that are added by default.
+        # It enables content to be resized fluidly.
+        fluid = True
     )
    @end
+** The dbc.Col component
+   This is where we will place all the components we have defined. 
 
-   As we can see, the container is made up of rows and columns. However, these 
-   are not to be confused with our usual conception of rows and columns which 
-   have one element. 
+   By default, columns will have equal width and will expand to fill available 
+   space. 
 
-   For example a column could have multiple dropdown menus, one stacked above 
-   the other, that visually form two rows in the app. However, these are still 
-   in a single row!
+   If we wish to change the size, we may do so with the `width` attribute.
+
+   - (!) Don't forget that there is a limit of 12 single unit columns per row!
+         So make sure the sum of all the widths of the columns in a single row add up 
+         to 12 at most.
+
+   Let's look at a simple example:
+   @code python
+    from dash import Dash, dcc
+    import dash_bootstrap_components as dbc
+    
+    # Instantiate your app 
+    app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+
+    app.layout = dbc.Container(
+        [
+            dbc.Row(
+                dbc.Col(
+                    html.H1(
+                        "My Main Title",
+                        style={"textAlign": "center", "color": "white"},
+                    ),
+                    # The width attribute sets the width of the column.
+                    # size: determines the width
+                    # offset: where it should start creating the column
+                    # order: the other of the column w.r.t others in the 
+                    # same row
+                    width={"size": 12, "offset": 0, "order": 1},
+                ),
+            ),
+            dbc.Row(
+                dbc.Col(
+                    html.H2(
+                        "My second subtitle",
+                        style={"textAlign": "center", "color": "white"},
+                    ),
+                    width={"size": 6, "offset": 0, "order": 1},
+                ),
+                dbc.Col(
+                    html.H2(
+                        "My third subtitle",
+                        style={"textAlign": "center", "color": "white"},
+                    ),
+                    width={"size": 6, "offset": 0, "order": 1},
+                ),
+            ),
+        ]
+    )
+
+    if __name__=='__main__':
+        app.run_server(port=8000)
+   @end
+
+
 
 
 
