@@ -186,8 +186,6 @@
     from dash import Dash, dcc
     import dash_bootstrap_components as dbc
 
-    external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
     # Instantiate your app 
     app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
@@ -212,6 +210,83 @@
 
    As we can see, the slider works very similarly to the `range` function in 
    python.
+
+
+* Dash Layout
+
+  The dash layout the organization of the components as well as the look and 
+  feel of the app. 
+
+  There are various ways to modify your layout, however, some require prior 
+  knowledge in HTML, which I do not currently have. 
+
+  For this reason, I currently use the `dash_bootstrap_components` library which 
+  enables very simple and intuitive modification for the layout. 
+
+  It relies on the container object which we have been using so far. 
+
+** The dbc.Container
+   The `dbc.Container` contains all the components we have initialized, and 
+   possibly others that we may want to create directly inside the container. 
+
+   In fact, a perfectly valid approach could be to define all your components 
+   directly inside the container and then reference them by their `id` in the 
+   callback.
+
+   Below we show the basic syntax of the container:
+
+   @code python
+    from dash import Dash, dcc
+    import dash_bootstrap_components as dbc
+
+    # Instantiate your app 
+    app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+
+    app.layout = dbc.Container(
+        [
+            # A first Row
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            # Some components...
+                        ]
+                    ),
+                    dbc.Col(
+                        [
+                            # Some other components...
+                        ]
+                    )
+                    # Possibly more columns
+                ]
+            ),
+
+            # Another Row
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            # Some components here
+                        ]
+                    ),
+                    # Possibly more columns
+
+                ]
+            )
+            # Possibly more Rows
+
+        ]
+    )
+   @end
+
+   As we can see, the container is made up of rows and columns. However, these 
+   are not to be confused with our usual conception of rows and columns which 
+   have one element. 
+
+   For example a column could have multiple dropdown menus, one stacked above 
+   the other, that visually form two rows in the app. However, these are still 
+   in a single row!
+
 
 
 
