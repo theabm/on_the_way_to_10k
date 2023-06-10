@@ -26,4 +26,7 @@
 ** {:linux/linux:}[Linux]
 ** Wezterm
 ** Nu Shell
+** HPC
+*** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
+
 

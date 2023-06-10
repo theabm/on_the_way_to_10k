@@ -1,0 +1,143 @@
+* Memory Alignment
+  Memory alignment refers to the need to properly place data structures in 
+  memory so that the processor may read it efficiently. 
+
+  The first important concept to understand, is that processors do not read from 
+  memory in byte sized chunks (as we are accustomed to think about) but rather 
+  in multi-byte chunks (depending on your architecture).
+
+  This is referred to as "memory access granularity". In a 32-bit architecture, 
+  a processor will read memory in 4 byte chunks (per memory access),
+  while in a 64-bit architecture, it will do so in 8 byte chunks.
+
+  Since memory access has an overhead, it is important to reduce it as much as 
+  possible to maximize performance (if we care about speed).
+
+  This consideration forces us to think about memory alignment. 
+
+  Suppose we wish are in a 64-bit architecture, and we store a floating point 
+  number starting at address 0.
+
+  Since floating point numbers take up 8 bytes, addresses 0-7 will be filled, 
+  and to read this number, the processor will need a single memory access.
+
+  However, if we were to store the data beginning at adress 1, the processor 
+  will still read a block of 8 bytest starting from adress 0, and then need to 
+  read another 8 bytes fromm adress 8 in order to obtain the full representation 
+  of the floating point.
+
+  So this requires two memory accesses. In this case, the variable is unaligned.
+
+  The jargon "aligned to X bytes" simply means that we store the value at the 
+  appropriate address which is divisible by X. 
+  To put it more clearly: An address aligned at 7 bytes means that the address 
+  is a multiple of 7. 
+  Instead, when we talk about "variable Y aligned at X bytes", we 
+  simply use the same concept with variable Y's address.
+
+  So, ideally, we want all our data to be aligned to our systems memory access 
+  granularity. 
+  In fact, the compiler does this for us automatically when we create new 
+  variables, by assigning addresses that are aligned with the data type. 
+  This is the reason why, if not careful, a custom data type may take more 
+  memory than we expect, since the compiler does some padding to ensure 
+  alignment.
+
+* Memory Allocation
+  Allocating memory always has an overhead (table maintained, and some other things)
+  EXPAND
+** SLIDE 06 memory allocation
+
+* Optimization
+** First Steps
+   The order of importance:
+   - correcteness
+   - data model
+   - algorithm you choose
+
+   Only after all of this, can we think about optimizing code. 
+   You may have beautiful code, but if you're ussing  the wrong 
+   algorithm, it will always be worse than a less optimmized code which 
+   is using the right algorithm/data structure
+
+   Other important factors:
+   - Clean code - Easy to understand in 1 year or by others.
+   - Maintainable code - Easy to expand functionality.
+   - Portable code - Easy to re-use it in other systems.
+
+   It is often worth to spend some extra time for these aspects in the beginning 
+   so that in the future we may benefit from it. 
+
+   Try to always thinking in parallel in the beginning!
+   In worst case scenario, we will run it in our laptop which is 
+   still a parallel device. So we can take advantage of this.
+
+*** Testing 
+    It is good to always test!
+
+    - Unit tests:
+      Write functions that perform small tasks that are easy to test. 
+      In this way, we can stress each unit of the code. 
+
+    - Integration test:
+      All units of code put together work.
+
+    - Systems test:
+      Code that was ported works as expected.
+
+*** Take advantage of the compiler!
+    The compiler is much better than us. It's a fact of life. Our task 
+    is to write code that the compiler can easily optimize.
+    What is a compiler? 
+    A program that translates a program from source language into an equivalent 
+    program in a target language. The compiler respects the semantics 
+    of our code (more later)
+    Compiler stages:
+     - precompiler: copies all include statemens into the code
+     - front end translates in symbolic language.
+     - Assembler: converts to assembly code
+
+    Different compilers have different capabilities so the way we write code helps 
+    protect us from these differences. 
+    We will look at GNU and PGI compiler. Both are very good in different things. 
+    If we write correct code, both yield similar results, but if my code is bad, 
+    results could be very different. 
+
+** Optimization levels of the compiler
+   Read manual of compiler - Good starting point.
+
+   Optimization level: On
+   - -On optimize for speed
+   - -Os optimized for size
+
+   Optimization level: native 
+   - (!)(Usually neglected) Compile specifically for the specific cpu we are running on.
+     In this way, we lose portability, but can gain a lot of performance.
+     Use `--march=native` flag for gcc and -xHost in icc compiler
+
+   Profile guided optimization:
+   - Ask compiler to inject in the code, some additional code that logs the 
+     patterns of my code. In subsequent compilations, this adittional code will 
+     be used to optimize even further. 
+     Steps:
+   -- gcc `-fprofile-generate`
+   -- run the code
+   -- gcc `-fprofile-use`
+
+   In other words, the source code remains the same, but the compiled code is 
+   different.
+
+
+
+
+
+
+
+
+
+
+
+** Next Steps
+
+* References
+   - {https://developer.ibm.com/articles/pa-dalign/}[IBM]
