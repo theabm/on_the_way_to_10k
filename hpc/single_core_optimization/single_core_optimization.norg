@@ -46,9 +46,11 @@
 * Memory Allocation
   Allocating memory always has an overhead (table maintained, and some other things)
   EXPAND
-** SLIDE 06 memory allocation
+  - SLIDE 06 memory allocation
 
 * Optimization
+  - Lesson 07 Optimization
+
 ** First Steps
    The order of importance:
    - correcteness
@@ -72,72 +74,114 @@
    In worst case scenario, we will run it in our laptop which is 
    still a parallel device. So we can take advantage of this.
 
-*** Testing 
-    It is good to always test!
+** Testing 
+   It is good to always test!
 
-    - Unit tests:
-      Write functions that perform small tasks that are easy to test. 
-      In this way, we can stress each unit of the code. 
+   - Unit tests:
+     Write functions that perform small tasks that are easy to test. 
+     In this way, we can stress each unit of the code. 
 
-    - Integration test:
-      All units of code put together work.
+   - Integration test:
+     All units of code put together work.
 
-    - Systems test:
-      Code that was ported works as expected.
+   - Systems test:
+     Code that was ported works as expected.
 
-*** Take advantage of the compiler!
-    The compiler is much better than us. It's a fact of life. Our task 
-    is to write code that the compiler can easily optimize.
-    What is a compiler? 
-    A program that translates a program from source language into an equivalent 
-    program in a target language. The compiler respects the semantics 
-    of our code (more later)
-    Compiler stages:
-     - precompiler: copies all include statemens into the code
-     - front end translates in symbolic language.
-     - Assembler: converts to assembly code
+** Take advantage of the compiler!
+   The compiler is much better than us. It's a fact of life. Our task 
+   is to write code that the compiler can easily optimize.
+   What is a compiler? 
+   A program that translates a program from source language into an equivalent 
+   program in a target language. The compiler respects the semantics 
+   of our code (more later)
+   Compiler stages:
+   - precompiler: copies all include statemens into the code
+   - front end translates in symbolic language.
+   - Assembler: converts to assembly code
 
-    Different compilers have different capabilities so the way we write code helps 
-    protect us from these differences. 
-    We will look at GNU and PGI compiler. Both are very good in different things. 
-    If we write correct code, both yield similar results, but if my code is bad, 
-    results could be very different. 
+   Different compilers have different capabilities so the way we write code helps 
+   protect us from these differences. 
+   We will look at GNU and PGI compiler. Both are very good in different things. 
+   If we write correct code, both yield similar results, but if my code is bad, 
+   results could be very different. 
 
-** Optimization levels of the compiler
-   Read manual of compiler - Good starting point.
+*** Optimization levels of the compiler
+    Read manual of compiler - Good starting point.
 
-   Optimization level: On
-   - -On optimize for speed
-   - -Os optimized for size
+**** Optimization level: On
+     - -On optimize for speed
+     - -Os optimized for size
 
-   Optimization level: native 
-   - (!)(Usually neglected) Compile specifically for the specific cpu we are running on.
-     In this way, we lose portability, but can gain a lot of performance.
-     Use `--march=native` flag for gcc and -xHost in icc compiler
+**** Optimization level: native 
+     - (!)(Usually neglected) Compile specifically for the specific cpu we are running on.
+          In this way, we lose portability, but can gain a lot of performance.
+          Use `--march=native` flag for gcc and -xHost in icc compiler
 
-   Profile guided optimization:
-   - Ask compiler to inject in the code, some additional code that logs the 
-     patterns of my code. In subsequent compilations, this adittional code will 
-     be used to optimize even further. 
-     Steps:
-   -- gcc `-fprofile-generate`
-   -- run the code
-   -- gcc `-fprofile-use`
+**** Profile guided optimization:
+     - Ask compiler to inject in the code, some additional code that logs the 
+       patterns of my code. In subsequent compilations, this adittional code will 
+       be used to optimize even further. 
+       Steps:
+     -- gcc `-fprofile-generate`
+     -- run the code
+     -- gcc `-fprofile-use`
 
-   In other words, the source code remains the same, but the compiled code is 
-   different.
+     In other words, the source code remains the same, but the compiled code is 
+     different.
 
+**** Qualifiers:
+     - const: Declaring a variable as const tells the compiler explicitly that 
+       it wont change. This allows the compiler to perform some additional 
+       optimization. 
+     - volatile: The volatile keyword tells the compiler that the variable will 
+       be changed and accessed from outside the program.
+     - restrict: Tells the compiler that the memory address is only accessed via 
+       the specific pointer. Since this addressed the memory aliasing problem, 
+       the compiler can optimize further.
+***** Memory Aliasing and the `restrict` keyword
+      Memory aliasing occurs when two pointers point to the same memory and we 
+      are doing some pointer arithmetics with them. As a quick example:
+      @code c 
+      // Suppose we have two pointers that point to the same memory region.
+      // *a=*b=1
+      void add1(int*a, int*b){
+          *a+=*b; // both *a=*b=2
+          *a+=*b; // both *a=*b=4
+      }
+      void add2(int*a, int*b){
+          *a+= 2* *b; // both *a=*b=3
+      }
+      @end
+      Mathematically speaking, we know that both of the functions above should 
+      yield the same results. However, in the case where the pointers point to 
+      the same region, we see that we get different results. 
 
+      This is called memory aliasing.
 
+      Since we are not specifying in our code explicitly that the pointers 
+      will be pointing to different regions (non overlapping), the compiler 
+      cannot convert one form to the other (to optimize), as it cannot know 
+      whether we will have the memory aliasing problem. Therefore it will stick 
+      to our syntactic code and will not optimize.
 
+      To fix this, we may help the compiler by using the restric keyword, or 
+      compile with the `-fstrict-aliasing` `-Wstrict-aliasing` options. The 
+      first flag tells the compiler to assume that all pointer point to 
+      separate regions, while the second flag asks the compiler to warn us about 
+      possible memory aliasing problems.
 
+      @code c 
+      // in this way we are telling the compiler that a and b will never overlap 
+      // so it is free to optimize as much as possible.
+      void add_restrict(int* restrict a, int* restrict b){
+          *a+=2* *b;
+      }
+      @end
 
-
-
-
-
-
-** Next Steps
+** Avoid the avoidable inefficiencies Steps
+      - Lesson 08
 
 * References
-   - {https://developer.ibm.com/articles/pa-dalign/}[IBM]
+  - {https://developer.ibm.com/articles/pa-dalign/}[IBM]
+  - Lesson 06 memory allocation
+  - Lesson 07 optimization
