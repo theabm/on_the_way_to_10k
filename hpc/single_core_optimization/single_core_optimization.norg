@@ -1,4 +1,5 @@
 * Memory Alignment
+
   Memory alignment refers to the need to properly place data structures in 
   memory so that the processor may read it efficiently. 
 
@@ -46,10 +47,10 @@
 * Memory Allocation
   Allocating memory always has an overhead (table maintained, and some other things)
   EXPAND
-  - SLIDE 06 memory allocation
+  - Memory allocation
 
 * Optimization
-  - Lesson 07 Optimization
+  - 04 Optimization Basic Steps
 
 ** First Steps
    The order of importance:
@@ -178,10 +179,145 @@
       }
       @end
 
-** Avoid the avoidable inefficiencies Steps
-      - Lesson 08
+** Avoid the avoidable inefficiencies
+   - 04 Optimization basic steps
+     One of the the main aspects we must care for is to avoid small details 
+     that consume extra unecessary cpu cycles. Although seemingly small, these 
+     inefficiences accumulate throughtout the execution of our code and can make 
+     it less performant. 
+*** Guidelines
+   - Avoid computing extra, uncessary calculations.
+
+   - Avoid expensive function calls (sqrt, pow function, for example).
+    -- Square root function (sqrt):
+    --- Prefer to work with squared distances when possible.
+    -- Power function (pow):
+    --- Prefer to multiply by hand if possible (unless exponent is very large).
+    -- Division:
+    --- Prefer multiplication instead if possible. For example, if we need to 
+        divide by a constant in a for loop, it is more efficient to calculate 
+        the inverse of the constant once, and then multiply inside the for loop.
+
+   - Avoid repeated calculations which can be reused. For example, in nested 
+     loops, keep track of what variables depend on the loop index so you can 
+     extract them to outer levels of the loop and compute them only once. This 
+     is called expression `Hoisting`.
+    -- Sometimes, we can 'hoist' an expression even further by doing some 
+       precomputations what will make our code more efficient.
+
+   - Clarify variable's scope. Local variables should be declared only in their 
+     scope. This helps the compiler to organize the stack.
+
+    - Use `register` modifier for variables which are frequently accessed. 
+      The `register` modifier suggest to the compiler to keep that variable in 
+      the register.
+
+   - Do not assume compiler can always reorganize operations. For example, due 
+     to the limited representation capabilities of a machine, floating point 
+     operations are not associative. This means the compiler cannot change 
+     these operations to make optimizations.
+** Take advantage of the CPU architecture
+*** Understanding the CPU architecture 
+**** Timeline
+
+     - CPU's become much faster than memory.(80's)
+     -- A memory hierarchy is introduced to reduce impact. This leads to the 
+        concept of *data locality*.
+
+     - CPU's become super scalar (90's).
+     -- i.e. instruction level parallelims (ILP) becomes possible.
+
+     - Operations are broken down into smaller stages and pipelined. 
+     -- Pipelines can be used to increase throughput.
+
+     - Branch predictors become important part of front end.
+     -- Branches cause stalls in pipelines and execution flow. Dealing with this 
+        is a key factor to increase performance.
+
+     - CPU's acquire vector capabilities. 
+     -- Special registers in the CPU have capabilites to perform the same 
+        operation on the same data (SIMD) - `Data level parallelism`. 
+** Von Neumann architecture
+   One processing unit, one instruction executed at a time, flat memory; i.e. 
+   access to memory on any location is the same and access to memory has same 
+   cost as instruction.
+
+   Modern architectures are completely different.
+
+** Cache Hierarchy
+   Before, cpu's were much faster than memory. This has been partially fixed by 
+   ddram but still the main bottleneck is the latency (order of nanoseconds).
+   This is in part also caused by physical limitations such as the physical 
+   distance that an electrical signal must travel from RAM to the CPU.
+
+   To fix this, manufactures equipped the CPU with a new type of ram (sram) 
+   that is much faster and place extremely close to the CPU. However, it is also 
+   more energy consuming, more expensive and much smaller than RAM. This memory
+   is called the `cache`, and it contains a hierarchy.
+   Below is the Hierarchy:
+   - Registers
+    1 cycle to access
+   -- L1 cache ~ 64 Kbytes
+      Split in two, one half for data and one half from instructions
+      2 cycles to access
+   --- L2 cache 
+       ~10 cycles to access 
+   ---- RAM 
+        ~100 cycles to access
+
+   This hierarchy shows the importance of data locality, i.e. having data 
+   close to you when needed. 
+   Consider for example a system with only an L1 cache and RAM. Then the cost 
+   to access memory will be given by:
+
+   %L1hit x L1 cost + %L1miss x RAM cost
+
+   If we have code with 100% L1 hit, the access time will be 2 cycles. 
+   But already at 99% L1 hit, we have an average access time of 3 cycles which 
+   is 50% more. 
+   With 97% we have 5 cycles which is 150% slower. 
+
+   If we work out the math, we see that the introduction of L2 and L3 cache 
+   serves to mitigate the effect of L1 cache misses. 
+
+** Data Locality
+   Data is defined as "local" when they reside in a small address that is 
+   accessed in a short period of time. 
+
+   Local data are more likely to be in the cache.
+
+   There are two principles of locality.
+*** Temporal locality
+    If the address is reference, it is likely to be referenced again soon.
+*** Spatial locality 
+    If an address is referenced, close addressed are likely to be referenced 
+    soon.
+** Cache Mapping
+   Question: If RAM is ~Gbytes and L1 cache is ~Kbytes, how do we effectively 
+   map the RAM to L1 cache?
+   The main problems:
+   1. Where to map an address
+   2. What to do if the location in L1 is already occupied.
+*** The 3 C's of memory foes
+    ~ Compulsory misses: Unavoidable misses when reading data for the first 
+    time.
+    ~ Capacity misses: Not enough space to hold all the data or too much data 
+      accessed between successive use.
+    ~ Conflict misses: Cache trashing due to data mapping to the same cache 
+      lines
+*** Three R's for friends
+    ~ Rearrange(code): Design for spatial and temporal locality.
+    ~ Reduce(size): Access smaller chunks and fewer instructions.
+    ~ Reuse(cache lines): Increase spatial and temporal locality by doing as much as 
+      possible when that data is available.
+
+
+
+
 
 * References
   - {https://developer.ibm.com/articles/pa-dalign/}[IBM]
   - Lesson 06 memory allocation
-  - Lesson 07 optimization
+  - 03 Optimization preliminaries and basic compiler usage
+  - 04 Optimization Basic Steps
+  - 05 Memory architecture

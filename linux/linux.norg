@@ -22,3 +22,7 @@
 
     The Power On Self Test or POST checks and initializes all the hardware 
     devices (keyboard, speakers, ram, etc)
+
+
+* References
+  {https://bbs.archlinux.org/viewtopic.php?id=254938}
