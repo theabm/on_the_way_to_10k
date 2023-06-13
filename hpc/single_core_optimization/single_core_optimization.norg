@@ -293,24 +293,141 @@
     If an address is referenced, close addressed are likely to be referenced 
     soon.
 ** Cache Mapping
-   Question: If RAM is ~Gbytes and L1 cache is ~Kbytes, how do we effectively 
+
+   Question: If RAM is ~O(Gbytes) and L1 cache is ~O(Kbytes), how do we effectively 
    map the RAM to L1 cache?
    The main problems:
    1. Where to map an address
    2. What to do if the location in L1 is already occupied.
+
 *** The 3 C's of memory foes
+
     ~ Compulsory misses: Unavoidable misses when reading data for the first 
     time.
     ~ Capacity misses: Not enough space to hold all the data or too much data 
       accessed between successive use.
     ~ Conflict misses: Cache trashing due to data mapping to the same cache 
       lines
+
 *** Three R's for friends
+
     ~ Rearrange(code): Design for spatial and temporal locality.
     ~ Reduce(size): Access smaller chunks and fewer instructions.
     ~ Reuse(cache lines): Increase spatial and temporal locality by doing as much as 
       possible when that data is available.
 
+*** Inside a CPU 
+
+    - Front End - Manager 
+    - Back End - Does the work
+    -- ports for ILP and Vectorization
+    -- Since CPU is superscalar we need to write code so compiler can take 
+       advantage of these aspects.
+
+*** Instructions and Pipeline 
+
+    Instructions constist of four stages:
+    - fetch: from memory to CPU.
+    - decode: must be understood and interpreted.
+    - execute: do the instruction.
+    - writeback: Write output in memory.
+
+    If four stages take 400 pico-seconds (a.k.a the latency of the instruction),
+    we obtain a throughput of 2.5 GIPS (giga operations per second).
+    But what if we could "detach" these four stages? 
+    We could re-organize everything.
+
+    The idea is that if we have to wait for one instruction to execute, we 
+    have to always wait 400 ps. However, if we introduce some specialized units 
+    for each of the four stages, as soon as fetching for the first instruction 
+    is done, we can immediately start fetching the second instruction while  
+    anoter unit for decoding starts to decode the first instruction. 
+
+    This is the basic concept of `pipelining`. The first time around, we have 
+    to still wait 400 ps, however, once the pipeline is full, the latency will 
+    be reduced and determined by the longest stage. So if we can reduce this, 
+    we can have even more throughput.
+
+    So, if we specialize even further by introducing even more specialized units, 
+    which perform smaller micro operations, we can break an instruction into 
+    even smaller pieces, thus reducing the time of the longest stage.
+    This is called `superpipelining` and modern CPU's may have 10-20 stages per 
+    pipeline. 
+
+    Taking even further, these specialized units do not necessarily even have 
+    to execute in order (as long as it doesnt break the semantics of your code).
+    So the CPU may execute many instructions out of order to fill the pipelines 
+    to the maximum. At the end of course the results are rearranged to give 
+    the correct result.
+
+    Hyperthreading tries to keep the pipelines always busy by sharing the 
+    specialized units (specialized ports) among different threads. In other 
+    words, if a certain thread is executing some instructions and the pipelines 
+    cannot be completely filled due to some semantic dependencies, hyperthreading 
+    will ensure that those physical resources that are temporarily free are 
+    used by another thread that is also executing at the same time. So it is as 
+    if you are doing operations from two threads in the same cycle (kind of 
+    doubling the number of cores).
+
+    If your code is extremely well written and takes advantage of pipelines and 
+    everything else at the maximum, hyperthreading can give bad results because 
+    it can introduce unwanted idle times and interfere with optimal execution. 
+*** Vector Registers
+    Are large special registers in the CPU that can be considered subdivided in 
+    smaller chunks which can perform the _same operation_ on different data (but 
+    of the _same type_ i.e all floats or doubles or ints etc...
+
+    This is called `SIMD` single instruction multiple data.
+
+    Vector registers are usually 32 bytes long. So they can contain 4 doubles 
+    or 8 floats (ints).
+
+** Cache optimization 
+   06 optimization cache
+
+   Memory is much slower than CPU. 
+   If our code is so good that the CPU is waiting for memory to be sent, then it 
+   is starving for data, and we are in a memory bound regime. 
+
+   In the opposite scenario, we are in a compute bound regime.
+
+
+*** How is Memory mapped to cache
+    The first important concept is that the cache is not reasoning about single 
+    bytes but rather chunks of bytes (similar to data alignment). 
+
+    "Let's say that both RAM and cache are subdivided in blocks of equal size, 
+    say 64 Bytes. You do not load a single byte in your cache, but an entire 
+    block - normally called a line." -- from the course.
+
+    This is actually what happens and you can measure it. In some architectures 
+    it is even larger. So a cache line can store 8 doubles.
+
+    The cache usually constains info on: 
+    - where the memory is in physical RAM 
+    - the data 
+    - Some mechanism that signals whether the data is valid or not. 
+
+    This last point is important. Suppose we are multicore and sharing memory. 
+    If different threads are working on the same data, then after a thread 
+    has modified and written to RAM, the cache in other cores must 
+    obtain some signal that that data has been changed so that it can be 
+    flushed obtain the latest copy. We will see more about this later. 
+
+** Cache Mapping (L1 cache)
+*** Full Mapping 
+    Data can be placed in any free cache block.
+    Convenient for loading, not convenient for accessing data. 
+*** Direct Mapping
+    Data can only be placed in certain blocks. This can be achieved by modulo 
+    arithmetic. 
+    Convenient for loading and accessing. But will cause a lot of clashes, 
+    because many addresses will be mapped to same place. 
+*** N-way associative
+    N locations available for a given line. This is a hybrid solution between 
+    the two previous approaches and provides a middle ground.
+    In fact, the previous two approaches are not used in practice but are useful 
+    for understanding. 
 
 
 
@@ -321,3 +438,4 @@
   - 03 Optimization preliminaries and basic compiler usage
   - 04 Optimization Basic Steps
   - 05 Memory architecture
+  - 06 optimization cache
