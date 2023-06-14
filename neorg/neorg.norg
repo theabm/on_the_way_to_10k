@@ -103,7 +103,7 @@
 ***** fifth level heading 
       This text belongs to the fifth level. 
       ---
-     Using 2 or more `_` signs, not followed by anything, moves the text one 
+     Using 2 or more `-` signs, not followed by anything, moves the text one 
      level backwards 
      The same can be done with the `=` sign, however, this closes all headings and 
      takes us to the root level.
