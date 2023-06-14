@@ -245,6 +245,7 @@
    Modern architectures are completely different.
 
 ** Cache Hierarchy
+
    Before, cpu's were much faster than memory. This has been partially fixed by 
    ddram but still the main bottleneck is the latency (order of nanoseconds).
    This is in part also caused by physical limitations such as the physical 
@@ -281,17 +282,34 @@
    serves to mitigate the effect of L1 cache misses. 
 
 ** Data Locality
+
    Data is defined as "local" when they reside in a small address that is 
    accessed in a short period of time. 
 
    Local data are more likely to be in the cache.
 
    There are two principles of locality.
+
 *** Temporal locality
+
     If the address is reference, it is likely to be referenced again soon.
+    This pattern can be observed for example in for loops, where an instruction 
+    will be repeated again in the next iteration. 
+
+    This also suggests that it is always useful to break our code into small 
+    logical units, so that the data stays in the cache as much as possible. In 
+    this case, if we have a ton of instructions inside a for loop, at the next 
+    iteration, the data is likely not to be in the cache. So to increase 
+    performance, it might be better to somehow split the workflow if possible.
+
 *** Spatial locality 
+
     If an address is referenced, close addressed are likely to be referenced 
     soon.
+
+    This pattern is seen when we access arrays. If we access one element, we 
+    most likely will access also its neighbors soon.
+
 ** Cache Mapping
 
    Question: If RAM is ~O(Gbytes) and L1 cache is ~O(Kbytes), how do we effectively 
@@ -372,7 +390,9 @@
     If your code is extremely well written and takes advantage of pipelines and 
     everything else at the maximum, hyperthreading can give bad results because 
     it can introduce unwanted idle times and interfere with optimal execution. 
+
 *** Vector Registers
+
     Are large special registers in the CPU that can be considered subdivided in 
     smaller chunks which can perform the _same operation_ on different data (but 
     of the _same type_ i.e all floats or doubles or ints etc...
@@ -383,6 +403,7 @@
     or 8 floats (ints).
 
 ** Cache optimization 
+
    06 optimization cache
 
    Memory is much slower than CPU. 
@@ -391,8 +412,8 @@
 
    In the opposite scenario, we are in a compute bound regime.
 
-
 *** How is Memory mapped to cache
+
     The first important concept is that the cache is not reasoning about single 
     bytes but rather chunks of bytes (similar to data alignment). 
 
@@ -414,23 +435,116 @@
     obtain some signal that that data has been changed so that it can be 
     flushed obtain the latest copy. We will see more about this later. 
 
-** Cache Mapping (L1 cache)
-*** Full Mapping 
+*** Cache Mapping (L1 cache)
+
+   This is related to the problem of how to map the RAM which is much bigger 
+   to the cache which is orders of magnitude smaller.
+
+**** Full Mapping 
+
     Data can be placed in any free cache block.
     Convenient for loading, not convenient for accessing data. 
-*** Direct Mapping
+
+**** Direct Mapping
+
     Data can only be placed in certain blocks. This can be achieved by modulo 
     arithmetic. 
     Convenient for loading and accessing. But will cause a lot of clashes, 
     because many addresses will be mapped to same place. 
-*** N-way associative
+
+**** N-way associative
+
     N locations available for a given line. This is a hybrid solution between 
     the two previous approaches and provides a middle ground.
     In fact, the previous two approaches are not used in practice but are useful 
     for understanding. 
 
+    Therefore, in this scenario, the cache is divided into $L1_{size}/N$ /sets/ 
+    which hold *N* lines. Addresses usually are mapped (in some way) to a unique 
+    set (direct mapping) and then inside the set, we use the first free location 
+    (full mapping).
 
+    In modern architectures, a cache line is typically 64 bytes long, and a set 
+    usually holds 8 lines. Therefore, we say that it is `8-way associative`.
+    ---
 
+   Understanding the mapping is useful to be able to improve the memory access 
+   pattern of our program to reduce cache misses and increase hits. 
+
+   This will ultimately increase the throughput of our code.
+*** Examples 
+
+    Matrix transposition and multiplication by blocks or by z strided access. 
+
+*** Organizing data to enhance locality
+
+    We study some aspects of how to better organize data to improve data 
+    locality and as a consequence, be able to increase cache hits (assuming 
+    the code is written well of course).
+
+**** Hot and cold fields
+***** Linked list traversal
+      Suppose we have a node:
+      @code c 
+      struct mynode{
+          double key;
+          char my_data[300];
+          my_node* next_node;
+      }
+      // and some traversal algorithm
+      // where we typically access key and next_node
+      @end
+      During traversal, we will access the key and the next node more often 
+      than the data itself (otherwise we would just allocate a huge array for 
+      the data).
+      With this organizational structure, we will have a cache miss when we 
+      access the key, and then 99% of the time, the we will not do anything 
+      with the data and want to traverse to the next node. However, since 
+      there are 300 bytes of data between key and next_node, next_node will not 
+      be in the cache and we will have another cache miss. 
+
+      If we reorganize like this:
+      @code c 
+      struct mynode{
+          double key;
+          my_node* next_node;
+          char my_data[300];
+      }
+      @end
+      Then, the first access to key will be a cache miss, but the access to 
+      next_node will be a hit as it has been loaded to cache.
+
+      This teaches us an important lesson which is: 
+
+      *"What is used together stays together"* 
+
+      So in our case, key and next_node are often used together, therefore, we 
+      must put them together in the struct.
+
+      Another optimization is that when we are traversing the linked list, we 
+      simply want to identify the right node. We don't really care about the 
+      data itself. 
+      In terms of efficiency, it is better for us to have structures which are 
+      as small as possible, so more can fit in the cache. 
+
+      This leads to the following change:
+      @code c 
+      struct mynode{
+          double key;
+          my_node* next_node;
+          char * my_data_ptr; // we now point to the data!
+      }
+      @end
+
+      In this way, many nodes can completely fit into the cache and it makes 
+      everything much more efficient if we are traversing the list many times 
+      for example.
+
+      In this example, key and next_node are called hot fields, since they are 
+      used together often, while my_data is a cold field. We wish group hot 
+      fields together and detach cold fields as much as possible, which is what 
+      we did with the pointer.
+      This whole process is called splitting of hot and cold fields.
 
 * References
   - {https://developer.ibm.com/articles/pa-dalign/}[IBM]
