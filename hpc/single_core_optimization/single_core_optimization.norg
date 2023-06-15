@@ -49,7 +49,7 @@
   EXPAND
   - Memory allocation
 
-* Optimization
+* Basic Optimization
   - 04 Optimization Basic Steps
 
 ** First Steps
@@ -546,6 +546,29 @@
       we did with the pointer.
       This whole process is called splitting of hot and cold fields.
 
+* Parallel computing
+** Intro to Parallel computing
+
+  Modern problems of interest require delivery of extremely high computing 
+  performance. 
+
+  So we require parallel computing.
+
+  This is because problems are: 
+  - complex 
+  - data intensive 
+  - require simulation very often (research)
+** Main Components
+   - nodes 
+   - switch network which connects nodes
+   -- typical latency and bandwidth are ~ micro seconds and ~100 Gbit/s 
+      respectively.
+   - storage: usually a home, a huge long term storage (RAID based) and a fast 
+     parallel file system for production.
+   -- The fast file system is because we dont want to spend a lot of time doing 
+      I/O operations since they are slow.
+   - some login nodes to connect 
+   - some job job scheduler
 * References
   - {https://developer.ibm.com/articles/pa-dalign/}[IBM]
   - Lesson 06 memory allocation
