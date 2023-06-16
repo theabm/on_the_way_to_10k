@@ -1,4 +1,5 @@
 * OpenMP
+
 ** Moore's law
 
    Goordon Moore came up with an empirical law that stated that every 2 years, 
@@ -21,19 +22,29 @@
 
     Plotting the power vs. performance, it can be seen that as performance 
     increases, the power consumption increases almost quadratically. This meant 
-    that the trend of packing more transistors in a single device to increase 
+    that the trend of packing more transistors in a single core to increase 
     performance would be unsustainable in the long term, which meant the end of 
     the Free Ride era.
 
     This caused manufactures to try to optimize for power as well as 
-    performance. They began to manufacture devices with less transistors and 
-    therefore, less frequency and less performance. 
+    performance. They began to manufacture cores with less transistors and 
+    therefore, less frequency and performance. However, they began to put more 
+    cores into a single device!
+
+    This was the start of the multicore era and the shared memory paradigm where 
+    cores would need to share the RAM (and other resources) among themselves 
+    efficiently to optimize performance.
+
+    In the image below, we can see that at a certain point, the frequency of the 
+    individual cores stays the same, but the number of cores inside a device 
+    started to grow. Power consumption per core also stayed the same, but 
+    performance still kept increasing!
     
     [INSERT IMAGE]
 
-    To maintain the performance, they had to design devices differently.
-
 *** Some physics
+
+    Below we explain why power decreases as you pack more cores together.
 
     The capacitance C of a core is defined as $C = q*V$ where q is the charge 
     and V is the voltage. Work is defined as $W = V*q$. Therefore, this implies 
@@ -54,41 +65,62 @@
 
     So this is why parallel computing will be the new paradigm.
 
-** The need for parallelization
+*** From Shared Memory to Distributed Memory
 
-   In the 90's processors were single core. Thanks to Moore's law, every
-   two years, the density of transistors inside a core would double, and this enabled
-   manufacturers to increase the clock rate of the cpu which in turn would increasenumber
-   the number of FLOPs per second (FLOPS) that it could execute. This era was known
-   as the "Free Ride" or "Free Lunch" since improvement came at no cost. 
+    As more and more cores began to be packed inside a single CPU, a new problem
+    arose: the classic architecture which relied on the front side bus and the 
+    northbridge to communicate between CPU and RAM became a major bottleneck
+    since all the cores were fighting for the same resource. 
 
-   However, around the [INSERT YEAR]'s, manufacturers soon clashed with the "Power Wall"
-   problem. In few words, the laws of physics imposed an unsustainable increase in the Power
-   consumption of the cpu's as the frequency increased. This increase in turn created an
-   excess of heat which was impossible to dissipate. 
+    For this reason, the northbridge was moved inside the CPU and more lanes 
+    were introduced that connected to RAM. 
 
-   The solution was to keep taking advantage of Moore's law, but in a different way:
-   Instead of making one single core faster, manufactures began to pack multiple cores
-   at lower clock rates (thus using a fraction of the power) inside the cpu's. Thus,
-   the number of FLOPS were still increasing, at the cost of having to account for this
-   new paradigm. This was the start of pararellization.
+    Finally, to scale even more, multi-socket motherboards were introduced which 
+    could use multiple CPU's (a.k.a sockets). The sockets were all connected 
+    together through some technology such as Quick Path Interconnect, which 
+    effectively made all memory visible to all the sockets.
 
-** Shared Memory
+    This introduced a non-uniform memory (NUMA) access paradigm since each 
+    socket had a faster access time to its closest memory bank, but could still 
+    access other banks which were farther away, at a higher cost. 
 
-   Another slight but important nuance is the paradigm of memory. As more and more
-   cores began to be packed inside a single CPU, a new problem started to become
-   apparent: the classic architecture that relied on the northbridge bus became a 
-   bottleneck for these multicore architectures. So, architectures switched from UMA
-   to NUMA by creating more specialized local memory that was closer to each core.
+    Lastly, to scale even further, many of these "nodes", a.k.a a multi-socket
+    device, were connected together by a very fast network (internet). This is 
+    the so called "distributed memory" paradigm, where nodes need to explicitly 
+    send messages (message passing) to each other throught the network. 
+    To make this paradigm usable, the network needs to be very fast, and since 
+    the protocol is less strict than http or https, typically the bandwith of 
+    these networks are much higher than standard internet connections with 
+    bandwiths of 100 Gbit/s. 
 
-   Lastly, this architecture was hard to make it scalable. If one keeps adding cores
-   to a cpu, the memory soon becomes saturated. Thus came the idea to make distributed
-   architectures which were nodes connected via a network. These are easy to scale: just
-   add a new node! However, this paradigm is more important for a message passing framework
-   (OpenMPI).
+    A last important note is that the shared memory and distributed memory 
+    paradigms are a concept at software level and can be completely detached 
+    from the physical hardware level. 
+
+    In other words, it is the */way/* we code that changes, and this is 
+    independent of the hardware we have. In fact, we can do message passing on 
+    a single node machine such as our laptop! In this case, each of our cores 
+    will act as if they were a separate process with their own memory, and the 
+    programmer will need to explicitly send messages between cores in the 
+    code. 
+
+    *How* this happens will then be determined at hardware level. In the 
+    case of a multi-node machine, it will be done through the network, while in 
+    the case of a single-node machine such as a laptop, it will be done through 
+    normal data sharing which will be much faster.
+
+    Viceversa, there exist some libraries which enable one to code in shared 
+    memory while on a multi-node machine. Of course, the library will do some
+    message passing under the hood, but the programmer */thinks/* in shared 
+    memory.
+
+    This is a very useful concept which must be clear - the separation between 
+    software level constructs and hardware level requirements.
 
 ** OpenMP 
-   Usually, a cpu has many threads which are running concurrently. However, these
+
+   A CPU can have many threads which are running concurrently.
+
    The fundamental idea of OpenMP is to enable an interface for managing threads.
    often interleave each other and no pararellization is achieved. 
 
@@ -104,33 +136,102 @@
 
    Something to keep in mind is that we must be careful with race conditions.
 
-** Commands:
+*** Concurrency and Parallelism
 
-   @code c
-   #pragma omp parallel           // Indicates the start of a parallel region 
-   {
-       // code block           // Where multiple threads will be created and 
-   }                           // Execute the block of code inside {}
+    - Concurrency: a property of a system when multiple things *may* be happening 
+      at the same time
+    - Paralellism: a subset of concurrency. We are taking some of the 
+      concurrency and actually executing at the same time.
 
-   @end
+    So we may have concurrent threads which are not parallel since they are just 
+    swapping in and out of execution. 
 
-   Note that inside {} each thread is executing the code and has a private memory
-   of each variable declared in the block. However, any variables declared before
-   the #pragma omp parallel can be seen by all threads. 
+    On the other hand, parallel threads are executing instructions at the same 
+    time.
 
-   `omp_set_num_threads(number)`: This function sets the number of threads that OpenMP 
-   will *try* to create. It is important to note that it only asks for that number
-   of threads, but the OS may give less (perhaps to avoid some crashes or resource 
-   overallocation)
+    The idea is that we need to expose the concurrency of a problem and then map 
+    it to processing units so they execute at the same time (paralellism).
 
-   `omp_get_num_threads()`: returns an int. Gives the number of actual threads running.
-   Useful to check how many threads I actually have.
+    A concurrent application has concurrency built into the problem definition
+    In concurrent applications, there is no way to have the problem 
+    run without concurrency.
 
-   `omp_get_thread_num()`: returns an int. Gives the id of the current thread that
-   calls this function, i.e. if I have 5 threads and the third thread calls this 
-   function, it will return 2 (note we start counting from 0)
+    In a parallel application there are things happening at the same time to make 
+    it run faster. In a parallel problem, we don't necessarily *need* to run 
+    in parallel. 
+
+*** Description OpenMP
+
+    OpenMP is a set of compiler directives and runtime libraries to be able to 
+    run code in parallel.
+
+    At the low level, it assumes shared address space. 
+
+    On top of it, we have an OS that supports a multi-threaded approach.
+
+    The programming layer is all the commands we will describe to enable the 
+    parallel execution.
+
+
+*** Syntax
+**** Core Syntax
+
+     OpenMP (OMP) consists of compiler directives of the form
+     `#pragma omp [construct] [clause1] [clause2] ...`. Most of the constructs
+     of OMP apply to a "structured block"", which is simply a block of code 
+     with an entry point at the top and another at the end. 
+
+     We also have some functions and variables that are declared in 
+     `#include <omp.h>`.
+
+     @code c
+     #include <omp.h>
+
+     int main(){
+
+        //
+        // some serial code done by one thread
+        //
+
+         // Indicates the start of a parallel region where multiple threads will
+         // be created and will execute the block of code inside the structured 
+         // block denoted by {}
+         #pragma omp parallel        
+         {
+             // some code block           
+         }                           
+
+     }
+     @end
+
+     OMP uses the master-fork-join paradigm, i.e. one in which a master thread 
+     spawns some threads (a fork) which are joined at the end of a parallel 
+     region.
+
+     Each of the threads has a private stack frame, but share the stack of the 
+     parent thread. 
+
+     Nested paralell regions are allowed. 
+
+     Note that inside the structured block each thread is executing the code 
+     and has a private memory of each variable declared in the block. However, 
+     any variables declared before the #pragma omp parallel can be seen by all 
+     threads. 
+
+     `omp_set_num_threads(number)`: This function sets the number of threads that OpenMP 
+     will *try* to create. It is important to note that it only asks for that number
+     of threads, but the OS may give less (perhaps to avoid some crashes or resource 
+     overallocation)
+
+     `omp_get_num_threads()`: returns an int. Gives the number of actual threads running.
+     Useful to check how many threads I actually have.
+
+     `omp_get_thread_num()`: returns an int. Gives the id of the current thread that
+     calls this function, i.e. if I have 5 threads and the third thread calls this 
+     function, it will return 2 (note we start counting from 0)
 
 ** False Sharing
+
    False sharing is an important problem we must always keep in mind to avoid
    serious performance hits. Basically, it occurs when we have a shared variable 
    among all threads. Suppose all threads want to read this variable, then, a copy 
@@ -142,6 +243,7 @@
    among caches as it is updated. Thus performance will be terrible.
 
 ** Synchronization
+
    two types:
    - barrier
    - exclusion
