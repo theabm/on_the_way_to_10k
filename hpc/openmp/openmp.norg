@@ -1,0 +1,216 @@
+* OpenMP
+** Moore's law
+
+   Goordon Moore came up with an empirical law that stated that every 2 years, 
+   the number of transistors that on a device would double. 
+
+   As a consequence, manufactures would pack more transistors into a single 
+   core and increase performance.
+
+   Because of this, people were trained to expect that performance would come 
+   automatically from hardware at no cost. This was known as the "Free Ride" 
+   era since every two years the performance of any application would double 
+   for "free" as long as one would get the latest processor.
+
+   As a consequence, many programmers were not taught to explicitly think about 
+   performance explicitly.
+
+   However, something happened that stopped this trend. 
+
+*** The power wall problem
+
+    Plotting the power vs. performance, it can be seen that as performance 
+    increases, the power consumption increases almost quadratically. This meant 
+    that the trend of packing more transistors in a single device to increase 
+    performance would be unsustainable in the long term, which meant the end of 
+    the Free Ride era.
+
+    This caused manufactures to try to optimize for power as well as 
+    performance. They began to manufacture devices with less transistors and 
+    therefore, less frequency and less performance. 
+    
+    [INSERT IMAGE]
+
+    To maintain the performance, they had to design devices differently.
+
+*** Some physics
+
+    The capacitance C of a core is defined as:
+    @math 
+   C = \frac{q}{V}
+    @end
+    Work W = V * q which implies W = CV^2 so Power = W*Freq. = CV^2Freq.
+    So given a single core with a fixed frequency and ouput, we have some 
+    power consumption. 
+    However, taking two cores with half the frequency (capacitance doubles) and 
+    same output, we find that power goes down!
+
+    So we are able to obtain the same output but with less power. This means 
+    we can keep increasing output while optimizing for power. 
+
+    So this is why parallel computing will be the new paradigm.
+    [Insert Pictures.]
+
+** The need for parallelization
+
+   In the 90's processors were single core. Thanks to Moore's law, every
+   two years, the density of transistors inside a core would double, and this enabled
+   manufacturers to increase the clock rate of the cpu which in turn would increasenumber
+   the number of FLOPs per second (FLOPS) that it could execute. This era was known
+   as the "Free Ride" or "Free Lunch" since improvement came at no cost. 
+
+   However, around the [INSERT YEAR]'s, manufacturers soon clashed with the "Power Wall"
+   problem. In few words, the laws of physics imposed an unsustainable increase in the Power
+   consumption of the cpu's as the frequency increased. This increase in turn created an
+   excess of heat which was impossible to dissipate. 
+
+   The solution was to keep taking advantage of Moore's law, but in a different way:
+   Instead of making one single core faster, manufactures began to pack multiple cores
+   at lower clock rates (thus using a fraction of the power) inside the cpu's. Thus,
+   the number of FLOPS were still increasing, at the cost of having to account for this
+   new paradigm. This was the start of pararellization.
+
+** Shared Memory
+
+   Another slight but important nuance is the paradigm of memory. As more and more
+   cores began to be packed inside a single CPU, a new problem started to become
+   apparent: the classic architecture that relied on the northbridge bus became a 
+   bottleneck for these multicore architectures. So, architectures switched from UMA
+   to NUMA by creating more specialized local memory that was closer to each core.
+
+   Lastly, this architecture was hard to make it scalable. If one keeps adding cores
+   to a cpu, the memory soon becomes saturated. Thus came the idea to make distributed
+   architectures which were nodes connected via a network. These are easy to scale: just
+   add a new node! However, this paradigm is more important for a message passing framework
+   (OpenMPI).
+
+** OpenMP 
+   Usually, a cpu has many threads which are running concurrently. However, these
+   The fundamental idea of OpenMP is to enable an interface for managing threads.
+   often interleave each other and no pararellization is achieved. 
+
+   OpenMP instead enables the creation of threads which all execute the same block
+   of code (called a structured block). This is done within a fork-join framework 
+   where the master thread (thread 0), upon finding directives of OpenMP for
+   thread creation, "forks" (creates) many threads which execute the block of code
+   in a concurrent and parallel fashion. After these threads exit the block of code,
+   they are once again joined to the master thread.
+
+   It is important to understand that threads share all the memory before the their
+   creation, and additionally have their own private memory!
+
+   Something to keep in mind is that we must be careful with race conditions.
+
+** Commands:
+
+   @code c
+   #pragma omp parallel           // Indicates the start of a parallel region 
+   {
+       // code block           // Where multiple threads will be created and 
+   }                           // Execute the block of code inside {}
+
+   @end
+
+   Note that inside {} each thread is executing the code and has a private memory
+   of each variable declared in the block. However, any variables declared before
+   the #pragma omp parallel can be seen by all threads. 
+
+   `omp_set_num_threads(number)`: This function sets the number of threads that OpenMP 
+   will *try* to create. It is important to note that it only asks for that number
+   of threads, but the OS may give less (perhaps to avoid some crashes or resource 
+   overallocation)
+
+   `omp_get_num_threads()`: returns an int. Gives the number of actual threads running.
+   Useful to check how many threads I actually have.
+
+   `omp_get_thread_num()`: returns an int. Gives the id of the current thread that
+   calls this function, i.e. if I have 5 threads and the third thread calls this 
+   function, it will return 2 (note we start counting from 0)
+
+** False Sharing
+   False sharing is an important problem we must always keep in mind to avoid
+   serious performance hits. Basically, it occurs when we have a shared variable 
+   among all threads. Suppose all threads want to read this variable, then, a copy 
+   of the variable will be pulled in the cache of the core belonging to a specific
+   thread. Suppose that all threads then want to write to this variable and change it. 
+   They will each modify their local version, which in turn will activate a cache coherency
+   protocol which ensures that the local copy of the variable in memory is always coherent.
+   This means however, that we will have a lot moving back and forth of the variable
+   among caches as it is updated. Thus performance will be terrible.
+
+** Synchronization
+   two types:
+   - barrier
+   - exclusion
+
+*** barrier
+
+    OMP provides functionality to ensure that all threads are synchronized at a barrier.
+    This can be achieved by the directive:
+    `#pragma omp barrier`
+
+    Upon finding this directive, all threads will wait until all the threads have called
+    the barrier and then keep going to the next block of code.
+
+    // insert example
+
+    Subtle point: By default, the barrier is inserted automatically after any worksharing
+    construct, which we will talk about later. However, it is important to keep in mind
+    that while the barrier is useful to make sure that all threads are synchronized at 
+    some point, if one doesn't truly need the barrier, this can slow down performance.
+
+*** exclusion
+
+    OMP provides a few constructs for exclusion, and they vary in their granularity of 
+    low level control that we can achieve.
+
+    1. '#pragma omp critical'  : This directive ensures that only one thread at a time
+    is executing the code found in the subsequent structured block. Note that all other
+    threads will be waiting before this directive to be able to execute the code block.
+    Therefore, if not needed, this could slow down performance. 
+
+    2. '#pragma omp atomic' : This directive is similar to atomic, but is slightly more 
+    low level in the sense that for simple operations, it can take advantage of some 
+    hardware functionality for switching between threads. If this functionality is not 
+    available, it will be identical to '#pragma omp critical'.
+
+    3. Locks: Locks are the most low level directives that are offered by OMP. In a 
+    few words, locks are variables of a type declared in <OMP.h> and they enable rich
+    functionality:
+    - omp_set_lock() : the thread that calls this function has the lock and can 
+    execute the code requiring that lock 
+    - omp_get_lock() : the thread that calls this function tries to obtain the 
+    lock, and if it fails, it will wait until the lock is available.
+    - omp_test_locl() : the thread will test whether the lock is free. If it isn't 
+    it will keep on going to do other stuff instead of waiting.
+
+    EXAMPLE 
+
+
+** Worksharing constructs:
+
+   OMP provides some worksharing construct. As an example, consider:
+
+   @code c
+   #pragma omp parallel{
+   #pragma omp for
+
+    }
+   @end
+
+   sections
+
+
+** Reductions
+
+
+* References 
+  - An amazing {https://www.youtube.com/playlist?list=PLLbPZJxtMs4ZHSamRRYCtvowRS0qIwC-I}[tutorial] by Tim Mattson from Intel.
+    He was one of the original developers of OpenMP and explains all the 
+    concepts with amazing clarity.
+  -- The repository of the {https://github.com/tgmattso/OpenMP_intro_tutorial}[course] with all the code and exercises he discusses
+  - Luca Tornatore's slides on the OpenMP portion of the HPC course for UniTS. 
+  -- {https://github.com/Foundations-of-HPC/Foundations_of_HPC_2020}[HPC 2020]
+  -- {https://github.com/Foundations-of-HPC/Foundations_of_HPC_2021/tree/main/OpenMP}[HPC 2021]
+  -- {https://github.com/Foundations-of-HPC/Foundations_of_HPC_2022/tree/main/Basic/OpenMP}[HPC 2022]
+
