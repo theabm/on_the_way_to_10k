@@ -35,13 +35,17 @@
 
 *** Some physics
 
-    The capacitance C of a core is defined as:
-    @math 
-   C = \frac{q}{V}
-    @end
-    Work W = V * q which implies W = CV^2 so Power = W*Freq. = CV^2Freq.
-    So given a single core with a fixed frequency and ouput, we have some 
-    power consumption. 
+    The capacitance C of a core is defined as $C = q*V$ where q is the charge 
+    and V is the voltage. Work is defined as $W = V*q$. Therefore, this implies 
+    that $W = CV^2$. Since Power p is defined as $P = W*f$ where $f$ is the 
+    frequency, we obtain that $P = C*V^2*f$.
+
+    So Power scales linearly in capacitance and frequency, but quadratically in 
+    voltage. 
+
+    So given a single core with a fixed frequency and desired ouput, we have 
+    some fixed power consumption. 
+
     However, taking two cores with half the frequency (capacitance doubles) and 
     same output, we find that power goes down!
 
@@ -49,7 +53,6 @@
     we can keep increasing output while optimizing for power. 
 
     So this is why parallel computing will be the new paradigm.
-    [Insert Pictures.]
 
 ** The need for parallelization
 
