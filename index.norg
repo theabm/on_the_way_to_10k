@@ -28,5 +28,6 @@
 ** Nu Shell
 ** HPC
 *** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
+** {:haskell/haskell:}[Haskell]
 
 

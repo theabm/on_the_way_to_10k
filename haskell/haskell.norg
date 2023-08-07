@@ -1,0 +1,33 @@
+* Haskell : A functional programming language 
+
+** What is Haskell?
+
+   Haskell is a functional programming language. This is in contrast to the 
+   more popular paradigm of imperative languages such as C, python, etc. where
+   your program is essentially a list of instructions, similar to a recipe. 
+   In this paradigm, we have a changing state which can be changed. 
+
+   On the other hand, in an FP paradigm, we describe what things are, rather 
+   than how they change. This is done through functions. 
+   A notable consequence of this is that calling a function many times, with 
+   the same parameters, is guaranteed to always yield the same results. This is 
+   called referential transparency. This allows the compiler to understand the 
+   logic of the program as well as us humans to prove that a function is 
+   correct. 
+
+   Haskell is: 
+   - Lazy : it will only execute functions if the result is explicitly needed. 
+   - Statically typed : all variables are known at compile time. 
+
+** Required tools
+
+   We will use GHC, the most used Haskell compiler. 
+   The GHC compiler has an interactive mode, which is very useful for learning. 
+   To use it, simply type _ghci_ in the terminal prompt. Then, to load a haskell 
+   program, we simply type _:l my_haskell_program.hs_ and this will load it up. 
+   Any functions defined in this program can be executed and the results will 
+   be immediately displayed. 
+   If you modify a program after loading it, simply reload it by _:r_ or by 
+   typing again _:l my_haskell_program_
+
+
