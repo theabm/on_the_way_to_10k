@@ -165,9 +165,7 @@
     environment variables, and OMP libraries that we will describe to enable 
     parallel execution.
 
-*** Syntax
-
-**** Core Syntax
+*** Core Syntax
 
      OpenMP (OMP) consists of compiler directives of the form
 
@@ -263,6 +261,9 @@
     calls this function, i.e. if I have 5 threads and the third thread calls 
     this function, it will return 2 (note that we start counting from 0)
 
+    - `omp_get_wtime()` -> double : return the number of seconds with respect 
+    to some time in the past.
+
 *** Assumed hardware/software
 
     Today, all machines are NUMA (non-uniform memory access) machines. Even a 
@@ -302,6 +303,113 @@
          }
      }
      @end
+
+    The order is random since the threads can interleave in any possible order.
+    This concept will be important later!
+
+    Furthermore, it is important to understand that threads communicate with 
+    each other through shared variables.
+
+*** Race Conditions
+
+    Sometimes, threads share data in an unsafe way, i.e. a thread writes in
+    a location (a variable) that another thread is trying to read. 
+
+    This leads to a so called "race condition" because the outcome of the 
+    program depends on what happened at that particular runtime (did the thread 
+    write before the other one managed to read? or viceversa?).
+
+    Race conditions are the biggest problem in parallel programming.
+
+    How do we prevent race conditions? By controlling and organizing access to 
+    shared variables. 
+    We can achieve this through {# Synchronization}[synchronization]. 
+
+    However, {# Synchronization}[synchronization] is very expensive and we must try to minimize it 
+    as much as possible. We do this by being careful with how we organize our 
+    code and data environment.
+
+*** How to create threads in OpenMP
+
+    As mentioned above, OMP uses a fork-join model. At the beginning, our program 
+    has a single thread which we call the master thread. 
+    Then it encounters a portion of execution where more threads can help out.  
+
+    The master thread forks threads at that point. The master thread continues 
+    and it has ID 0 while the other threads all have increasing ID's. This is 
+    called a collection of threads. 
+
+    When they all finish their work, they join back together again and we are 
+    left with one thread. 
+
+    This process can be repeated as much as needed, and we can even nest threads.
+
+    This is done through the #pragma omp parallel construct that we saw before.
+    And this is the *only* way we can create multiple threads using OMP.
+
+    Take a look at the following code:
+
+    @code c 
+    int main(){
+        double A[1000];
+        // request 4 threads (OS will try to satisfy, not guaranteed)
+        omp_set_num_threads(4);
+        #pragma omp parallel
+        {
+            // each thread will run this block of code
+            int ID = omp_get_thread_num();
+            foo(ID,A);
+        }
+    }
+    @end
+
+    If we allocate data outside the #pragma omp parallel, it is in the heap, and 
+    it is shared among all threads. 
+    If I allocate the data inside the #pragma omp parallel, it is allocated in 
+    the threads stack. So it is private.
+
+    So in this case, all threads see the same copy of array A, and they all 
+    call the function foo() with the same copy of A, but with their *own* 
+    ID.
+
+    If we were to print out the address of ID inside the code block, we would 
+    see that they are all different. On the other hand, if we print the address 
+    of A\[0\] from inside the code block, they all print the same address.
+
+    But what does the compiler do? It takes the structured block, and packages 
+    it into a function called a "thunk". Then it sets up the p-threads environment 
+    and it launches each p-thread using a copy of the thunk.
+
+    The advantage of using OMP is that we don't have to deal with the low level 
+    interface of p-threads.
+
+*** \[Exercise\] Hello World of Parallel Computing
+
+    Below is a serial program that calculates pi.
+
+    Using only the constructs seen so far, how would you parallelize it?
+
+    #tangle serial_pi.c
+    @code c 
+    #include <stdio.h>
+    static long num_steps = 100000;
+    double step;
+    int main()
+    {
+        int i;
+        double x, pi, sum = 0.0;
+        step = 1.0/(double)num_steps;
+        for (i=0; i<num_steps;i++){
+            x = (i+0.5)*step;
+            sum += 4.0/(1.0+x*x);
+        }
+        pi = step * sum
+    }
+    @end
+
+
+
+
 
 ** False Sharing
 
