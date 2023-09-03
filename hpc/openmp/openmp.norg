@@ -389,26 +389,133 @@
 
     Using only the constructs seen so far, how would you parallelize it?
 
-    #tangle serial_pi.c
+    #tangle serialpi.c
     @code c 
     #include <stdio.h>
-    static long num_steps = 100000;
+    #include <omp.h>
+    static long num_steps = 100000000;
     double step;
     int main()
     {
         int i;
         double x, pi, sum = 0.0;
+        double t0 = omp_get_wtime();
+
         step = 1.0/(double)num_steps;
         for (i=0; i<num_steps;i++){
             x = (i+0.5)*step;
             sum += 4.0/(1.0+x*x);
         }
-        pi = step * sum
+        pi = step * sum;
+        double t1 = omp_get_wtime();
+
+        printf("pi is %f\n", pi);
+        printf("execution time is %f s \n", t1-t0);
     }
     @end
 
+    The first thing we must try to do is to expose some concurrency in the 
+    problem. 
 
+    A first simple idea, is to divide the work of the for loop among more 
+    threads. Can we do this? 
 
+    #tangle parallelpi.wrong.c
+    @code c 
+    #include <stdio.h>
+    #include <omp.h>
+    #define NUM_THREADS 2
+
+    static long num_steps = 100000000;
+    double step;
+    int main()
+    {
+        double pi = 0.0;
+        int nthreads;
+        double t0 = omp_get_wtime();
+        double partial_sum[NUM_THREADS];
+
+        step = 1.0/(double)num_steps;
+
+        // we *request* these threads, but the OS can give us less!
+        omp_set_num_threads(NUM_THREADS);
+
+        #pragma omp parallel
+        {
+            double x = 0.0;
+            int i;
+
+            // we check since it is not guaranteed that 
+            // we get 10 threads
+            int num_threads = omp_get_num_threads();
+            // I get my id
+            int my_id = omp_get_thread_num();
+
+            // the master thread updates the shared variable 
+            if(my_id==0) nthreads = num_threads;
+
+            for (i=my_id, partial_sum[my_id] = 0.0; i<num_steps;i+=num_threads){
+                x = (i+0.5)*step;
+                partial_sum[my_id] += 4.0/(1.0+x*x);
+            }
+        }
+        for(int i = 0; i<nthreads;++i){
+            pi+=partial_sum[i]*step;
+        }
+        double t1 = omp_get_wtime();
+
+        printf("pi is %f\n", pi);
+        printf("execution time is %f s \n", t1-t0);
+    }
+    @end
+    
+    First of all, if you came up with the code above on your own, 
+    congratulations! You are officially a parallel programmer. 
+    If you didn't, that's okay too. Let's see if I can explain what's going on!
+
+    The main idea is that each thread will process an iteration of the 
+    foor loop, in a round robin fashion (also called "cyclic distribution"). 
+    But let's look at the variables we were using in more detail.
+
+    Variable x is a function of the loop index and, as such, it can be 
+    calculated independently from other iterations. This is good, because each 
+    thread can do its own thing without bothering anyone. 
+
+    However, we can't leave it as it was before! Why? 
+
+    Because "variables declared outside of the parallel construct are *shared* 
+    among threads". So basically, while each thread is doing its own thing, as 
+    soon as its done calculating its expression for x, it will race against 
+    other threads for who gets to write at x first.
+
+    In other words, we have a race condition (remember those? yuck.) 
+
+    To fix this, we can simply declare x inside the parallel construct, making 
+    it *private*. Now, each thread can do its own thing and write on its own 
+    variable x.  
+
+    The same idea applies to the variable sum. However, in this case, we can't 
+    solve it in the same way because each thread has to somehow *communicate* its 
+    partial sum to the overall result.
+
+    Also, as soon as we exit the parallel construct, the stack of each thread 
+    is deallocated, i.e. the variables declared inside are lost. So we can't 
+    use a local sum variable, as we did for x, because we have to somehow get 
+    this information out of the parallel regions.
+
+    Therefore, the partial sum of each thread *must* somehow be shared! How 
+    can we achieve this? Through an array.
+
+    We create a partial sum array, which is as long as the maximum number of 
+    threads we are hoping to get. Each thread then writes in its own "slot" 
+    and at the end, we sum all the partial values in the array to calculate pi.
+
+    So why is this code wrong? As we can see, if we run the code, we obtain a 
+    correct answer for pi, however, it the performance is considerably worse 
+    than the serial case!
+
+    In the next sections, we will dive into the pitfalls of this code and learn 
+    how to fix it. 
 
 
 ** False Sharing
