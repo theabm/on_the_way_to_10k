@@ -1,21 +1,21 @@
 #include <stdio.h>
 #include <omp.h>
-#define NUM_THREADS 2
 
-static long num_steps = 1000000000;
+#define NUM_THREADS 20
+
+static long num_steps = 100000000;
 double step;
 int main()
 {
     double pi = 0.0;
     int nthreads;
     double t0 = omp_get_wtime();
+    double partial_sum[NUM_THREADS];
 
     step = 1.0/(double)num_steps;
 
     // we *request* these threads, but the OS can give us less!
     omp_set_num_threads(NUM_THREADS);
-
-    double partial_sum[NUM_THREADS];
 
     #pragma omp parallel
     {
@@ -32,12 +32,12 @@ int main()
         if(my_id==0) nthreads = num_threads;
 
         for (i=my_id, partial_sum[my_id] = 0.0; i<num_steps;i+=num_threads){
-            x = (i+0.5)*step;
-            partial_sum[my_id] += 4.0/(1.0+x*x);
+        x = (i+0.5)*step;
+        partial_sum[my_id] += 4.0/(1.0+x*x);
         }
-    }
-    for(int i = 0; i<NUM_THREADS;++i){
-        pi+=partial_sum[i]*step;
+        }
+    for(int i = 0; i<nthreads;++i){
+    pi+=partial_sum[i]*step;
     }
     double t1 = omp_get_wtime();
 
