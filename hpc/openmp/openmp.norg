@@ -8,39 +8,36 @@
    As a consequence, manufactures would pack more transistors into a single 
    core and increase performance.
 
+   Many years later, Moore's law is still working. Over the years we see that 
+   performance keeps increasing.
+
    Because of this, people were trained to expect that performance would come 
    automatically from hardware at no cost. This was known as the "Free Ride" 
    era since every two years the performance of any application would double 
    for "free" as long as one would get the latest processor.
 
    As a consequence, many programmers were not taught to explicitly think about 
-   performance explicitly.
+   performance.
 
    However, something happened that stopped this trend. 
 
 *** The power wall problem
 
-    Plotting the power vs. performance, it can be seen that as performance 
-    increases, the power consumption increases almost quadratically. This meant 
-    that the trend of packing more transistors in a single core to increase 
-    performance would be unsustainable in the long term, which meant the end of 
-    the Free Ride era.
+    If we plot the power vs. performance, it can be seen that as performance 
+    increases, the power consumption increases almost quadratically. 
+
+    This meant that the trend of packing more transistors in a single core to 
+    increase performance would be unsustainable in the long term, which meant 
+    the end of the Free Ride era.
 
     This caused manufactures to try to optimize for power as well as 
     performance. They began to manufacture cores with less transistors and 
-    therefore, less frequency and performance. However, they began to put more 
-    cores into a single device!
+    therefore less frequency (i.e. a simpler architecture). However, they began
+    to put more cores into a single device (CPU)!
 
     This was the start of the multicore era and the shared memory paradigm where 
     cores would need to share the RAM (and other resources) among themselves 
-    efficiently to optimize performance.
-
-    In the image below, we can see that at a certain point, the frequency of the 
-    individual cores stays the same, but the number of cores inside a device 
-    started to grow. Power consumption per core also stayed the same, but 
-    performance still kept increasing!
-    
-    [INSERT IMAGE]
+    efficiently in order to obtain increased performance.
 
 *** Some physics
 
@@ -48,10 +45,10 @@
 
     The capacitance C of a core is defined as $C = q*V$ where q is the charge 
     and V is the voltage. Work is defined as $W = V*q$. Therefore, this implies 
-    that $W = CV^2$. Since Power p is defined as $P = W*f$ where $f$ is the 
+    that $W = CV^2$. Since power p is defined as $P = W*f$ where $f$ is the 
     frequency, we obtain that $P = C*V^2*f$.
 
-    So Power scales linearly in capacitance and frequency, but quadratically in 
+    So power scales linearly in capacitance and frequency, but quadratically in 
     voltage. 
 
     So given a single core with a fixed frequency and desired ouput, we have 
@@ -121,27 +118,29 @@
 
    A CPU can have many threads which are running concurrently.
 
-   The fundamental idea of OpenMP is to enable an interface for managing threads.
-   often interleave each other and no pararellization is achieved. 
+   The fundamental idea of OpenMP is to enable an interface for managing threads
+   which otherwise interleave each other.
 
-   OpenMP instead enables the creation of threads which all execute the same block
-   of code (called a structured block). This is done within a fork-join framework 
-   where the master thread (thread 0), upon finding directives of OpenMP for
-   thread creation, "forks" (creates) many threads which execute the block of code
-   in a concurrent and parallel fashion. After these threads exit the block of code,
-   they are once again joined to the master thread.
+   OpenMP instead enables the creation of threads which all execute the same 
+   block of code (called a structured block). This is done within a fork-join 
+   framework where the master thread (thread 0), upon finding directives of 
+   OpenMP for thread creation, "forks" (creates) many threads which execute the 
+   block of code in a concurrent and parallel fashion. After these threads exit 
+   the block of code, they are once again joined to the master thread.
 
-   It is important to understand that threads share all the memory before the their
-   creation, and additionally have their own private memory!
+   It is important to understand that threads share all the memory before the 
+   their creation, and additionally have their own private memory!
 
    Something to keep in mind is that we must be careful with race conditions.
 
 *** Concurrency and Parallelism
 
     - Concurrency: a property of a system when multiple things *may* be happening 
-      at the same time
+      at the same time.
     - Paralellism: a subset of concurrency. We are taking some of the 
       concurrency and actually executing at the same time.
+
+    *insert conc_vs_par.jpg*
 
     So we may have concurrent threads which are not parallel since they are just 
     swapping in and out of execution. 
@@ -152,37 +151,39 @@
     The idea is that we need to expose the concurrency of a problem and then map 
     it to processing units so they execute at the same time (paralellism).
 
-    A concurrent application has concurrency built into the problem definition
-    In concurrent applications, there is no way to have the problem 
-    run without concurrency.
-
-    In a parallel application there are things happening at the same time to make 
-    it run faster. In a parallel problem, we don't necessarily *need* to run 
-    in parallel. 
-
 *** Description OpenMP
 
     OpenMP is a set of compiler directives and runtime libraries to be able to 
     run code in parallel.
 
-    At the low level, it assumes shared address space. 
+    It makes it as easy as possible to write a parallel program.
 
+    At the low level, it assumes shared address space. 
     On top of it, we have an OS that supports a multi-threaded approach.
 
-    The programming layer is all the commands we will describe to enable the 
+    Finally, at the top is the programming layer, which is all the commands, 
+    environment variables, and OMP libraries that we will describe to enable 
     parallel execution.
 
-
 *** Syntax
+
 **** Core Syntax
 
      OpenMP (OMP) consists of compiler directives of the form
-     `#pragma omp [construct] [clause1] [clause2] ...`. Most of the constructs
-     of OMP apply to a "structured block"", which is simply a block of code 
-     with an entry point at the top and another at the end. 
 
-     We also have some functions and variables that are declared in 
-     `#include <omp.h>`.
+     @code c
+     // this library includes functions and variables that we need to 
+     // run openmp
+     #include <omp.h>
+     #pragma omp construct [clause1] [clause2] ...
+
+     @end
+     
+     Most of the constructs of OMP apply to a "structured block", which is 
+     simply a block of code with an entry point at the top and another at the 
+     end. 
+
+     Conceptually, our code will look something like this:
 
      @code c
      #include <omp.h>
@@ -193,42 +194,114 @@
         // some serial code done by one thread
         //
 
-         // Indicates the start of a parallel region where multiple threads will
-         // be created and will execute the block of code inside the structured 
-         // block denoted by {}
-         #pragma omp parallel        
-         {
-             // some code block           
-         }                           
+        // Indicates the start of a parallel region where multiple threads will
+        // be created and will execute the structured block of code inside {}
+
+        #pragma omp parallel        
+        {
+             // some code block (a.k.a structured block).
+             // multiple threads will execute this block of code 
+             // in parallel.
+        }                           
 
      }
      @end
 
-     OMP uses the master-fork-join paradigm, i.e. one in which a master thread 
-     spawns some threads (a fork) which are joined at the end of a parallel 
+     The #pragma omp parallel directive tells the compiler to spawn some threads 
+     which will execute the code block. The number of threads depends on the 
+     OS, however, we will talk about this in more detail later.
+
+     OMP uses the master-fork-join paradigm, i.e. one in which a *master* thread 
+     spawns some threads (a *fork*) which are *joined* at the end of a parallel 
      region.
 
      Each of the threads has a private stack frame, but share the stack of the 
-     parent thread. 
+     parent thread (also called the master thread). This means all of the 
+     variables declared inside the code block are private to each thread, while 
+     variables declared *before* the code block are visible by all the threads.
+     This has important consequences in how we handle variables as we will 
+     see later.
+        
+     Below is a very simple omp program.
 
-     Nested paralell regions are allowed. 
+     #tangle hello.v1.c
+     @code c 
+     #include <omp.h>
+     #include <stdio.h>
+     int main()
+     {
 
-     Note that inside the structured block each thread is executing the code 
-     and has a private memory of each variable declared in the block. However, 
-     any variables declared before the #pragma omp parallel can be seen by all 
-     threads. 
+         printf("I am the master thread and I will print only once!\n");
+         #pragma omp parallel
+         {
+             printf("I am a lowly thread among many, hello!\n");
+         }
+     }
+     @end
 
-     `omp_set_num_threads(number)`: This function sets the number of threads that OpenMP 
-     will *try* to create. It is important to note that it only asks for that number
-     of threads, but the OS may give less (perhaps to avoid some crashes or resource 
-     overallocation)
+     We compile this program as "gcc -fopenmp hello.v1.c -o hello.v1", 
+     to obtain the executable. Note that to use openmp, we have to compile 
+     with the flag *-fopenmp*. 
 
-     `omp_get_num_threads()`: returns an int. Gives the number of actual threads running.
-     Useful to check how many threads I actually have.
+     If we run the executable, we will see that the phrase hello is printed 
+     multiple times in standard output (once by each thread) while the first 
+     print statement is executed only once.
 
-     `omp_get_thread_num()`: returns an int. Gives the id of the current thread that
-     calls this function, i.e. if I have 5 threads and the third thread calls this 
-     function, it will return 2 (note we start counting from 0)
+*** Some initial run-time commands
+
+    Now we will describe some useful run-time commands for beginners.
+
+    - `omp_set_num_threads(int number)` -> void : This function sets the number
+    of threads that OpenMP will *try* to create. It is important to note that 
+    it only asks for that number of threads, but the OS may give less to avoid 
+    some crashes or resource overallocation.
+
+    - `omp_get_num_threads()` -> int : Gives the total threads that have been 
+    spawned. Useful to check how many threads I actually have.
+
+    - `omp_get_thread_num()` -> int : Gives the id of the current thread that
+    calls this function, i.e. if I have 5 threads and the third thread calls 
+    this function, it will return 2 (note that we start counting from 0)
+
+*** Assumed hardware/software
+
+    Today, all machines are NUMA (non-uniform memory access) machines. Even a 
+    single processor level, each core has its own L1 cache, therefore memory 
+    access times are not uniform. 
+
+    As we know a program has a stack, a heap, a text, and a data region. Modern 
+    OS's decompose further into threads by fragmenting the stack. Each thread has 
+    its private stack, which makes it cheap to switch between threads based on 
+    context (this is handled by the OS). However, all threads share the heap, 
+    text, and data regions. 
+
+    So in summary, all the threads have their private stack, but share the heap, 
+    which belongs to the process that is calling the program execution.
+
+    *include threads_vs_process.jpg*
+
+    Note that we can have more threads than cores! Nothing stops us from being 
+    in this scenario. Furthermore, when a program is running, we must think of 
+    all the  possible ways that the threads can be interleaved to give a correct 
+    execution, since these may actually happen. This is why, in the program 
+    below, the order of the output is random.
+
+     #tangle hello.v2.c
+     @code c 
+     #include <omp.h>
+     #include <stdio.h>
+     int main()
+     {
+
+         #pragma omp parallel
+         {
+             int my_id = omp_get_thread_num();
+             int num_threads = omp_get_num_threads();
+
+             printf("Hi from thread %d of %d\n", my_id, num_threads);
+         }
+     }
+     @end
 
 ** False Sharing
 
