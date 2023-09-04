@@ -632,6 +632,7 @@
     granularity of low level control that we can achieve.
 
 **** Critical 
+
      The easiest construct to achieve mutual exclusion is the critical construct
 
      The critical construct creates a *critical section*, which ensures that only
@@ -753,20 +754,39 @@
     little time calculating x. So you lose performance. This is a typical 
     mistake when approaching synchronization constructs for the first time.
 
-**** Locks
+**** Locks - (Advanced!)
 
-    Locks are the most low level directives that are offered by OMP. In a 
-    few words, locks are variables of a type declared in <OMP.h> and they enable rich
-    functionality:
+     Locks are the most low level directives that are offered by OMP. In a 
+     few words, locks are variables of a type declared in <OMP.h> and they enable 
+     rich functionality:
 
-    - omp_set_lock() : the thread that calls this function has the lock and can 
-    execute the code requiring that lock 
+     In a few words, if a thread holds a lock, it can do what it wants. 
+     If a thread tries to grab a lock, and it is held by someone else, it must 
+     wait until the lock is freed.
 
-    - omp_get_lock() : the thread that calls this function tries to obtain the 
-    lock, and if it fails, it will wait until the lock is available.
+     However, since the lock is a variable, we can obtain more complex, flexible 
+     behavior compared to using critical or atomic.
 
-    - omp_test_locl() : the thread will test whether the lock is free. If it isn't 
-    it will keep on going to do other stuff instead of waiting.
+     - omp_init_lock() : initialize the lock variable.
+
+     - omp_set_lock() : the thread that calls this function obtains the lock if 
+     the lock is available. If the lock is unavailable, it will wait until 
+     it becomes available (inefficient!). The thread that has the lock can execute the code 
+     requiring that lock 
+
+     - omp_unset_lock() : frees the lock and makes it available for grabs by 
+     other threads. 
+
+     - omp_destroy_lock() : destroys the lock so it is no longer available. 
+     Similar to freeing allocated memory in C.
+
+     - omp_test_lock() : the thread will test whether the lock is free. If it 
+     is, it will set the lock and retun. If it isn't it will return and the 
+     thread can keep on going to do other stuff instead of waiting. 
+     This is in contrast to omp_set_lock() where a thread has to wait if the 
+     lock is not available. 
+
+     EXAMPLE IN VIDEO 14 - Intro to OPENMP 11 PART 2 ABOUT HISTOGRAMS ----------------------------------------------------------
 
 ** OMP Worksharing constructs:
 
@@ -800,6 +820,7 @@
     through the `schedule` clause.
 
 **** Scheduling
+
      - `schedule(static [,chunk])` : Deal out blocks of iterations of size "chunk" 
      to each thread. Note that the chunk parameter is optional, and can be left 
      to the compiler. 
@@ -833,6 +854,10 @@
      environment variable (or a runtime library). 
      This is used a lot when we don't know which schedule is best and we want to 
      try different options without having to recompile our code each time.
+     This can be combined with 
+     -- `omp_set_schedule("static"|"dynamic"|"auto")` : sets the schedule at 
+        runtime.
+     -- `omp_get_schedule()` : get the schedule type.
 
      - `schedule(auto)` : A relatively new option. The schedule is left up to 
      the runtime to choose (does not necessarily have to be any of the above 
@@ -910,6 +935,12 @@
    avg /= SIZE;
    @end
 
+   Note that by default, the loop index i is made local to each thread under 
+   the hood, so we don't need to worry about race conditions.
+
+   However, for clarity, we could declare i locally (which is what I prefer to 
+   do).
+
 *** \[Exercise\] Parallel Pi - Round 3
 
     This one's pretty easy. 
@@ -951,7 +982,112 @@
 
     Boom! Now it looks much cleaner doesn't it?
 
+    Notice that the variable x has to be local to each thread. We can do this in 
+    two ways: 
+    - Declaring it inside the #pragma omp parallel region. To do this, we cannot 
+      use the compact notation of the for loop.
+    - Using the compact notation, put it in the list of variables. However, this 
+      will insert some useless code to recombine the local copies to the global 
+      variable. 
 
+    There are more elegant ways which we will see later to deal with this.
+
+** Working with OpenMP
+
+   Now we are going to talk about a collection of constructs that require a good 
+   overall grasp of OMP.
+
+*** Barrier - Revisited
+
+    Let's talk about where barriers are implied and where they are explicit.
+
+    At the end of a `#pragma omp for` there is an implicit barrier. This was a 
+    design choice by OMP designers to increase the safety of the code, since 
+    most of the time, after a for loop, you will use that result immediately.
+
+    This holds true for any worksharing construct.
+
+    To override this default behavior, we can use the `nowait` clause. 
+
+    @code c
+    #pragma omp parallel 
+    {
+
+        #pragma omp for
+        for(i = 0; i<N; ++i){
+            // big calculations
+        }// there is an implicit barrier here. 
+        // at the end of this, I am sure that all threads have finished 
+        // doing the calculations
+
+        #pragma omp for nowait
+        for(i = 0; i<N; ++i){
+            // other big calculations
+        }
+
+        // ... other calculations which dont depend on results of previous for loop
+
+    }
+    @end
+
+    As we can see, the last calculations we make are independent of the for 
+    loop before them.
+    So we don't need an implicit barrier! And remember, synchronization 
+    constructs are performance killers. 
+
+    So by overriding the default behavior, we can gain some performance.
+
+    A word of advice: use this only when you are *_absolutely_* sure of what you 
+    are doing.
+
+    Note: there is also an implied barrier at the end of a parallel region which 
+    we can't turn off - it would't even make sense to do so.
+*** Master and Single
+
+    1. `#pragma omp master` : When I want the master thread only to do something.
+
+    --- ( ) *no* synchronization implied at the end of this construct,
+        so all threads keep on going to the next portion of code.
+
+    2. `#pragma omp single` : When I want a *single* thread to do something, and I 
+      don't care if it's the master thread. With this construct, the first 
+      thread to arrive to the structured code block will execute it.
+
+    --- (x) *implied* synchronization barrier at the end of this (worksharing) 
+            construct. So all threads wait at the end of the structured block 
+            until the single thread is done.
+            Of course, we can put a `nowait` at the end of this clause.
+
+*** Sections
+
+    Gives us a way to create sections of code and each thread does a certain 
+    section.
+
+    This is more easily illustrated with an example.
+
+    @code c
+    #pragma omp parallel
+    {
+        #pragma omp sections
+        {
+            #pragma omp section
+            x_calculation();
+            #pragma omp section
+            y_calculation();
+            #pragma omp section
+            z_calculation();
+        }
+    }
+    @end
+    
+    As we can see, we first declare a region which will contain *sections*, and
+    then we define the single *section*, one by one.
+
+    In this case, one thread will execute the first section, another the second, 
+    and another the third.
+
+
+** Additional Runtime libraries 
 
 
 
