@@ -518,84 +518,441 @@
     In the next sections, we will dive into the pitfalls of this code and learn 
     how to fix it. 
 
+** The Problem of False Sharing
 
-** False Sharing
+   One of the reasons our code performs terribly is *False Sharing*. 
 
-   False sharing is an important problem we must always keep in mind to avoid
-   serious performance hits. Basically, it occurs when we have a shared variable 
-   among all threads. Suppose all threads want to read this variable, then, a copy 
-   of the variable will be pulled in the cache of the core belonging to a specific
-   thread. Suppose that all threads then want to write to this variable and change it. 
-   They will each modify their local version, which in turn will activate a cache coherency
-   protocol which ensures that the local copy of the variable in memory is always coherent.
-   This means however, that we will have a lot moving back and forth of the variable
-   among caches as it is updated. Thus performance will be terrible.
+   It is an important problem we must always keep in mind to avoid
+   serious performance hits. 
 
-** Synchronization
+   Basically, it occurs when we have a shared variable among all threads. 
 
-   two types:
-   - barrier
-   - exclusion
+   Suppose that we have as many threads as cores, and that all threads want to 
+   read this variable. Then, a copy of the variable will be pulled into the 
+   cache of each core. 
 
-*** barrier
+   Now, imagine that all threads want to write to this variable and change it. 
+   They will each modify their local copy in the cache, which in turn will 
+   activate a cache coherency protocol. This protocol ensures that the local 
+   copy in cache is coherent with the copy in memory.
 
-    OMP provides functionality to ensure that all threads are synchronized at a barrier.
-    This can be achieved by the directive:
-    `#pragma omp barrier`
+   For example, if we use the MESI protocol, the local variable will be marked 
+   with M (modified) while all the other copies, along with the one in main 
+   memory will be marked with I (invalid).
 
-    Upon finding this directive, all threads will wait until all the threads have called
-    the barrier and then keep going to the next block of code.
+   As a consequence, the local copy in cache is written in main memory and then 
+   all other threads *flush* their local cache copy, and update their copy 
+   of the variable. 
 
-    // insert example
+   This process is expensive, and requires a lot of memory movement, which is 
+   one of the biggest performance killers in parallel applications since it 
+   is an unwanted synchronization. (remember synchronization?)
 
-    Subtle point: By default, the barrier is inserted automatically after any worksharing
-    construct, which we will talk about later. However, it is important to keep in mind
-    that while the barrier is useful to make sure that all threads are synchronized at 
-    some point, if one doesn't truly need the barrier, this can slow down performance.
+   In our example above, the partial sum array is most likely sitting 
+   in the same cache line. So, whenever a thread updates its "slot", the 
+   coherency protocol is triggered, and all the other threads must pause what 
+   they are doing, flush the *whole* array, update it, and then continue on. 
+   And this may happen many many times, killing performance.
 
-*** exclusion
+*** False Sharing Solution (1)
 
-    OMP provides a few constructs for exclusion, and they vary in their granularity of 
-    low level control that we can achieve.
+    A possible solution to our problem is to pad our array, so that all the 
+    partial sum slots reside in different cache lines.
 
-    1. '#pragma omp critical'  : This directive ensures that only one thread at a time
-    is executing the code found in the subsequent structured block. Note that all other
-    threads will be waiting before this directive to be able to execute the code block.
-    Therefore, if not needed, this could slow down performance. 
+    So, if we assume a 64 Byte L1 cache line, then it will fit 8 doubles values. 
+    Therefore, our partial sum array will be declared as  
+    @code c 
+    #define PAD_SIZE 8
 
-    2. '#pragma omp atomic' : This directive is similar to atomic, but is slightly more 
-    low level in the sense that for simple operations, it can take advantage of some 
-    hardware functionality for switching between threads. If this functionality is not 
-    available, it will be identical to '#pragma omp critical'.
+    //...
 
-    3. Locks: Locks are the most low level directives that are offered by OMP. In a 
+    double partial_sum [NUM_THREADS][PAD_SIZE]
+
+    // ... 
+
+    partial_sum[my_id][0] += 4.0/(1.0+x*x);
+    @end
+
+    So now, the slot of each thread is in its own cache line, and they can 
+    safely modify their own slot without triggering the coherency protocol.
+
+    Of course, this is an ugly solution because it requires knowing the size 
+    of the cache line. So it kills portability!
+
+    We will look at better solutions along this tutorial.
+
+** An issue of synchronization
+
+   Synchronization is a delicate concept, and it can get very technical. 
+   Fortunately, OMP keeps it simple.
+
+   There are two main types of synchronization:
+
+   - Barrier: Each thread waits at the barrier until all threads arrive.
+   - Mutual Exclusion: Define a block of code that only one thread at a time can 
+     execute.
+
+    How do we achieve this in OMP?
+
+*** Barrier construct
+
+    The simplest synchronization construct is the barrier.
+    @code c
+    //...
+    #pragma omp parallel 
+    {
+        int id = omp_get_thread_num();
+        // some big calculation that depends on the thread id
+        A[id] = big_calc1(id);
+
+        // Barrier. This ensures *all* threads have calculated A before going on 
+        // to the next part.
+        #pragma omp barrier
+        // We need a barrier because, to calculate B, we need all A to be 
+        // completed. 
+        // So we cannot allow one thread to finish and try calculating B when 
+        // other threads are still working on A!
+        B[id] = big_calc2(id, A);
+    }
+
+    @end
+
+    We introduce now a subtle point. By default, a barrier is inserted 
+    automatically after all worksharing constructs (which we will see in a bit).
+
+    However, it is important to keep in mind that while the barrier is useful 
+    to make sure that all threads are synchronized at some point, if one 
+    doesn't truly need a barrier, it can slow down performance.
+
+    So make sure your barriers are actually needed.
+
+*** Mutual Exclusion
+
+    OMP provides a few constructs for exclusion, and they vary in their 
+    granularity of low level control that we can achieve.
+
+**** Critical 
+     The easiest construct to achieve mutual exclusion is the critical construct
+
+     The critical construct creates a *critical section*, which ensures that only
+     one thread at a time is executing the code found in the subsequent 
+     structured block. 
+
+     Note that all other threads will be waiting before this directive for their 
+     turn to execute the code block. In other words, the critical construct 
+     /serializes/ our code for some time. Therefore, if not needed, this could 
+     slow down performance. 
+
+     @code c
+     #pragma omp parallel 
+     {
+         // ... 
+         #pragma omp critical 
+         {
+             // critical section
+         }
+
+     }
+     @end
+
+     A pro tip: Since a critical directive serializes our code, make sure that 
+     the work that has to be done in the critical section is not too big! 
+     Otherwise performance will take a serious hit.
+
+**** Atomic
+
+     The atomic directive is very nuanced and subtle, and will be discussed in
+     more detail later. 
+
+     For now, lets keep it simple.
+
+     There are certain constructs supported in hardware that allow for quick 
+     updates of values of values in memory. The atomic construct tries to use
+     these hardware constructs if they are available. Otherwise, it behaves 
+     like a critical construct.
+
+     @code c
+     #pragma omp parallel 
+     {
+         // ... 
+         #pragma omp atomic 
+         {
+             // critical section
+         }
+
+     }
+     @end
+
+*** \[Exercise\] Parallel Pi
+
+    It's time to fix our program!
+
+    Using all the constructs we have seen so far, how would you fix our previous 
+    program to avoid false sharing and become blazingly fast?
+
+    Here is a possible solution using the atomic construct.
+
+    #tangle parallelpi.atomic.c
+    @code c 
+    #include <stdio.h>
+    #include <omp.h>
+
+    static long int num_steps = 10000000;
+    double step;
+
+    #define NUM_THREADS 100
+
+    int main(){
+        double start = omp_get_wtime();
+        double pi, sum = 0.0;
+
+        step = 1.0/(double) num_steps;
+
+        omp_set_num_threads(NUM_THREADS);
+
+        #pragma omp parallel
+        {
+            int num_threads = omp_get_num_threads();
+            int id = omp_get_thread_num();
+
+            double x, partial_sum = 0.0;
+
+            for(int j = id; j < num_steps; j+=num_threads){
+                x = (j + 0.5)*step;
+                partial_sum += 4.0/(1.0+x*x);
+            }
+
+            #pragma omp atomic
+                sum+=partial_sum;
+
+        }
+        pi = sum*step;
+        
+        double end = omp_get_wtime();
+
+        printf("Pi is: %f\t Wtime is: %f\n", pi, end-start);
+    }
+    @end
+    
+    As we can see, our code is very similar to before. 
+
+    However, now we have a variable "partial sum" which is private for each 
+    thread. Each thread accumulates its partial sum in this variable, and when 
+    it's done, it updates a global variable "sum". However, to avoid race  
+    conditions, we must use synchronization. 
+
+    This is achieved with the atomic construct (we could also have used the 
+    critical construct).
+
+    The performance *may* be similar to the padded solution. However, this is 
+    much more portable!
+
+    - (!) Warning: Be careful not to make the mistake of putting the critical 
+    construct inside the for loop (to calculate pi directly). If you do this, 
+    your code becomes basically serialized since each thread spends very 
+    little time calculating x. So you lose performance. This is a typical 
+    mistake when approaching synchronization constructs for the first time.
+
+**** Locks
+
+    Locks are the most low level directives that are offered by OMP. In a 
     few words, locks are variables of a type declared in <OMP.h> and they enable rich
     functionality:
+
     - omp_set_lock() : the thread that calls this function has the lock and can 
     execute the code requiring that lock 
+
     - omp_get_lock() : the thread that calls this function tries to obtain the 
     lock, and if it fails, it will wait until the lock is available.
+
     - omp_test_locl() : the thread will test whether the lock is free. If it isn't 
     it will keep on going to do other stuff instead of waiting.
 
-    EXAMPLE 
+** OMP Worksharing constructs:
 
+   Worksharing is an extremely important feature of OMP.
 
-** Worksharing constructs:
+*** The loop worksharing construct:
 
-   OMP provides some worksharing construct. As an example, consider:
+    One of the most important and common worksharing constructs is loops. 
 
-   @code c
-   #pragma omp parallel{
-   #pragma omp for
+    Imagine we want to divide the work of a for loop in the same way we did 
+    above. However, we want to avoid having to go through the hassle of manually 
+    splitting up the iterations according to thread id.
 
+    Ideally, what we want is to let the compiler figure things out.
+
+    OMP provides *just* the right construct for that!
+
+    @code c 
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for (i = 0; i<N; ++i)
+        {
+            // work
+
+        }
     }
-   @end
+    @end
 
-   sections
+    We can also specify *how* work is divided among threads. This is done 
+    through the `schedule` clause.
 
+**** Scheduling
+     - `schedule(static [,chunk])` : Deal out blocks of iterations of size "chunk" 
+     to each thread. Note that the chunk parameter is optional, and can be left 
+     to the compiler. 
+
+     All of this is done at compile time. Note that if we have 
+     less threads than blocks, for example, a loop of 100 iterations and chunk 
+     20, i.e. 5 blocks, and 2 threads, the compiler will distribute work in a 
+     round robin fashion.
+
+     - `schedule(dynamic [,chunk])` : Each thread grabs "chunk" iterations off 
+     a queue until all iterations have been handled. Again, the chunk parameter 
+     is optional. 
+
+     This is done at runtime. This is advantageous if we have very different 
+     workloads between different runs or if we don't know ahead of time the 
+     workload! (For example, maybe we are always changing the data set we are 
+     working with). 
+
+     Of course, the price of this flexibility is some additional runtime 
+     functions which are added to our code. So if we *know* the workload ahead 
+     of time, a static schedule will be faster (simply because it doesnt need 
+     to account for this flexibility).
+
+     - `schedule(guided [,chunk])` : Threads dynamically grab blocks of 
+     iterations. The size of the block starts large and shrinks down to size 
+     "chunk" as the calculation proceeds.
+
+     This construct is not very popular.
+
+     - `schedule(runtime)` : Schedule and chunk size taken from the OMP_SCHEDULE
+     environment variable (or a runtime library). 
+     This is used a lot when we don't know which schedule is best and we want to 
+     try different options without having to recompile our code each time.
+
+     - `schedule(auto)` : A relatively new option. The schedule is left up to 
+     the runtime to choose (does not necessarily have to be any of the above 
+     options, and the compiler may do some complicated scheduling).
+     This option gives the compiler the most flexibility in choosing the 
+     schedule.
+
+     Pro tip: We have listed all the schedules for completeness. In the 
+     beginning, only use static or dynamic.
+
+     Pro tip 2: Use static when we know the workload ahead of time. Otherwise, 
+     use dynamic to ensure a good load balancing among threads (i.e. they do 
+     equal work).
+
+**** A combined notation
+
+     Since one of the most popular uses of OMP is to parallelize 
+     loops, it is very common to find code snippets like the one above where 
+     the *only* parallelization is a for loop. 
+
+     To make notation shorter, OMP supports a combined notation:
+
+     @code c 
+     #pragma omp parallel for
+     for (i = 0; i<N; ++i)
+     {
+        // work
+
+     }
+
+     @end
+
+     This is syntactic sugar for the previous code snippet.
 
 ** Reductions
+
+   One of the most common uses cases of parallel progamming is to speed up 
+   an operation over a for loop, such as finding the sum, the max, the min,
+   the product, etc.
+
+   These type of operations are so important, that they are given a specific 
+   name: Reductions (because they *reduce* the array to a single value we care 
+   about).
+
+   OMP supports reductions out of the box, as clauses that are added at the end 
+   of the for loop construct.
+
+   The syntax is:
+
+   `reduction(operator:list of variables)`
+
+   Lets dive into more detail. 
+
+   This clauses tells the compiler to make a local copy of each of the 
+   variables in the list and initialize them depending on the operation. 
+
+   - For sum : initialized to 0
+   - For product : intialized to 1
+   - etc.
+
+   Then, updates occur on the local copy. 
+   At the end of the entire process, local copies are reduced into a single 
+   value and combined with the original global value.
+
+   This is *all* done under the hood by the compiler! So nice!
+
+   Below is a quick example:
+
+   @code c 
+   double avg = 0.0, A[SIZE]; int i;
+   #pragma omp parallel for reduction (+:avg)
+   for(i = 0; i<SIZE; ++i){
+       avg += A[i];
+   }
+   avg /= SIZE;
+   @end
+
+*** \[Exercise\] Parallel Pi - Round 3
+
+    This one's pretty easy. 
+
+    Try to rewrite the parallel pi using the worksharing constructs we have 
+    seen so far!
+
+    As usual, try to come up with your own solution before looking at the 
+    answer.
+
+    #tangle parallelpi.reductions.c
+    @code c
+    #include <stdio.h>
+    #include <omp.h>
+
+    static long int num_steps = 100000000;
+
+    double step;
+    #define NUM_THREADS 100
+
+    int main(){
+        double x, pi, sum = 0.0;
+
+        step = 1.0/(double) num_steps;
+        double start = omp_get_wtime();
+
+        omp_set_num_threads(NUM_THREADS);
+        #pragma omp parallel for reduction (+:sum, x)
+        for (int i=0; i<num_steps; i++){
+            x = (i+0.5)*step;
+            sum += 4.0/(1.0+x*x);
+        }
+        pi = step*sum;
+        double end = omp_get_wtime();
+
+        printf("Pi is: %f\t Wtime is: %f\n", pi, end-start);
+    }
+    @end
+
+    Boom! Now it looks much cleaner doesn't it?
+
+
+
 
 
 * References 
