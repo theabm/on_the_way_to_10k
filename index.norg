@@ -13,10 +13,11 @@
   in a similar path.
 
 * Table of contents
+
 ** Neovim
 ** Kmonad
 ** {:dash/dash:}[Dash]
-** Rust
+** {:rust/rust:}[Rust]
 ** Lua 
 ** {:neorg/neorg:}[Neorg] 
 ** Org
@@ -28,6 +29,8 @@
 ** Nu Shell
 ** HPC
 *** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
+*** {:hpc/openmp/openmp:}[OpenMP]
+** {:profiling/profiling:}[Profiling]
 ** {:haskell/haskell:}[Haskell]
 
 
