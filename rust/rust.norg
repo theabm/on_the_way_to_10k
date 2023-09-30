@@ -76,6 +76,75 @@
     - .gitignore
 
 
+    * Common Programming Concepts 
+  In this section we cover some basic programming concepts and describe them 
+  in the context of Rust. We will see:
+  - variables 
+  - basic types 
+  - functions 
+  - comments 
+  - control flow 
+
+    ** Variables and mutability 
+    By default variables are immutable. This is one of the main design choices 
+    of rust to encourage safety and easy concurrency.
+
+    However, variables can still be made to be mutable.
+    Consider the following example:
+    @code rust
+        fn main() {
+            let x = 5;  
+            println!("The value of x is: {x}");
+            x = 6; 
+            println!("The value of x is: {x}");
+        }
+    @end
+    This code does not compile and we get an immutability error.
+
+    Immutability is helpful because it prevents bugs that occur when we operate 
+    under the assumption that variables are constant but in reality get changed 
+    throughout the code. 
+
+    However, mutability is necessary in an imperative paradigm.  
+    To make a variable mutable, add the `mut` keyword.
+
+    @code rust
+        fn main() {
+            let x = 5;  
+            println!("The value of x is: {x}");
+            x = 6; 
+            println!("The value of x is: {x}");
+        }
+@end
+This code now compiles.
+*** Constant variables
+We can create constant variables with the `const` keyword instead of `let`. 
+They are different from immutable variables in the following: 
+- const variables cannot be used with `mut`
+- const variables must always be type annotated.
+- const variables must *_always_* be known at compile time. 
+On the other hand, immutable variables can be known at run-time.
+
+
+
+* Understanding Ownership 
+* Using Structs to Structure Related Data
+* Enums and Pattern Matching 
+* Managing Growing Projects with Packages, Crates, and Modules
+* Common Collections
+* Error Handling 
+* Generic Types, Traits, and Lifetimes
+* Writing Automated Tests
+* I/0 
+* Functional Language Features: Iterators and Closures
+* More about Cargo and Crates.io 
+* Smart Pointers
+* Concurrency 
+* Object Oriented Programming in Rust 
+* Patterns and Matching
+* Advanced Features: Unsafe Rust, Advanced Traits, Types, Functions, Closures, and Macros
+
+
 
 
 
