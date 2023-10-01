@@ -116,15 +116,91 @@
             println!("The value of x is: {x}");
         }
 @end
-This code now compiles.
-*** Constant variables
-We can create constant variables with the `const` keyword instead of `let`. 
-They are different from immutable variables in the following: 
-- const variables cannot be used with `mut`
-- const variables must always be type annotated.
-- const variables must *_always_* be known at compile time. 
-On the other hand, immutable variables can be known at run-time.
 
+This code now compiles.
+
+*** Constant variables
+
+    We can create constant variables with the `const` keyword instead of `let`. 
+    They are different from immutable variables in the following: 
+    - const variables cannot be used with `mut`
+    - const variables must always be type annotated.
+    - const variables must *_always_* be known at compile time. 
+      On the other hand, immutable variables can be known at run-time. 
+
+    Some useful facts about constants:
+
+    1. The naming convention is MY_CONST_VARIABLE_NAME.
+
+    2. The operations we can use for const expressions are limited by the 
+    compiler.
+
+    3. Constants are valid throughout the entire run-time of the code and exist 
+    within the scope in which they are declared. 
+
+    4. They can be used in the global scope (outside of a function) while `let`
+    can only be used in a function. 
+
+*** Shadowing 
+
+    In Rust we can redeclare variables with the same name and different type. 
+    This is called variable *_shadowing_* since the compiler only sees the second 
+    variable until its shadowed again or the scope ends.
+
+    An example:
+    @code rust 
+    fn main() {
+        // first variable name
+        let x = 5;
+
+        // the variable is shadowed
+        let x = x + 1;
+        // from this point, x=6
+
+        {
+            // variable is shadowed again, x=12
+            let x = x * 2;
+            println!("The value of x in the inner scope is: {x}");
+        } // after scope ends, shadow goes out of scope and we see old 
+        // variable once again, i.e x=6
+
+        println!("The value of x is: {x}");
+    }
+    @end
+
+    - Shadowing is different from marking a variable as `mut` because it allows 
+      us to perfom some transformations and then have that variable be 
+      immutable for the rest of the code. 
+      On the other hand, a `mut` variable can always be changed (even though 
+      we may not want it to).
+
+    - The other difference is that since we are effectively creating a new 
+      variable, we can change its type. This can't be done if we just mark a 
+      variable as `mut` and then try to assign to it a different type without 
+      using the `let` keyword to overshadow.
+
+    - A subtle note: when shadowing we can also change the mutability of a the 
+      variable.
+
+      This code compiles:
+    @code rust 
+    // spaces is a string 
+    let spaces = "   "; 
+    // spaces is now a number
+    let spaces = spaces.len();
+    @end 
+    Note that shadowing can work together with `mut`. The key is using `let` 
+    twice.
+
+    This code does not compile:
+    @code rust
+    // spaces is a string 
+    let mut spaces = "   ";
+    // here we try to assign an int to spaces 
+    // which is declared as a string since 
+    // its the same variable.
+    spaces = spaces.len();
+    @end
 
 
 * Understanding Ownership 
