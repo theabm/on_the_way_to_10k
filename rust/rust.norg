@@ -112,7 +112,7 @@
 
    @code rust
    fn main() {
-       let x = 5;  
+       let mut x = 5;  
        println!("The value of x is: {x}");
        x = 6; 
        println!("The value of x is: {x}");
@@ -120,6 +120,18 @@
    @end
 
    This code now compiles.
+
+   One last subtlety: Rust does not require a variable declared only with 
+   `let` to be initialized as long as it is assigned only once. Therefore, 
+   this is allowed:
+
+   @code rust
+   fn main() {
+       let x;  
+       x = 6; 
+       println!("The value of x is: {x}");
+   }
+   @end
 
 *** Constant variables
 
@@ -394,8 +406,8 @@
       In other words, Rust inserts run-time checks to make sure we don't 
       access out of bound elements. 
 
-      These checks cannot be put at compile time since we cannot know what  
-      the user will try to enter. 
+      These checks cannot be done only at compile time since we cannot know 
+      what the user will try to enter. 
 
       This is one example of Rust's memory safety since in other languages, we 
       could access the out of bound index and get undefined behavior.
@@ -417,6 +429,7 @@
    We _must_ declare the type of each parameter in a function signature. 
 
 ** Statements and Expressions
+
    - *_Statements_*: are instructions that perform some action and do not return 
      a value.
    - *_Expressions_*: evaluate to a resultant value. 
@@ -463,6 +476,7 @@
    @end
 
 ** Functions with Return Values
+
    Rust functions can return a values to the caller. We always need 
    to declare the type of the returned value with an arrow `->`.
 
@@ -477,9 +491,185 @@
 
 ** Control Flow
 
+   We briefly discuss the control flow constructs available in Rust: 
+   `if`, `loop`, `while`, `for`.
 
+*** `if` Expressions
 
+    The first important detail to notice is that in Rust an `if` is 
+    an *expression*. This means we can use it to return a value and bind 
+    it to another variable. 
 
+    `if` expressions allow to change the execution of a program based 
+    on a boolean condition. Rust does not implicitly convert non-boolean 
+    types to booleans, as C does for example. So we *must* have a 
+    boolean condition. 
+
+    The syntax is as usual:
+
+    @code rust
+    fn main() {
+        let number = 6;
+
+        if number % 4 == 0 {
+            println!("number is divisible by 4");
+        } else if number % 3 == 0 {
+            println!("number is divisible by 3");
+        } else if number % 2 == 0 {
+            println!("number is divisible by 2");
+        } else {
+            println!("number is not divisible by 4, 3, or 2");
+        }
+    }
+    @end
+
+    However, we can use it as an expression inside a `let` statement: 
+
+    @code rust
+    fn main() {
+        let condition = true;
+        // note that since there are no semicolons inside the block 
+        // of code, we implicitly return the last expression, which
+        // is the number
+        let number = if condition { 5 } else { 6 };
+
+        println!("The value of number is: {number}");
+    }
+    @end
+
+    Note that the returned values from both branches of the 
+    `if` expression must be of the same type since Rust must know 
+    the type of each variable at compile time. If they were of different 
+    types, the compiler cannot infer the type. 
+
+    Also, if we want to use `if` as an expression, we *need* to include 
+    an `else` block so that the compiler knows what to do in both cases. 
+
+*** `loop` Expressions
+
+    The `loop` keyword executes a block of code indefinitely until you 
+    stop it explicitly with the `break` keyword.
+
+    We can also use `continue` to skip the rest of the code block for 
+    the current iteration and start the next iteration.
+
+    Since `loop` is an expression, we can use it to return a value. 
+
+    We can do this by writing the value we wish to return after the 
+    `break` keyword as follows:
+
+    @code rust 
+    fn main() {
+        let mut counter = 0;
+
+        let result = loop {
+            counter += 1;
+
+            if counter == 10 {
+                break counter * 2;
+            }
+        };
+
+        println!("The result is {result}");
+    }
+    @end
+
+    Since, by default, the `break` and `continue` keywords apply to 
+    the innermost loop, we can label nested loops and use the 
+    labels to specify which loop - innermost or outermost - 
+    we want to `break` or `continue`. 
+
+    @code rust 
+    fn main() {
+        let mut count = 0;
+        // label for outermost loop
+        'counting_up: loop {
+            let mut remaining = 10;
+
+            loop {
+                if remaining == 9 {
+                    break;
+                }
+                if count == 2 {
+                    // breaking outermost loop using 
+                    // label
+                    break 'counting_up;
+                }
+                remaining -= 1;
+            }
+
+            count += 1;
+        }
+    }
+    @end
+
+*** `while` Statements
+
+    If we want to execute a code block while some condition holds true, 
+    we can use a `while` loop. 
+    For example:
+    @code rust 
+    fn main() {
+        let mut number = 3;
+
+        while number != 0 {
+            println!("{number}!");
+
+            number -= 1;
+        }
+
+        println!("LIFTOFF!!!");
+    }
+    @end
+
+    *Note*: If you are anything like me, you may be wondering what 
+    is the difference between `loop` and `while true`. The answer
+    I have found so far is that since loop is guaranteed to run 
+    at /least/ once, the compiler can make different assumptions. 
+
+    For example, this is ok since we know the loop will execute 
+    once at least:
+
+    @code rust 
+    let x;
+    loop { x = 1; break; }
+    println!("{}", x)
+    @end 
+
+    However, this is not valide for the compiler: 
+    @code rust 
+    let x;
+    while true { x = 1; break; }
+    println!("{}", x);
+    @end
+
+    The behaviour could be made to be the same if the compiler 
+    would treat `while true` as a special case. However, this 
+    adds a lot of complexity which can also introduce some 
+    other bugs.     
+    On the other hand, if you use `loop` you *tell* the compiler 
+    this block will execute at least once, which is more elegant.
+
+    Furthermore, a `loop` is an *expression* which can return a 
+    value through `break` and a `while` is a *statement*.
+
+*** `for` Statement
+
+    Rust has a `for` keyword to loop through elements of a collection in 
+    a very pythonic way: 
+
+    @code rust 
+    fn main() {
+        let a = [10, 20, 30, 40, 50];
+
+        for element in a {
+            println!("the value is: {element}");
+        }
+    }
+    @end
+
+    This is much more safe and elegant than using a `while` statement with 
+    a condition on the index of the array.
 
 
 * Understanding Ownership 
