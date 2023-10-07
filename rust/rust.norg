@@ -673,6 +673,441 @@
 
 
 * Understanding Ownership 
+
+  Ownership is a discipline for ensuring the safety of Rust programs. 
+
+  What is safety? 
+  - The absence of undefined behavior
+
+  The primary goal of Rust is to ensure that programs never have undefined 
+  behavior. 
+  A secondary goal is to prevent undefined behavior at /compile-time/ rather 
+  that at /run-time/. The purpose of this is twofold: 
+  - Catching bugs at compile-time means avoiding them in production, improving 
+    the reliability of your software. 
+  - Catching bugs at compile-time means fewer run-time checks which improve the 
+    performance of the code.
+
+  Since ownership is about safety and safety is about preventing undefined 
+  behavior, we need to understand ownership in the context of preventing 
+  undefined behavior. 
+
+  We concentrate on one type of undefined behavior: operations on memory. 
+
+  Rust does not think about memory as an array of bytes, and it provides 
+  a very particular way to think about memory. Ownership is a
+  discipline to safely handle memory in this way of thinking.
+
+** Rust model of memory
+
+   Local variables live in _stack frames_. As we know, the stack grows downwards,
+   towards lower addresses. Once a function goes out of scope, its associated 
+   stack frame is *freed/dropped/deallocated*.
+
+   Since the stack is reserved for small local variables, if we need to 
+   deal with larger variables, we use the _heap_. Rust uses pointers 
+   which point to memory regions in the heap.
+
+   _Rust provides a construct called `Box` for putting data on the heap._
+
+   When we copy boxes (i.e. data in the heap), we only copy the pointer. 
+   In other words: 
+   @code rust
+   // we allocate an array of zeros of length 1 million in the heap
+   // a is a pointer to that memory region.
+   let a = Box::new([0; 1_000_000]);
+   // We copy the address! Not the whole array. This corresponds to a 
+   // shallow copy. 
+   let b = a;
+
+   // So throughout this program, we only have one array of 1 million 
+   // elements.
+   @end
+
+   In the above example, at the end of the program, we cannot access the 
+   array through `a` because it has been _moved_ - as we will explain 
+   shortly.
+
+   *_Rust does not allow manual memory management_*. Stack frames are 
+   automatically managed by Rust. When a function goes out of scope, 
+   Rust deallocates the stack frame immediately. 
+
+   But what about the heap? Imagine if Rust had a `free()` function 
+   that allowed manual deallocation. This manual memory management 
+   can easily lead to bugs, for example, we could try to read a pointer 
+   to a region that has been freed, or we could try to free a memory 
+   region more than once.
+
+   To avoid this, Rust does not allow manual memory deallocation. 
+
+   Instead, Rust /automatically/ frees a box's heap memory. 
+
+   $ Box deallocation principle (almost correct)
+   If a variable is bound to a box, when Rust deallocates the 
+   variable's stack frame, then Rust deallocates the box's heap 
+   memory.
+
+   This is almost correct. However, what happens if more than one 
+   variable is bound to a box as the previous code snippet? In this 
+   case, with the /almost/ correct principle, we would try to free 
+   memory twice, which is also undefined behavior.
+
+   To avoid this, we arrive at _*ownership*_. 
+
+** What is Ownership?
+
+   When we write:
+   @code rust 
+   let a = Box::new([0;1_000_000]);
+   @end
+
+   We say that `a` *_owns_* the box. Then, the statement `let b = a;` 
+   *_moves_* ownership from `a` to `b`. 
+
+   With these concepts, the fully correct version is: 
+
+   $ Box deallocation principle (fully correct)
+   If a variable owns a box, when Rust deallocates the variable's 
+   stack frame, then Rust deallocates the box's heap memory. 
+
+   Let's look at an example:
+
+   @code rust
+   fn main() {
+       // first owns the heap that is allocated for the string
+       let first = String::from("Ferris");
+       // calling add_suffix
+       let full = add_suffix(first);
+       // after calling the add suffix, we pass ownership to full 
+       // and then the stack of add suffix is deallocated.
+        
+       println!("{full}");
+   }
+
+   fn add_suffix(mut name: String) -> String {
+       // here ownership has been moved from first to name
+
+       // this function allocates a new box, copies old contents, 
+       // adds the "jr" and then deallocates old box. So now, 
+       // first points to invalid memory, while name owns the new 
+       // mem region.
+       name.push_str(" Jr.");
+
+       name
+   }
+   @end
+
+   What happens if we try to access `first` after it points to invalid 
+   memory? Undefined behavior!
+
+   To avoid this, rust imposes another rule:
+
+   $ Moved heap data principle
+   If a variable x moves ownership of heap data to another variable 
+   y, then x cannot be used after the move.
+
+   So we cannot use `first` after it has been moved! 
+   If we tried doing it, we would get an error saying that we try to 
+   *borrow* a value after it has been moved. 
+
+   If we wanted to avoid moving data, we could *clone* it using the 
+   `.clone()` method.
+
+   @code rust
+   fn main() {
+       let first = String::from("Ferris");
+       // this does a deep copy of first
+       let first_clone = first.clone();
+       // so now, we have two copies in heap of the same string
+
+       // after the call to add_suffix on first_clone, 
+       // first_clone will point to invalid data (as first did in 
+       // the previous example). However, first is unchanged and 
+       // safe to use
+       let full = add_suffix(first_clone);
+       println!("{full}, originally {first}");
+   }
+
+   fn add_suffix(mut name: String) -> String {
+       name.push_str(" Jr.");
+       name
+   }
+   @end
+
+   In summary, ownership is primarily a discipline of heap management. More 
+   generally, it is about _pointer management_, which we will see when we
+   discuss how to create pointers in places other than the heap.
+   The main ideas of ownership so far are:
+
+   - All heap data must be owned by exactly one variable.
+   - Rust deallocates heap data once its owner goes out of scope.
+   - Ownership can be transferred by moves, which happen on assignments
+     and function calls.
+   - Heap data can only be accessed through its current owner, not a 
+     previous owner.
+
+** References and Borrowing
+
+   Ownership, boxes, and moves provide a way to safely program 
+   with the heap. However, move-only APIs can be inconvenient to use. 
+   For example, suppose we want to read a string twice:
+   @code rust 
+   fn main() {
+       let m1 = String::from("Hello");
+       let m2 = String::from("world");
+       greet(m1, m2);
+       let s = format!("{} {}", m1, m2); // Error: m1 and m2 are moved
+   }
+
+   fn greet(g1: String, g2: String) {
+       println!("{} {}!", g1, g2);
+   }
+   @end
+
+   We could return ownership back to the main stack by returning a tuple, 
+   however, this makes the code quite verbose. 
+
+   Rust provides a way to achieve this. 
+
+*** References are Non-Owning Pointers
+
+    References allow us to /borrow/ values by creating non-owning references 
+    to it. 
+    Below we can see an example program that reads the strings twice using 
+    references: 
+
+    @code rust 
+    fn main() {
+        let m1 = String::from("Hello");
+        let m2 = String::from("world");
+        // note the ampersands to create a reference
+        greet(&m1, &m2); 
+        let s = format!("{} {}", m1, m2);
+    }
+    // note the ampersands to create a reference
+    fn greet(g1: &String, g2: &String) { 
+        println!("{} {}!", g1, g2);
+    }
+    @end 
+
+    In this example we use references, which are created with `&`. 
+    By writing `&m1` we are passing a reference to `m1` into the 
+    function `greet` which we call `g1`. 
+
+    Therefore, `g1` is a reference that points to `m1`. To go from
+    `g1` to the memory in heap we need to do two jumps, one from 
+    `g1` to `m1` and then from `m1` to the heap string.
+
+    Note that `m1` owns the heap data `Hello`, while `g1` does not 
+    own either `m1` or `Hello`. So after `greet` ends, no heap data 
+    is dropped and only the stack frame for `greet` disappears.
+
+*** Dereferencing a Pointer Accesses its Data
+
+    In Rust, we use the *dereference* operator to "follow" pointers. 
+    Below we have a few examples of dereferencing. 
+    Note the difference between `r1` and `r2`. 
+    @code rust
+    let mut x: Box<i32> = Box::new(1);
+    let a: i32 = *x;         // *x reads the heap value, so a = 1
+    *x += 1;                 // *x on the left-side modifies the heap value,
+                             //     so x points to the value 2
+
+    let r1: &Box<i32> = &x;  // r1 points to x on the stack
+    let b: i32 = **r1;       // two dereferences get us to the heap value
+
+    let r2: &i32 = &*x;      // r2 points to the heap value directly
+    let c: i32 = *r2;
+    @end
+
+    However, we rarely see the dereference operator in Rust programs. 
+    This is because Rust implicitly inserts dereferences and references 
+    in certain cases, such as calling a method with the dot operator. 
+    In this way, our code is cleaner. 
+
+    @code rust 
+    let x: Box<i32> = Box::new(-1);
+    let x_abs1 = i32::abs(*x); // explicit dereference
+    let x_abs2 = x.abs();      // implicit dereference
+    assert_eq!(x_abs1, x_abs2);
+
+    let r: &Box<i32> = &x;
+    let r_abs1 = i32::abs(**r); // explicit dereference (twice)
+    let r_abs2 = r.abs();       // implicit dereference (twice)
+    assert_eq!(r_abs1, r_abs2);
+
+    let s = String::from("Hello");
+    // note that in this case, we need a reference because 
+    // otherwise ownership is moved to the function and 
+    // we cannot access s anymore. 
+    let s_len1 = str::len(&s); // explicit reference
+    let s_len2 = s.len();      // implicit reference
+    assert_eq!(s_len1, s_len2);
+    @end
+
+*** Rust Avoids Simultaneous Aliasing and Mutation
+
+    Pointers allow *aliasing*: when two variables point to the same memory 
+    region. When aliasing is combined with *mutation*, we have a recipe 
+    for disaster: 
+    - Deallocating the aliased data, leaving the other one to point to 
+      freed memory. 
+    - Mutating the aliased data, invalidating runtime properties expected 
+      of the other variable.
+    - Concurrently mutating the aliased data, causing a race condition.
+
+    The example we analyze uses the vector data structure `Vec` which 
+    is an array that can dynamically grow in size. This is done with 
+    the `Vec::push` method, which can dynamically reallocate the array 
+    to fit more elements if we exceed the *capacity* of the vector.
+
+    Suppose that we try to do the following: 
+    @code rust 
+    let mut v: Vec<i32> = vec![1, 2, 3];
+    let num: &i32 = &v[2];
+    v.push(4);
+    println!("Third element is {}", *num);
+    @end
+
+    By doing `v.push(4)`, the array could be dynamically reallocated to 
+    enlarge its capacity. However, this means that the reference `num`
+    is left pointing to invalid data. This is unsafe. 
+
+    The origin of this unsafety is that we are both *aliasing*
+    the vector (through the reference `num`) as well as *mutating* 
+    it (through the `v.push(4)` operation). 
+
+    To avoid these kinds of issues, Rust follows a basic principle: 
+
+    $ Pointer Safety Principle
+    Data should never be aliased and mutated at the same time
+
+    Rust enforces this principle for owned pointers by disallowing
+    aliasing since assigning a box from one variable to another 
+    will move ownership, invalidating the use of the previous variable.
+
+    However, since references by design create temporary aliases and 
+    are non-owning pointers, they need to be treated 
+    differently to ensure the /Pointer Safety Principle/.
+    This is done through the *_borrow checker_*.
+
+*** The Borrow Checker
+    The main idea behind the borrow checker is that variables have 
+    three kinds of *permissions* on their data. 
+    - *Read(R)*: data can be copied to another location. 
+    - *Write(W)*: data can be mutated in-place. 
+    - *Own(O)*: data can be moved or dropped.
+
+    These permissions don't exist at runtime, only within the compiler. 
+    They describe how the compiler *thinks* about your program before 
+    it is executed. 
+
+    By default, a variable has R/O permissions on its data. 
+    If it is annotated with `mut` it also has W permission. 
+
+    The key idea is that
+    *_references can temporarily remove these permissions_*
+
+    Lets look at a safe example of the previous snippet:
+    @code rust
+    fn main() {
+        let mut v: Vec<i32> = vec![1, 2, 3];
+        let num: &i32 = &v[2];
+        println!("Third element is {}", *num);
+        v.push(4);
+    }
+    @end
+
+    ~ After `let mut v = (...)`, the variable `v` has been initialized. 
+      It gains *RWO* permissions
+    ~ After `let num = &v[2]`, the data in `v` has been *borrowed* by `num` 
+      Three things happen:
+        ~~ The borrow removes *WO* permissions from `v`. `v` cannot be written 
+           or owned, but can still be read. This also means we can't pass 
+           ownership of `v` to another variable. 
+        ~~ The variable `num` has gained *RO* permissions. `num` is not 
+           writable (it is missing W permissions) because it was 
+           not marked `let mut`.
+        ~~ The path `\*num` has gained the *R* permission.
+    ~ After `println!(...)`, then `num` is no longer in use, so `v` 
+      is no longer borrowed. Therefore:
+        ~~ `v` regains its *WO* permissions.
+        ~~ `num` and `\*num` have lost all of their permissions 
+    ~ After `v.push(4)`, then `v` is no longer in use, and it loses all
+      of its permissions.
+
+    Why do we see `num` and `\*num`? Because it's different to access 
+    data through a reference, versus to manipulate the reference 
+    itself. 
+    Let's look at the following example that showcases this:
+    @code rust 
+    fn main() {
+        let x = 0;
+        let mut x_ref = &x;
+        println!("{x_ref} {x}");
+    }
+    @end
+    `x_ref` has the *W* permission, while `\*x_ref` does not. This 
+    means we can assign `x_ref` to a different reference, i.e. 
+    `x_ref = &y` but we cannot mutate the pointed data, i.e 
+    `\*x_ref += 1`.
+
+    More generally, _permissions are defined on *paths*_ and not 
+    just variables. Paths are anything you can put on the left 
+    side of an assignment. 
+    They can be: 
+    - Variables, like `a`.
+    - Dereferences of paths, like `\*a`.
+    - Fields of paths, like `a.0` for tuples or `a.field` for 
+      structs (discussed later).
+    - Any combination of the above.
+
+*** The Borrow Checker Finds Permission Violations
+
+    By the /Pointer Safety Principle/ data should not be aliased 
+    and mutated at the same time. 
+    The goal of these permissions is to ensure that this doesn't 
+    happen. 
+
+    Rust uses the *_borrow checker_* to check for potentially unsafe 
+    operations involving references. Any time a path is used, Rust 
+    checks that it has the appropriate permissions for the operation 
+    that needs to be done. 
+    Lets look at the unsafe snippet:
+    @code rust 
+    fn main() {
+        let mut v: Vec<i32> = vec![1, 2, 3];
+        let num: &i32 = &v[2];
+        v.push(4);
+        println!("Third element is {}", *num);
+    }
+    @end
+    For example, the borrow `&v[2]` requires `v` to have *R* permissions.
+    `v.push(4)` requires `v` to have *RW* permissions since it needs 
+    to read and possibly reallocate data to enlarge the capacity. 
+    However, in this case, `v` does not have *W* permissions, since 
+    it has been borrowed. Therefore, Rust will not compile this code 
+    and we will see an error related to immutable borrowing. 
+
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 * Using Structs to Structure Related Data
 * Enums and Pattern Matching 
 * Managing Growing Projects with Packages, Crates, and Modules
