@@ -992,6 +992,7 @@
     This is done through the *_borrow checker_*.
 
 *** The Borrow Checker
+
     The main idea behind the borrow checker is that variables have 
     three kinds of *permissions* on their data. 
     - *Read(R)*: data can be copied to another location. 
@@ -1068,12 +1069,17 @@
     and mutated at the same time. 
     The goal of these permissions is to ensure that this doesn't 
     happen. 
+    Creating a reference to data i.e *borrowing* it, causes that 
+    data to be temporarily read-only until the reference is no longer 
+    used. 
 
     Rust uses the *_borrow checker_* to check for potentially unsafe 
     operations involving references. Any time a path is used, Rust 
     checks that it has the appropriate permissions for the operation 
     that needs to be done. 
+
     Lets look at the unsafe snippet:
+
     @code rust 
     fn main() {
         let mut v: Vec<i32> = vec![1, 2, 3];
@@ -1082,12 +1088,177 @@
         println!("Third element is {}", *num);
     }
     @end
+
     For example, the borrow `&v[2]` requires `v` to have *R* permissions.
     `v.push(4)` requires `v` to have *RW* permissions since it needs 
     to read and possibly reallocate data to enlarge the capacity. 
     However, in this case, `v` does not have *W* permissions, since 
     it has been borrowed. Therefore, Rust will not compile this code 
     and we will see an error related to immutable borrowing. 
+
+*** Mutable References Provide Unique and Non-Owning Access to Data
+
+    So far, we have only seen read-only *immutable references*. 
+    *_Immutable references permit aliasing but disallow mutation._*
+
+    We can also use *mutable references* which allow mutation. Let's 
+    see how it works.
+
+    The syntax is shown below:
+    @code rust 
+    fn main() {
+        let mut v: Vec<i32> = vec![1, 2, 3];
+        let num: &mut i32 = &mut v[2];
+        *num += 1;
+        println!("Third element is {}", *num);
+        println!("Vector is now {:?}", v);
+    }
+    @end
+
+    A *mutable reference* is created with `&mut` operator. 
+    The type of `num` is written as `&mut i32`. Compared to 
+    *immutable references*, we note two important differences: 
+    ~ When `num` was an *immutable reference*, `v` still had *R* 
+      permissions. Now, when `num` is a *mutable reference*, 
+      `v` has lost /all/ permissions while `num` is in use. 
+    ~ When `num` was an *immutable reference*, the path `\*num` only 
+      had the *R* permissions. Now that `num` is a *mutable reference*, 
+      `\*num` has also gained the *W* permission. 
+
+    The first observation is what makes *mutable references* safe.  
+    _*Mutable references allow mutation but prevent aliasing.*_
+    The borrowed path `v` becomes temporarily unusable, so effectively 
+    not an alias. 
+
+    The second observation is what makes *mutable references* /useful/ 
+    because we can modify `v` through `\*num`. 
+
+    Notice the difference between having *W* permissions for 
+    `num` and for `\*num`. In the first case, it means we can 
+    assign `num` to be a reference to something else. In the second 
+    case, it means we can change that the reference points to. 
+
+    To have *W* permissions for `num`, we need simply to write 
+    `let mut num = &v[2]`. To have *W* permissions for `\*num`
+    we need to make `num` a *mutable reference*.
+
+    *_Mutable references can also be temporarily downgraded to read-only 
+    references_*
+
+    Lets look at the following snippet:
+    @code rust 
+    fn main() {
+        let mut v: Vec<i32> = vec![1, 2, 3];
+        let num: &mut i32 = &mut v[2];
+        // the borrow &*num removes write permissions from num 
+        // but not read permissions. 
+        let num2: &i32 = &*num;
+        // so both *num and *num2 are R only
+        println!("{} {}", *num, *num2);
+    }
+    @end
+
+    Finally, we note that permissions are changed while the reference 
+    is in use. They are returned at the end of a 
+    reference's *lifetime* - the range of code from the birth of 
+    the reference to its death.
+
+    When we have control flow the lifetime of a reference can be 
+    different inside the different branches.
+
+*** Data Must Outlive All Of Its References
+
+    The borrow checker enforces that *_data must outlive any references to it_*.
+    Rust enforces this property in two ways: 
+    - References that are created and dropped within the scope of a 
+      single function. 
+      For example, the following code doesn't compile:
+
+    @code rust 
+    fn main() {
+        let s = String::from("Hello world");
+        let s_ref = &s;
+        // since we still use s_ref later, we can't drop s. 
+        // this violates the principle by which data must outlive 
+        // all references to it.
+        drop(s);
+        println!("{}", s_ref);
+    }
+    @end
+
+    Rust catches these errors by checking the *O* permission.
+    However, in this example, Rust knows the lifetime of the reference. 
+    This is harder to do when a reference is an input or output of a 
+    function. 
+    For this, Rust needs a different mechanism.
+
+    - References that are input or output of a function.
+      Whenever an expression uses an input reference or returns an output 
+      reference, Rust checks the *_Flow_* (*F*) permission.
+      Unlike *RWO* permissions, *F* does not change throughout the body 
+      of a function. 
+      A reference has *F* permission if it is allows to be used. 
+
+    Suppose we have a function which takes a string and a default string. 
+    If the string is not empty, it returns a reference to the first element, 
+    otherwise it returns the default string. 
+    This is shown below:
+    @code rust 
+    fn first_or(strings: &Vec<String>, default: &String) -> &String {
+        if strings.len() > 0 {
+            &strings[0]
+        } else {
+            default
+        }
+    }
+    @end
+    If we try to compile this function, Rust will complain about missing 
+    lifetime specifiers. The error says that Rust cannot understand whether 
+    the function returns a reference to `strings` or `default`. To understand 
+    why this could be a problem, imagine we had this code:
+    @code rust 
+    fn main() {
+        let strings = vec![];
+        let default = String::from("default");
+        // since the string is empty, we return a reference 
+        // to default
+        let s = first_or(&strings, &default);
+        // if we drop default, we invalidate s
+        drop(default);
+        println!("{}", s);
+    }
+    @end
+    Rust would only allow this program to compile if it was certain 
+    that the function cannot return a reference to `default`.
+    In this case, we would say that `default` cannot *flow* into 
+    the return value.
+
+    To specify whether `default` can be returned, Rust uses a mechanism 
+    called /lifetime parameters/ which we will discuss later. 
+
+    To summarize: 
+    ~ Input/Output references are treated differently than references 
+      withing a function body. 
+    ~ Rust uses the *F* permission to check the safety of these references.
+
+    Another unsafe example is a function that returns a reference to a stack 
+    variable. This is unsafe because as soon as the function goes out of scope, 
+    the stack is deallocated and the reference will be invalidated. 
+    Rust does not allow this code to compile because it is missing *F* 
+    permissions.
+    @code rust 
+    fn return_a_string() -> &String {
+        let s = String::from("Hello world");
+        let s_ref = &s;
+        s_ref
+    }
+    @end
+
+
+
+
+
+
 
      
 
