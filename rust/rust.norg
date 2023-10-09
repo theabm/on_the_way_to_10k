@@ -1096,6 +1096,25 @@
     it has been borrowed. Therefore, Rust will not compile this code 
     and we will see an error related to immutable borrowing. 
 
+    Let's also shed some light on the *O* permission. Obviously, *O* 
+    permission is needed to drop data in the heap, so if we have a 
+    reference, we cannot manually drop anything since it could 
+    invalidate the reference. 
+
+    However, we also need *O* permissions to *move* the data. 
+    Imagine the following scenario: 
+    @code rust 
+    let mut v: Vec<i32> = vec![1, 2, 3];
+    let v2 = &v;
+    let v3 = *v2;
+    @end
+    If this program was allowed to compile, it would be unsafe since 
+    at the end we would have two owners of the heap data which would 
+    cause a double free. 
+    For this reason, to *move* data, as in line 3, we need *O* permissions, 
+    which `v2` does not have. Hence this code will not compile.
+
+
 *** Mutable References Provide Unique and Non-Owning Access to Data
 
     So far, we have only seen read-only *immutable references*. 
@@ -1254,31 +1273,19 @@
     }
     @end
 
+*** Granularity of Permissions
+    TODO - discuss section in *improving ownership errors* which discusses 
+    granularity of tuples and lists.
+
+** The Slice Type
+
+   /Slices/ let you reference a contiguous sequence of elements 
+   in a collection rather than the whole collection. 
+   *_A slice is a kind of reference, so it is a non-owning pointer._*
 
 
 
-
-
-
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+** Ownership Recap
 * Using Structs to Structure Related Data
 * Enums and Pattern Matching 
 * Managing Growing Projects with Packages, Crates, and Modules
