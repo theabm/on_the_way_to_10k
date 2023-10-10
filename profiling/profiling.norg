@@ -1,0 +1,61 @@
+** Call tree
+
+   A call tree is a connected graph that illustrates the program execution 
+   of the code. 
+
+   *Nodes* represent routines, and *edges* represent calling relationships.
+
+** Basic Concepts
+
+   A profiler inserts extra code at compile time, wrapping functions calls 
+   to call how many times it calls/was called and how much time it takes to 
+   execute
+
+   It also asks for *interrupts* at various points of the code, where it then 
+   collects *program events*, which it then uses to infer the call graph. 
+
+** Using gcc + gprof 
+
+   The most simple profiler is called gprof.
+
+   To profile using gprof, simply compile using the `-pg` flag.
+   Remember to also turn on the optimizations you are interested in using when 
+   profiling.
+
+   `gcc -[my optimizations] -pg -o my_program.x my_program.c`
+
+   - (!) Don't use the flag `-p` as it gives less information that `-pg`
+
+   After this, simply run the program. 
+   All profiling info will be written in the file *gmon.out*
+
+   - To read the information use:
+     `gprof my_program.x`
+   - To visualize the call grap, use:
+     `gprof my_program.x | gprof2dot.py | dot -T png -o callgraph.png`
+
+*** Goodbye grandpa!
+
+    It's been a pleasure, but gprof is a realic of the past. 
+
+    It lacks multithreaded support, lacks line-by-line capabilities, does not 
+    profile shared libraries, and needs recompilation each time. 
+
+    Furthermore, we can induce it to lie much easier than other tools.
+
+** Performance Monitoring Units (PMU's)
+
+   Modern high end processors provide on-chip hardware that monitors 
+   the processors performance and inside events.
+
+   This allows us to obtain a clear, precise picture of CPU utilization.
+
+   This is the data that will guide us towards performance improvements.
+
+
+   PMU's consist of two types of registers:
+   - Performance event select register 
+   - Performance monitor counter
+
+
+

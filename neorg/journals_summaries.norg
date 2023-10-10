@@ -1,0 +1,35 @@
+In this sections we will talk about *generation*. 
+
+* Metadata 
+  Metadata is data that describes our document but is not part of the 
+  content. 
+
+** The Manual Way
+  The manual way to add metadata is through the following tags:
+  @document.meta 
+  @end
+  Inside this tag, we can put anything we want, although there 
+  are some things Neorg uses for the summary module.
+
+  - title
+  - description 
+  - authors
+  - categories
+
+  @document.meta 
+  title: My title
+  description: my description
+  authors: [
+      me
+  ]
+  categories: [
+      work 
+      misc
+  ]
+  @end
+
+** The Automatic Way
+
+
+
+

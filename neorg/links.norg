@@ -1,0 +1,139 @@
+Links are created by inserting `target` inside curly brackets and 
+colons. Clicking the link takes you to it.
+
+* Link targets
+
+  The following things can be used as link /targets/:
+  - `* Heading1`: Defines a link to a heading of a specific level.
+  - `^ Footnote`: A link to a footnote.
+  - `$ Definition`: A link to a definition.
+  - `# magic`: The magic symbol is used to match any of the above.
+  - `:path:# target`: The target is in another norg file at a given
+    path.
+  - `:path:`: Another norg file at a given path without specific 
+    target.
+  - `/path`: A non-norg file at a given path.
+  - `https://github.com`: Some URL.
+  - `file:///some/path`: Any file, opened via `(xdg-)open`
+
+* How to specify paths
+
+  Any of the paths used in `:path:` or `/path` can be formatted as:
+  - `:path/to/norg/file:` relative to the file which contains this link
+  - `:/path/from/root:` absolute w.r.t. the entire filesystem 
+  - `:~/path/from/user/home:` relative to the user's home directory
+    (e.g. `/home/user` on Linux machines)
+  - `:../path/to/norg/file:` these paths also understand `../`
+  - `:$/path/from/current/workspace:` relative to current workspace root
+  - `:$gtd/path/in/gtd/workspace:` relative to the root of the workspace 
+    called `gtd`.
+
+* How to specify links
+
+  There are seveal ways to specify links:
+
+** Pure inline links
+
+   A inline link to {*** How to specify links}
+
+   Inline links are case and whitespace insensitive. However, they 
+   are punctuation sensitive. 
+
+   Note that if we want to link to headings, we must specify the correct
+   number of asterisks. This can be avoided by using the magic 
+   character which matches any of the targets types. 
+
+** Custom inline link text
+
+   An inline {*** How to specify links}[link] with custom text is achieved by 
+   appending square bracks with the placeholder text after the link.
+
+* Anchors
+
+  Anchors are similar to custom links, however, they can be 
+  reused throughout the document. For example, if I wanted to 
+  create a link to my github page, I could do something like: 
+  {https://github.com/theabm}[my github]. However, if I wanted to 
+  repeat it, I would have to retype everything. 
+
+  On the other hand, with anchors, I can just define the anchor 
+  *once* /anywhere/ and then resue the same word enclosed by 
+  brackets anywhere else! An example:
+
+  A link to [my github].
+  Take a look at [my github]{https://github.com/theabm}
+
+  In the first line, we have an *anchor declaration*.
+  It requires an *anchor definition*, which is the second line.
+
+* Linking to a location inside another norg file
+
+  Linking to another `norg` file works exactly the same as inline 
+  linking except that we must wrap the path in `:` specifier.
+
+  For example this is a link to an {:newnote:}[An external file].
+
+  To link to a location inside another `norg` file, we use the same 
+  syntax, and append the location after the second `:` specifier:
+
+  - {:newnote:# Some Heading I Want To Link To}[A location in an external file]
+
+  Link fixing in this case works in the same exact way. 
+
+  To move back to the previous file, we can use the `<Ctrl-o>` key 
+  binding.
+
+** Examples
+
+   - {* Norg Syntax} Inline link to a level 1 heading
+   - {** Links} Inline link to a level 2 heading
+   - {*** Link targets} Inline link to a level 3 heading
+   - {**** Pure links} Inline link to a level 4 heading
+   - {# What Is Neorg?} Using the magic char. to link
+   - {:newnote:}[A link to an external file]
+   - {:newnote:# Some Heading I Want To Link To}[A link to a location in an external file]
+   - {https://github.com/theabm}[A link to a url]
+   - An [anchor]{https://github.com/theabm} link
+
+*** (!) Note
+
+     If we are linking to a type which is marked with to-do modifiers, 
+     we omit the parenthesis!
+     So if we have some heading with a to-do modifier:
+
+***** (x) Some heading 
+      ---
+     And we want to link to it, we simply write:
+     {*****  Some heading}
+
+** Fixing links
+
+    If a link isn't found, neorg will propose to fix the link. Two options are 
+    available:
+
+*** `f` - attempt to fix the link
+
+     This attempts to fix the link with the current target type it has. 
+
+     Therefore, if it doesnt find a link to a level one heading, it will look 
+     through all level one headings and find the best match. 
+
+     However, if we made a mistake and specified the wrong type, this will not 
+     successfully fix the mistake. 
+
+*** `F` - attempt to fix the link (loose fuzzing)
+
+     This will look for the best fix also among other types. 
+
+*** (!) Important note
+
+     If have a broken link with of type # (magic char.), fixing with `f`, will 
+     look for the best fix everywhere, since the magic char. matches with all 
+     types.
+     After the fix, the type of the link will still be the magic char. 
+
+     However, if we fix with `F`, after the fix, the link type will be changed 
+     to the type of the best match it found.
+
+     Since the fixing algorithm is very powerful, we can take advantage of the 
+     second feature to automatically construct links with less typing. 

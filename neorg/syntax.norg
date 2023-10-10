@@ -1,0 +1,138 @@
+  Text in neorg is in interpreted as text. 
+
+** Headings
+
+   Headings are created by prepending with asterisk.
+
+   Level 1 headings are made by *
+   Level 2 headings are made by **
+   And so on...
+
+   You will see that the concealer module kicks in and makes the 
+   asterisk nice.
+
+*** Indentation reversion
+
+    Suppose we have the following heading:
+
+**** fourth level heading 
+
+     This text belongs to the fourth level heading.
+
+***** fifth level heading 
+
+      This text belongs to the fifth level. 
+      ---
+     Using 2 or more `-` signs, not followed by anything, moves the 
+     text one level backwards 
+     The same can be done with the `=` sign, however, this closes all 
+     headings and takes us to the root level.
+
+** Horizontal Lines
+
+   We can place horizontal lines with 2 or more `_` symbols:
+   ___
+
+** Lists
+
+*** Unordered lists
+
+    We can create unodered lists with the - symbol:
+    - This
+    - Is 
+    - A 
+    -- List 
+    --- I 
+    - Created
+
+*** Ordered lists
+
+    We can create an ordered list with the ~ symbol:
+    ~ Ordered list level 1
+    ~~ Ordered list level 2
+    ~~ Ordered list level 2
+    ~~~ Ordered list level 3
+    ~~~ Ordered list level 3
+    ~~~~ Ordered list level 4
+    ~~~~~ Ordered list level 5
+    ~~~~~~ Ordered list level 6
+    ~ Ordered list level 1
+
+** Formatting
+
+   Pressing == will indent it properly
+
+   Alternatively, you can highlight and press =. 
+
+** Folding
+
+   *za* toggles fold on current heading
+
+** Text Styling
+
+   - *bold*
+   - /italic/
+   - _underline_
+   - -strikethrough-
+   -  !spoiler!
+   - `inline code`
+   - ^superscript^  (when nested into `subscript`, will highlight as an error)
+   - ,subscript,  (when nested into `superscript`, will highlight as an error)
+   - $f(x) = y$ (see also {# Math})
+   - &variable& (see also {# Variables})
+   - %inline comment%
+
+   You can also combine them to create a mix. 
+
+** Quotes
+
+   We can create quotes with the `>` symbol.
+
+   > level 1 quote
+   >> level 2 quote
+
+** Definitions
+
+   Two kinds of definitions
+
+*** Single-paragraph definitions
+
+    $ Term
+    The definition of the object in a single paragraph.
+
+    This is not considered part of the definition.
+
+*** Multi-paragraph definitions
+
+    $$ Object to be defined
+    Here, I can place any number of paragraphs or other format objects.
+
+    Even a code example:
+    @code lua
+    print("Hello world!")
+    @end
+    $$
+
+    This is no longer part of the definition because the `$$` on the 
+    previous line marked its end.
+** Footnotes
+
+   There are also two kinds of footnotes:
+
+*** Single-paragraph footnotes
+
+    ^ This is the title of my footnote. I can use this as a link target.
+    This is the actual footnote content.
+
+    This is no longer part of the {^ This is the title of my footnote. I can use this as a link
+    target}[footnote].
+
+*** Multi-paragraph footnotes
+
+    ^^ This is a multi-paragraph footnote.
+    Here go the actual contents...
+
+    ... which I can even continue down here.
+    ^^
+
+    Now, the footnote has ended.

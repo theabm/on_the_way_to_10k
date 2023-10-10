@@ -1,33 +1,42 @@
 * On the way to 10k 
+
   This is my own personal growth project. 
-  Legend says that if you put 10,000 hours on a specific topic, you will become 
-  a master in it. 
-  Therefore, the aim of this project is to put those 10,000 hours on the various 
-  tools I will find along my journey. The topics may not necessarily be cohesive 
-  in the traditional sense. For example, the material may include new programming 
-  languages, better tools for sofware developing, ideas workflow management, 
-  as well as advanced themes in areas I already posses some versatility in. However,
-  they all coexist under the paradigm of self improvement. 
-  The ultimate goal is to document my learning journey as I attempt at becoming a 
-  master version of myself, as well as make these tools available for anyone
-  in a similar path.
+
+  Legend says that if you put 10,000 hours on a specific topic, 
+  you will become a master in it. 
+
+  Therefore, the aim of this project is to put those 10,000 hours on 
+  the various tools I will find along my journey. The topics may not 
+  necessarily be cohesive in the traditional sense. 
+
+  For example, the material may include new programming 
+  languages, better tools for sofware developing, ideas for workflow 
+  management, as well as advanced themes in areas I already 
+  posses some versatility in. 
+
+  However, they all coexist under the paradigm of self improvement. 
+  The ultimate goal is to document my learning journey as I attempt 
+  at becoming a master version of myself, as well as make these 
+  tools available for anyone in a similar path.
 
 * Table of contents
 
-** Neovim
-** Kmonad
 ** {:dash/dash:}[Dash]
 ** {:rust/rust:}[Rust]
 ** {:haskell/haskell:}[Haskell]
-** Lua 
 ** {:neorg/neorg:}[Neorg] 
+*** {:neorg/introduction:}[Introduction]
+*** {:neorg/modules:}[Modules]
+*** {:neorg/commands:}[Commands]
+*** {:neorg/syntax:}[Syntax]
+*** {:neorg/links:}[Links]
+*** {:neorg/todo:}[To-Do Items]
+*** {:neorg/journals_summaries:}[Journals And Summaries]
+*** {:neorg/automation:}[Automation]
+
+
 ** Org
-** Advanced Python 
-** Reinforcement learning
-** Zettelkasten workflow 
 ** {:linux/linux:}[Linux]
-** Wezterm
-** Nu Shell
 ** HPC
 *** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
 *** {:hpc/openmp/openmp:}[OpenMP]

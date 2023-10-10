@@ -1,0 +1,53 @@
+  *:Neorg* exposes the API of modules in neorg. This is the starting place for anythig 
+  that neorg can do. 
+
+* *:Neorg workspace* command
+
+   *:Neorg workspace* - Shows the workspaces available. You always 
+   see at least `default` workspace and with the default config 
+   the *notes* workspace.
+
+   Selecting a workspace and hitting enter brings you into 
+   the *index.norg* file for the workspace. 
+
+   The index file is the entry point of the workspace. It is like a 
+   table of contents for the whole directory. So you can create notes 
+   and links to other files from here (in case you want to create a 
+   wiki or track a journal). 
+
+   If we have many workspaces, this makes it super easy to enter 
+   different areas of focus using a single command! 
+
+   Note that the workspaces can be in different locations of our 
+   directory.
+
+** Options for the command
+
+    *:Neorg workspace default* - Shows the default workspace. Using 
+    the default config, this will just be "notes".
+
+    *:Neorg workspace notes* - The notes workspace we have made 
+    available with the default config. Note that we can define many 
+    workspaces! However, with the default config, we only see these 
+    two. 
+
+* *<LocalLeader> nn* command
+
+   Creates a new note. It creates a prompt to insert a note name. 
+   This will create a note in the directory workspace. 
+
+* *:Neorg index* command 
+
+   Jumps to the index file of the workspace workspace we are 
+   currently in. This is useful to always go back to a specific entry 
+   point. 
+
+* *:Neorg return* command 
+
+   This command closes all neorg buffers that are currently open and 
+   returns to the buffer prior to running neorg. 
+
+   This is combined super well with a workflow where we are coding, 
+   we open the index on some workspace, we open a few buffers to 
+   verify something, we write a new note, and when we are done, we 
+   simply type out the command above to return to our coding session! 

@@ -1,0 +1,207 @@
+From the packer command to install neorg, we can see that the setup 
+call initializes neorg with a lua table. 
+
+In this table we load some modules which are subplugins that run 
+inside of neorg and build up the entire functionality. 
+
+This is much like Unix phylosophy. This is useful because in the 
+future, when neorg will be extended, knowledge of these modules 
+will be needed. The Wiki section contains a detailed description of 
+all the modules available for Neorg. 
+
+We will now discuss three of these. 
+
+* *core.defaults* module
+
+   A meta module that loads default modules. More information can be
+   found online.
+
+* *core.norg.concealer* module
+
+   It converts some markdown elements in documents into nice 
+   icons. It hides stars, dashes etc.
+
+* *core.norg.dirman* module
+
+   Assigns the name of a workspace to an actual location. This data 
+   is then used in other modules to figure out where your norg files 
+   are stored.
+
+   With the default config, there is a single workspace called 
+   "notes" and it is located at "~/notes".
+
+   Neorg will automatically create this directory for you the first 
+   time you actually need it. 
+
+** Configuration
+
+   The default workspace is the default workspace whenever neovim 
+   starts. It is set to "nil" by default. 
+
+   If we set it to one of the workspaces we defined, then every time 
+   neovim starts neorg will be set automatically to that workspace. 
+
+   We verify this by running *:Neorg workspace* without any arguments 
+   and observing that the output is the default workspace. 
+
+   This is especially useful if we combine it with the *:Neorg index* 
+   command since this takes us current workspace, which is the default 
+   one, unless we have changed it.
+
+   The workflow can be further supercharged with *:Neorg return* 
+  j command which closes all neorg buffers and returns to where 
+   we were.
+
+* *core.pivot* module
+  The idea is that we can convert between different list types with a 
+  single key press.
+
+  Suppose we have an un-ordered list: 
+  - list item 1 
+  - list item 2
+  - list item 3
+
+  If we press `<local_leader> lt` (for list toggle) we toggle the list between ordered 
+  and non-ordered list.
+
+  If we press `<local_leader> li` (for list invert) we invert the list.
+
+  Initially, this seems like it does the same thing. 
+  So what is the point? The idea is that in Neorg, lists can be merged 
+  and nested together. If we write the following list:
+
+  - list item 1 
+  - list item 2
+  - list item 3
+  ~ list item 4 
+  ~ list item 5
+  ~ list item 5
+
+  Inside Neorg, it will be treated as a *single* list.
+
+  This can be verified by running the `:InspectTree` command in 
+  Neovim. If we look at the start of the list, we will see a label 
+  `content: (generic_list)` which encompasses the entire list. 
+
+  If we put the cursor on the first element of the list and toggle the 
+  list, Neorg will look at the type of the first element - non-ordered - 
+  to decide the new type for *all* the other items of the list as well.
+
+  In other words, we will get a single ordered list. 
+
+  On the other hand, if we *invert* the list, it will go through 
+  each element, one by one, analyze the type, and then toggle it. 
+  So we obtain an ordered first half of the list and an unordered 
+  second half. 
+
+* *core.itero* module
+  This module allows fast repetition of the last object we used. 
+  Suppose we are writing a list: 
+  - list item 1
+
+  As soon as we are done writing the `1`, if we press `Alt Enter`, Neorg 
+  will drop us under a newly created list item right below.
+
+  - list item 1
+  - list item 2
+
+  This can also be done with headers and to-do lists.
+
+* *core.promo* module
+  It either promotes or demotes nestable objects such as headers, 
+  lists, etc.
+
+  Suppose we have a header: 
+
+** Some header
+
+   If we hover over it and press `>>`, this will increase the level of 
+   the header by one. Analogously, if we type `<<` we will 
+   decrease the header level by one.
+
+*** Some header
+
+    Note that on non-norg files, the `>>` and `<<` commands are Neovim
+    commands for indentation.
+
+    This keybinding is *recursive* meaning that it will affect the level 
+    of all the objects after. So in this case, all the headers will get 
+    promoted or demoted.
+** Some header 
+*** Some other Header
+
+    Usually, this is what we want. However, if we want to change a 
+    single level, we can use `>.` and `<,` keybindings.
+*** Some header  
+*** Some other header
+
+    We can also use `Ctrl t` and `Ctrl d` to promote and and demote 
+    from *within* insert mode.
+    This module depends on Treesitter, so sometimes it may not understand 
+    what to do if we are mid-typing. So the recommendation is to first 
+    type the entire title and then promote or demote.
+
+    These keybindings are Neovim bindings which will still work for normal 
+    text.
+
+* Skimming through documents
+
+  Whenever we have a large file, we want to quickly jump 
+  between important sections of the file.
+
+  We can do this in two ways to do this. 
+
+  The first one is using the traverse heading mode. 
+  The second one is the table of contents.
+
+** *traverse-heading* mode
+
+  Neorg can operate in many keybinding modes and there are only two that 
+  are available by default. 
+
+  These can be changed by typing `:Neorg mode` and pressing TAB for
+  complete.
+  We will see that there are two modes: 
+  - norg : the default mode we use when we launch neorg.
+  - traverse-heading : mode to quickly skim through docs.
+
+  In traverse-heading mode, when we press `j` or `k` to go up or down, 
+  we will move heading by heading rather than line by line.
+
+  We can activate these modes using `<local_leader> mh` (mode header) 
+  and `<local_leader> mn` (mode normal) for traverse-heading mode 
+  and norg mode respectively.
+
+* *table of contents* module
+
+  The table of contents module creates an overview in a side buffer. 
+  It shows the headings which you can clik and jump to.
+
+  To use it we type `:Neorg toc left/right/qflist`. The options specify 
+  where the buffer will be opened. If we don't specify anything, Neorg 
+  will respect your splitright option. By defeault, this is off, so 
+  the buffer will be opened on the left.
+
+  The table of contents also changes if we change the file! So it always 
+  stays updated.
+  If we make any changes to the file, we need to save in order to 
+  display the changes in the table of contents.
+
+  We can change the title of the table of contents by adding 
+  `.toc My Custom Title` at the top of the document.
+
+  If we want the table of contents to close after we jump to a heading, 
+  then we need the *core.qol.toc* module which has a configuration 
+  option `close after use` which we can set to `True`.
+
+
+
+
+
+
+
+
+
+
+
+

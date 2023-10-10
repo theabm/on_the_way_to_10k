@@ -1,0 +1,55 @@
+Neorg allows us to create a very flexible to-do list which can help us 
+to do some task management.
+
+The items in a to-do list can have various statuses. Some examples are:
+- undone: not done.
+- done: completed.
+- on hold/pending: not needed at the moment, but will be needed later on.
+- canceled: not needed anymore. 
+
+* (x) Syntax
+  A to do list can be created with:
+  - (-) Bread (This symbol means pending)
+  - ( ) Butter (Undone)
+  - (x) Milk (Done)
+
+  Unordered lists with to-do modifiers are called tasks.
+
+  Note however, that to-do items are not only for lists. You can put them 
+  after anything that has a modifier, for example, in the header above!
+
+  So we can basically keep track of all of these! 
+
+* Key bindings
+  - *`<Ctrl-Space>`*: To cycle between states
+  - *`<LocalLeader>td`*: To set to done
+  - *`<LocalLeader>tu`*: To set to undone
+  - *`<LocalLeader>tp`*: To set to pending
+  - And analogously for all types
+
+  Note that we can use these keybindings to just create a to-do item!
+
+* Types 
+  - ( ) Undone -> not done yet
+  - (x) Done -> done with that
+  - (?) Needs further input
+
+  - (!) Urgent -> high priority task
+  - (+) Recurring task with children
+
+  - (-) Pending -> currently in progress
+  - (=) Task put on hold
+  - (_) Task cancelled (put down)
+
+* Nesting
+  Imagine we have a nested list:
+  - ( ) Shopping 
+  -- ( ) Bread 
+  -- ( ) Butter
+  -- ( ) Milk
+
+  If we mark shopping to `done`, all the sub items get marked as `done` as well. 
+
+  Similarly, if one of the sub-items are changed, the top parent item gets changed. 
+  So basically, all the items interact with each other to give a powerful framework 
+  for management/tracking.
