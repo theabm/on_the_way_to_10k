@@ -18,6 +18,7 @@
 ** Kmonad
 ** {:dash/dash:}[Dash]
 ** {:rust/rust:}[Rust]
+** {:haskell/haskell:}[Haskell]
 ** Lua 
 ** {:neorg/neorg:}[Neorg] 
 ** Org
@@ -31,6 +32,5 @@
 *** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
 *** {:hpc/openmp/openmp:}[OpenMP]
 ** {:profiling/profiling:}[Profiling]
-** {:haskell/haskell:}[Haskell]
 
 

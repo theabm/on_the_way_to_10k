@@ -1,33 +1,90 @@
-* Haskell : A functional programming language 
+Haskell : A functional programming language 
 
-** What is Haskell?
 
-   Haskell is a functional programming language. This is in contrast to the 
-   more popular paradigm of imperative languages such as C, python, etc. where
-   your program is essentially a list of instructions, similar to a recipe. 
-   In this paradigm, we have a changing state which can be changed. 
 
-   On the other hand, in an FP paradigm, we describe what things are, rather 
-   than how they change. This is done through functions. 
-   A notable consequence of this is that calling a function many times, with 
-   the same parameters, is guaranteed to always yield the same results. This is 
-   called referential transparency. This allows the compiler to understand the 
-   logic of the program as well as us humans to prove that a function is 
-   correct. 
+* Introduction
 
-   Haskell is: 
-   - Lazy : it will only execute functions if the result is explicitly needed. 
-   - Statically typed : all variables are known at compile time. 
+  What is a functional language? 
 
-** Required tools
+  - A style of programming in which the basic method of computation 
+    is the application of functions to arguments.
+  - A language that supports and encourages functional style.
 
-   We will use GHC, the most used Haskell compiler. 
-   The GHC compiler has an interactive mode, which is very useful for learning. 
-   To use it, simply type _ghci_ in the terminal prompt. Then, to load a haskell 
-   program, we simply type _:l my_haskell_program.hs_ and this will load it up. 
-   Any functions defined in this program can be executed and the results will 
-   be immediately displayed. 
-   If you modify a program after loading it, simply reload it by _:r_ or by 
-   typing again _:l my_haskell_program_
+  In a purely functional language, we do not have variable 
+  assignment, i.e. there is no concept of *_state_*. 
+
+* First Steps
+
+  We use GHCi which is the leading implementation of the Haskell language. 
+  It has both a compiler and interpreter. The interpreter can be used 
+  for interactive learning. 
+
+** GHCi Commands
+
+   :load name  - load script name 
+   :reload     - reload current script 
+   :set editor name - set the editr you use
+   :edit name - edit a certain script 
+   :edit - edit current script 
+   :type expr - show type of expression
+   :?  - show all commands
+   :quit - quit GHCi
+
+** The standard prelude
+
+   Haskell has a large number of standard library functions.
+   Some popular functions are:
+
+   @code bash 
+   ghci> head [1,2,3,4] 
+   ghci> 1
+   ghci> tail [1,2,3,4] 
+   ghci> [2,3,4]
+   ghci> [1,2,3,4] !! 2
+   ghci> 3
+   ghci> take 2 [1,2,3,4]
+   ghci> [1,2]
+   ghci> drop 3 [1,2,3,4,5]
+   ghci> [4,5]
+   ghci> length [1,2,3,4,5]
+   ghci> 5
+   ghci> sum [1,2,3,4,5]
+   ghci> 15
+   ghci> product [1,2,3,4,5]
+   ghci> 120
+   ghci> [1,2,3] ++ [4,5]
+   ghci> [1,2,3,4,5]
+   ghci> reverse [1,2,3,4,5]
+   ghci> [5,4,3,2,1]
+   @end
+
+   Note that some functions are of the form `f a b` while others are of the 
+   form `a f b`. The latter syntax is called an *infix* operator.
+   All functions can be expresses as an infix operator through the 
+   use of backticks:
+
+   @code haskell 
+   ghci> 2 `take` [1,2,3,4,]
+   ghci> [1,2]
+   @end
+
+   Some functions are easier to read when using this syntax such as the 
+   `div` function.
+
+** Naming Requirements 
+   - Function names and arguments must begin with lowercase letters. 
+   - Capital letters are reserved for types.
+   - List arguments usually have an `s` suffix
+
+** Layout Rule
+
+   In a sequence of definitions, each definition must begin in the 
+   same column. Think of python indenting.
+
+   So we can avoid using `{}` for grouping. However, we can still use 
+   them if we prefer.
+
+
+
 
 
