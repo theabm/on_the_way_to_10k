@@ -1,0 +1,84 @@
+* AI
+** Reinforcement Learning
+    - {https://www.assemblyai.com/blog/deepminds-alphatensor-explained/}[Deep Mind Alpha Tensor Explained]
+** Deep Learning
+   - {https://horace.io/brrr_intro.html}[Making Deep Learning Go Brrr From First Principles]
+
+* Linux
+** System
+   - {https://linuxjourney.com/}[Linux Journey]
+** Mounting
+   - {https://unix.stackexchange.com/questions/3192/what-is-meant-by-mounting-a-device-in-linux}[What is meant by mounting a device in linux?]
+
+
+
+* Programming
+** C
+   - {https://www.assemblyai.com/blog/deepminds-alphatensor-explained/}[What Every C Programmer Should Know About Undefined Behavior]
+   - {https://blog.regehr.org/archives/213}[A Guide TO Undefined Behavior in C and C++, Part 1]
+   - {https://stackoverflow.com/questions/562303/the-definitive-c-book-guide-and-list}[The Definitive C Book Guide and List]
+   - {https://stackoverflow.com/questions/562303/the-definitive-c-book-guide-and-list}[Michael Abrash's Graphics Programming Black Book, Special Edition]
+   - {https://www.smashthestack.org/main.html#wargames}[Smash The Stack]
+   - {https://web.archive.org/web/20080607055623/http://www.ibm.com/developerworks/library/pa-dalign/}[Data Alignment]
+   - {http://phrack.org/issues/49/14.html}[Smashing The Stack For Fun And Profit]
+** Assembly 
+   - {https://gcc.gnu.org/onlinedocs/gcc/extensions-to-the-c-language-family/how-to-use-inline-assembly-language-in-c-code.html}[How To Use Inline Assembly Language in C Code]
+   - [Computer Architecture CS 3330]{https://www.cs.virginia.edu/~lat7h/3330/S2022/index.html}
+** MPI
+   - {https://enccs.github.io/intermediate-mpi/mpi-and-threads-pt1/}[Introducing MPI and Threads]
+** OpenMP
+   - {https://www.youtube.com/playlist?list=PLLX-Q6B8xqZ8n8bwjGdzBJ25X2utwnoEG}[A Hands-on Introduction to OpenMP by Tim Mattson]
+** Rust
+   - {https://doc.rust-lang.org/book/title-page.html}[The Book]
+   - {https://rust-book.cs.brown.edu/experiment-intro.html}[An Experimental Book]
+   - [Amos's Blog]{https://fasterthanli.me/}
+   - {https://github.com/nrc/r4cppp}[Rust for C++]
+   - {https://google.github.io/comprehensive-rust/}[A Rust course developed by Android team at Google]
+   - {https://matklad.github.io/2023/03/26/zig-and-rust.html}[Zig and Rust]
+   - {https://kobzol.github.io/rust/python/2023/05/20/writing-python-like-its-rust.html}[Writing Python Like Its Rust]
+** ATS Programming Language
+   - {https://www.cs.bu.edu/~hwxi/atslangweb/}[The ATS Programming Language]
+** Haskell
+   - {https://www.youtube.com/playlist?list=PLF1Z-APd9zK7usPMx3LGMZEHrECUGodd3}[Functional Programming In Haskell]
+   - {https://www.youtube.com/playlist?list=PLF1Z-APd9zK5uFc8FKr_di9bfsYv8-lbc}[Advanced Functional Programming In Haskell]
+   - {http://learnyouahaskell.com/}[Learn You a Haskell For Greater Good]
+   - {https://www.cs.nott.ac.uk/~pszgmh/fold.pdf}[A Tutorial On The Universality And Expressiveness Of Fold]
+** Computer Architecture
+   - {https://www.nand2tetris.org/}[Nand2Tetris]
+   - {https://www.eeweb.com/building-a-4-bit-computer-from-the-ground-up/}[Building a 4 Bit Computer From The Ground Up]
+   - [Computer Architecture CS 3330]
+   - {https://teachyourselfcs.com/}[Teach Yourself Computer Science]
+** Languages
+   - {https://www.scattered-thoughts.net/writing/implementing-interactive-languages/}[Implementing Interactive Languages]
+   -- {https://www.scattered-thoughts.net/#mvs}[Full Blog]
+** Risc V
+   - {https://punkx.org/overflow/}[Projekt Overflow]
+** Advent Of Code
+   - {https://adventofcode.com/}[Advent of Code]
+   - {https://fasterthanli.me/series/advent-of-code-2022}[Amos Advent Of Code In Rust]
+** Mixing Programming Languages
+   - {https://blog.frankel.ch/rust-from-python/}[Calling Rust From Python]
+
+* Tools
+** Debugger
+  - {https://www.debuggingbook.org/#}[The Debugging Book]
+** Vim
+   - {https://www.barbarianmeetscoding.com/boost-your-coding-fu-with-vscode-and-vim/dedication}[Boost Your Coding Fu with VsCode and VIM]
+** Programming Practice
+   - {https://exercism.org/}[Exercism]
+   - {https://www.codewars.com/}[Code Wars]
+
+* Blogs
+  - [Amos's Blog] - A blog discussing Rust and how computers work.
+  - [Julia Evans]{https://jvns.ca/} - A blog for exploring interesting topics
+
+* Misc 
+** Blue Blocking Glasses
+   - {https://optimizeyourbiology.com/blue-blocker-database}[Find The Best Blue Blocking Glasses]
+** Writing
+   - {https://developers.google.com/tech-writing/overview}[Technical Writing]
+** Poetry
+   - {https://johnlisle.us/wp/stedman-history/ballad-of-sir-andrew-barton/}[Ballad Of Sir Andres Barton]
+
+
+
