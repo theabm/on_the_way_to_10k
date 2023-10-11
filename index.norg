@@ -41,7 +41,7 @@
 *** {:rust/ownership:}[Understanding Ownership]
 **** {:rust/ownership:# What Is Ownership?}[What Is Ownership?]
 **** {:rust/ownership:# References and Borrowing}[References and Borrowing]
-**** {:rust/ownership:# The Slice Tyoe}[The Slice Type]
+**** {:rust/ownership:# The Slice Type}[The Slice Type]
 **** {:rust/ownership:# Ownership Recap}[Ownership Recap]
 
 ** {:haskell/haskell:}[Haskell]

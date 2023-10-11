@@ -601,9 +601,197 @@ ___
    }
    @end
 
-** Granularity of Permissions
-   TODO - discuss section in *improving ownership errors* which discusses 
-   granularity of tuples and lists.
+* Fixing Ownership Errors
+  Learning to fix an ownership error is a core Rust skill. 
+
+  The first thing we must do is understand if our program is safe or not. 
+  Remember that Rust will reject *all* unsafe programs, but also *some* 
+  safe ones. 
+
+  Lets look at some unsafe examples that are rejected and see how to fix them. 
+
+** Fixing an Unsafe Program: Returning a Reference to the Stack
+   The first case is the following: 
+
+   @code rust 
+   fn return_a_string() -> &String {
+   let s = String::from("Hello world");
+   &s
+   }
+   @end
+   Is this code safe? 
+
+   No! Because as soon as the function scope ends, the stack gets deallocated.
+   Since `s` owns the string, the string will be dropped and the reference `&s`
+   will be invalidated. 
+
+   How can we fix it? 
+   There are a two solutions: 
+
+   - Take ownership of the string:
+   @code rust 
+   fn return_a_string() -> String {
+    let s = String::from("Hello world");
+    s
+   }
+   @end
+
+   - Return a string literal which lives forever (indicated by `\'static`):
+   @code rust 
+   fn return_a_string() -> &'static str {
+   "Hello world"    
+   }
+   @end
+
+** Fixing an Unsafe Program: Not Enough Permissions
+   Another common issue is trying to mutate read-only data or trying to 
+   drop data behind a reference.
+
+   For example: 
+   @code rust 
+   fn stringify_name_with_title(name: &Vec<String>) -> String {
+   name.push(String::from("Esq."));
+   let full = name.join(" ");
+   full
+   }
+
+   // ideally: ["Ferris", "Jr."] => "Ferris Jr. Esq."
+   @end
+   This program doesn't compile because `name.push()` requires *W* 
+   permissions, which it doesn't have. This is a good thing, because 
+   this operation could invalidate references outside of the 
+   function. 
+
+   To fix this, there are various solutions.
+   ~ Pass a mutable reference to the function.
+   -- This is not a good solution because a function should not mutate 
+      inputs if the caller would not expect it.
+   ~ Take ownership of the name. 
+   -- This is not a good solution because it would make the data structure 
+      outside of the function unusable.
+   ~ Clone the input so we can act on it freely.
+
+** Fixing an Unsafe Program: Copying vs. Moving Out of a Collection
+   A common confusion for Rust learners happens when copying data out of 
+   a collection, like a vector. 
+   For example:
+
+   @code rust
+   fn main() {
+   let v: Vec<i32> = vec![0, 1, 2];
+   let n_ref: &i32 = &v[0];
+   let n: i32 = *n_ref;
+   }
+   @end
+   The dereference operator `\*n_ref` expects just the *R* permission, 
+   which the path `\*n_ref` has.
+   But what happens if we change the type from `i32` to `String`?
+   Then, it turns out we no longer have the right permissions.
+   @code rust 
+   fn main() {
+   let v: Vec<String> = 
+   vec![String::from("Hello world")];
+   let s_ref: &String = &v[0];
+   let s: String = *s_ref;
+   }
+   @end
+   This program does not compile. Why? Because `v` owns the string and 
+   references are non-owning pointers, so we cannot take ownership 
+   from it. 
+   This is unsafe because if it was allowed, we would have a *double free* 
+   which is a bug.
+
+   This behavior does not happen when the vector has `i32` elements. 
+   The difference is that `String` does not implement the Copy Trait, 
+   and so when we do an assignment, we do a *move*.
+   On the other hand, `i32` implements the Copy Trait so the data 
+   simply gets copied into another local variable. 
+   In general, *if a value does not own heap data, then it can be copied without a move.*
+   For example: 
+   - `i32` does not own heap data so it can be copied without a move
+   - `String` does own heap data so it cannot be copied without a move 
+   - `&String` does own heap data so it cannot be copied without a move 
+
+   One exception is *mutable references*, since for *any* data type, 
+   we cannot have two of them overlap at the same time.
+
+** Fixing a Safe Program: Mutating Different Tuple Fields
+   One common issue of Rust is that it keeps track of permissions at 
+   a fine-grained level. This may cause it to reject safe programs.
+   Let's first look at a snippet that passes the borrow checker:
+
+   @code rust 
+   fn main() {
+   let mut name = (
+   String::from("Ferris"), 
+   String::from("Rustacean")
+   );
+   let first = &name.0;
+   name.1.push_str(", Esq.");
+   println!("{first} {}", name.1);
+   }
+   @end
+   The statement `let first = &name.0` borrows `name.0`. This removes 
+   *WO* permissions from `name.0` and from `name`.
+   However, `name.1` still has *W* permissions, so doing `name.1.push_str()` 
+   is valid.
+
+   However, Rust lose track of this. Suppose that we try to do the same thing 
+   through a function:
+   @code rust 
+   fn get_first(name: &(String, String)) -> &String {
+   &name.0
+   }
+
+   fn main() {
+   let mut name = (
+   String::from("Ferris"), 
+   String::from("Rustacean")
+   );
+   let first = get_first(&name);
+   name.1.push_str(", Esq.");
+   println!("{first} {}", name.1);
+   }
+   @end
+   Now, `name.1.push_str()` will cause a compilation error. To understand 
+   this error, we have to remember that Rust only looks at the function 
+   signature and not the implementation. Therefore, Rust cannot 
+   understand from the function signature that we are only borrowing 
+   the first element of the tuple, so it removes permissions from both 
+   elements.
+   In the future, this program may compile, but for now, it doesn't.
+
+** Fixing a Safe Program: Mutating Different Array Elements
+   A similar problem arises when we borrow elements of an array. 
+   @code rust 
+   fn main() {
+   let mut a = [0, 1, 2, 3];
+   let x = &mut a[0];
+   *x += 1;
+   println!("{a:?}");
+   }
+   @end
+   In this case, the Borrow Checker does not contain different paths 
+   for `a[0]`, `a[1]`, etc. It uses a *single* path `a[_]` that represents 
+   /all/ indexes of `a`.
+   This is different from tuples because tuples are accessed through named
+   fields. On the other hand, an index may be created at runtime, so Rust 
+   does not know how to deal with it at compile time. This is why it treats 
+   arrays differently and has a single path for all indexes.
+
+   So the following program will give be rejected by the compiler because 
+   Rust already gave *R* permissions to `x`.
+   @code rust 
+   fn main() {
+   let mut a = [0, 1, 2, 3];
+   let x = &mut a[0];
+   let y = &a[1];
+   *x += *y;
+   }
+   @end
+
+   For cases like this, Rust has some implementations that allow for *unsafe* 
+   code blocks that bypass the borrow checker. We will see this later.
 
 ** The Slice Type
 
