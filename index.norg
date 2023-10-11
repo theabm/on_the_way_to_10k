@@ -22,8 +22,30 @@
 * Table of contents
 
 ** {:dash/dash:}[Dash]
+
 ** {:rust/rust:}[Rust]
+*** {:rust/getting_started:}[Getting Started]
+**** {:rust/getting_started:# Installing}[Installing]
+**** {:rust/getting_started:# Hello World}[Hello World]
+**** {:rust/getting_started:# Using Cargo}[Using Cargo]
+*** {:rust/common_programming_concepts:}[Common Programming Concepts]
+**** {:rust/common_programming_concepts:# Variables and Mutability}[Variables and Mutability]
+**** {:rust/common_programming_concepts:# Data Types}[Data Types]
+**** {:rust/common_programming_concepts:# Functions}[Functions]
+***** {:rust/common_programming_concepts:# Statements and Expressions}[Statements and Expressions]
+**** {:rust/common_programming_concepts:# Control Flow}[Control Flow]
+***** {:rust/common_programming_concepts:# if Expressions}[if Expressions Flow]
+***** {:rust/common_programming_concepts:# loop Expressions}[loop Expressions]
+***** {:rust/common_programming_concepts:# while Statements}[while Statements]
+***** {:rust/common_programming_concepts:# for Statements}[for Statements]
+*** {:rust/ownership:}[Understanding Ownership]
+**** {:rust/ownership:# What Is Ownership?}[What Is Ownership?]
+**** {:rust/ownership:# References and Borrowing}[References and Borrowing]
+**** {:rust/ownership:# The Slice Tyoe}[The Slice Type]
+**** {:rust/ownership:# Ownership Recap}[Ownership Recap]
+
 ** {:haskell/haskell:}[Haskell]
+
 ** {:neorg/neorg:}[Neorg] 
 *** {:neorg/introduction:}[Introduction]
 *** {:neorg/modules:}[Modules]
@@ -34,12 +56,15 @@
 *** {:neorg/journals_summaries:}[Journals And Summaries]
 *** {:neorg/automation:}[Automation]
 
-
 ** Org
+
 ** {:linux/linux:}[Linux]
+
 ** HPC
 *** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
 *** {:hpc/openmp/openmp:}[OpenMP]
+
 ** {:profiling/profiling:}[Profiling]
+
 
 

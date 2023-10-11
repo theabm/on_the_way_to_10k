@@ -1,3 +1,16 @@
+@document.meta
+title: introduction
+description: An introduction to Neorg
+authors: andres
+categories: [
+    neorg 
+    note-taking
+]
+created: 2023-10-11T12:36:12+0100
+updated: 2023-10-11T12:49:37+0100
+version: 1.1.1
+@end
+
 * What is Neorg?
 
   [Neorg]{https://github.com/nvim-neorg/neorg} is a powerful interface for a plaintext markup 

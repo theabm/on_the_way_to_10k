@@ -1,3 +1,16 @@
+@document.meta
+title: links
+description: A guide to Neorg liks.
+authors: andres
+categories: [
+    neorg 
+    note-taking
+]
+created: 2023-10-11T12:40:02+0100
+updated: 2023-10-11T12:40:28+0100
+version: 1.1.1
+@end
+
 Links are created by inserting `target` inside curly brackets and 
 colons. Clicking the link takes you to it.
 

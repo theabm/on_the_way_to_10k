@@ -1,0 +1,87 @@
+@document.meta
+title: getting_started
+description: 
+authors: andres
+categories: 
+created: 2023-10-11T13:54:53+0100
+updated: 2023-10-11T13:55:00+0100
+version: 1.1.1
+@end
+
+* Installing 
+
+  To install rust, run the following:
+  @code bash
+  curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf \| sh
+  @end
+
+  You will also need to install a `Linker` to join compiled outputs into one. 
+  The most common linker is the one you get when you install gcc or clang.
+
+  Once rust is installed, to update it you can run:
+
+  @code bash 
+  rustup update
+  @end
+
+
+* Hello World 
+
+  Open a file called hello_world.rs and write the following: 
+
+  @code rust 
+  // the main function is declared like this (with no parameters)
+  // in rust we place the curly bracket in the same line as the 
+  // function declaration
+  //
+  // To use rust formatting use rustfmt
+  fn main() {
+      // this prints text to screen. Note:
+      // 1. we use indent
+      // 2. println! calls a rust macro. Functions dont have !
+      // 3. we pass string "Hello, world!"
+      // 4. lines are ended with semicolon
+      println!("Hello, world!");
+  }
+
+  @end
+
+  To compile and run: 
+  @code bash
+  rustc hello_world.rs
+  ./hello_world
+
+  @end
+
+* Using Cargo
+
+  Cargo is Rust's build system and package manager. It is used to manage 
+  Rust projects since it:
+  - builds your code 
+  - downloads libraries your code depends on - a.k.a dependencies
+  - building these libraries
+
+  Furthermore, Cargo comes preinstalled with rust if you use official installers.
+
+  Check your version by running: 
+  @code bash
+  cargo --version
+  @end 
+
+** Creating new cargo project
+
+   To create a new project using cargo, simply run:
+
+   @code bash 
+   cargo new hello_cargo 
+   @end
+   This will create an initialized git repository named
+   `hello_cargo` where you will find the following structure:
+   - Cargo.toml
+   - src directory
+   -- main.rs 
+   - .git 
+   - .gitignore
+
+
+

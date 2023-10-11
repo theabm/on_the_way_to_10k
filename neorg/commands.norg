@@ -1,3 +1,16 @@
+@document.meta
+title: commands
+description: A description of neorg commands and basic utility
+authors: andres
+categories: [
+    neorg 
+    note-taking
+]
+created: 2023-10-11T12:38:10+0100
+updated: 2023-10-11T12:38:33+0100
+version: 1.1.1
+@end
+
   *:Neorg* exposes the API of modules in neorg. This is the starting place for anythig 
   that neorg can do. 
 
