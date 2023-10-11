@@ -615,8 +615,8 @@ ___
 
    @code rust 
    fn return_a_string() -> &String {
-   let s = String::from("Hello world");
-   &s
+       let s = String::from("Hello world");
+       &s
    }
    @end
    Is this code safe? 
@@ -631,15 +631,15 @@ ___
    - Take ownership of the string:
    @code rust 
    fn return_a_string() -> String {
-    let s = String::from("Hello world");
-    s
+       let s = String::from("Hello world");
+       s
    }
    @end
 
    - Return a string literal which lives forever (indicated by `\'static`):
    @code rust 
    fn return_a_string() -> &'static str {
-   "Hello world"    
+       "Hello world"    
    }
    @end
 
@@ -650,9 +650,9 @@ ___
    For example: 
    @code rust 
    fn stringify_name_with_title(name: &Vec<String>) -> String {
-   name.push(String::from("Esq."));
-   let full = name.join(" ");
-   full
+       name.push(String::from("Esq."));
+       let full = name.join(" ");
+       full
    }
 
    // ideally: ["Ferris", "Jr."] => "Ferris Jr. Esq."
@@ -664,11 +664,17 @@ ___
 
    To fix this, there are various solutions.
    ~ Pass a mutable reference to the function.
-   -- This is not a good solution because a function should not mutate 
-      inputs if the caller would not expect it.
+   -- *This is not a good solution because a function should not mutate 
+      inputs if the caller would not expect it.*
    ~ Take ownership of the name. 
-   -- This is not a good solution because it would make the data structure 
-      outside of the function unusable.
+   -- This is not a good solution because it would make the data 
+      structure outside of the function unusable. 
+      *It is very rare for Rust functions to take ownership of 
+      heap-owning data structures*
+      Why? Think if we were using some functions from a library and 
+      every time we used a function, it took owership of our data. 
+      That would be very annoying and introduce a lot of boilerplate 
+      code.
    ~ Clone the input so we can act on it freely.
 
 ** Fixing an Unsafe Program: Copying vs. Moving Out of a Collection
@@ -678,9 +684,9 @@ ___
 
    @code rust
    fn main() {
-   let v: Vec<i32> = vec![0, 1, 2];
-   let n_ref: &i32 = &v[0];
-   let n: i32 = *n_ref;
+       let v: Vec<i32> = vec![0, 1, 2];
+       let n_ref: &i32 = &v[0];
+       let n: i32 = *n_ref;
    }
    @end
    The dereference operator `\*n_ref` expects just the *R* permission, 
@@ -689,10 +695,10 @@ ___
    Then, it turns out we no longer have the right permissions.
    @code rust 
    fn main() {
-   let v: Vec<String> = 
-   vec![String::from("Hello world")];
-   let s_ref: &String = &v[0];
-   let s: String = *s_ref;
+       let v: Vec<String> = 
+       vec![String::from("Hello world")];
+       let s_ref: &String = &v[0];
+       let s: String = *s_ref;
    }
    @end
    This program does not compile. Why? Because `v` owns the string and 
@@ -722,13 +728,13 @@ ___
 
    @code rust 
    fn main() {
-   let mut name = (
-   String::from("Ferris"), 
-   String::from("Rustacean")
-   );
-   let first = &name.0;
-   name.1.push_str(", Esq.");
-   println!("{first} {}", name.1);
+       let mut name = (
+           String::from("Ferris"), 
+           String::from("Rustacean")
+       );
+       let first = &name.0;
+       name.1.push_str(", Esq.");
+       println!("{first} {}", name.1);
    }
    @end
    The statement `let first = &name.0` borrows `name.0`. This removes 
@@ -740,17 +746,17 @@ ___
    through a function:
    @code rust 
    fn get_first(name: &(String, String)) -> &String {
-   &name.0
+       &name.0
    }
 
    fn main() {
-   let mut name = (
-   String::from("Ferris"), 
-   String::from("Rustacean")
-   );
-   let first = get_first(&name);
-   name.1.push_str(", Esq.");
-   println!("{first} {}", name.1);
+       let mut name = (
+           String::from("Ferris"), 
+           String::from("Rustacean")
+       );
+       let first = get_first(&name);
+       name.1.push_str(", Esq.");
+       println!("{first} {}", name.1);
    }
    @end
    Now, `name.1.push_str()` will cause a compilation error. To understand 
@@ -765,10 +771,10 @@ ___
    A similar problem arises when we borrow elements of an array. 
    @code rust 
    fn main() {
-   let mut a = [0, 1, 2, 3];
-   let x = &mut a[0];
-   *x += 1;
-   println!("{a:?}");
+       let mut a = [0, 1, 2, 3];
+       let x = &mut a[0];
+       *x += 1;
+       println!("{a:?}");
    }
    @end
    In this case, the Borrow Checker does not contain different paths 
@@ -783,22 +789,250 @@ ___
    Rust already gave *R* permissions to `x`.
    @code rust 
    fn main() {
-   let mut a = [0, 1, 2, 3];
-   let x = &mut a[0];
-   let y = &a[1];
-   *x += *y;
+       let mut a = [0, 1, 2, 3];
+       let x = &mut a[0];
+       let y = &a[1];
+       *x += *y;
    }
    @end
 
    For cases like this, Rust has some implementations that allow for *unsafe* 
    code blocks that bypass the borrow checker. We will see this later.
 
-** The Slice Type
+* The Slice Type
 
    /Slices/ let you reference a contiguous sequence of elements 
    in a collection rather than the whole collection. 
    *_A slice is a kind of reference, so it is a non-owning pointer._*
 
+   Lets explain why they are useful.
+
+   Imagine we have a string of words separated by spaces and we want a 
+   functio that returns the first word in this string. If there 
+   are no spaces, it should return the whole string.
+
+   How can we do this? 
+
+   Since we dont have a way to return /part/ of the string, we could 
+   think to return an index!
+   However, this is unsafe. Why? 
+   Because we could change the string after we have calculated the 
+   index which would invalidate it.
+
+   For example:
+   @code rust
+   fn first_word(s: &String) -> usize {
+       let bytes = s.as_bytes();
+
+       for (i, &item) in bytes.iter().enumerate() {
+           if item == b' ' {
+               return i;
+           }
+       }
+
+       s.len()
+   }
+
+   fn main() {
+       let mut s = String::from("hello world");
+       let word = first_word(&s);
+       s.clear();    
+   }
+   @end
+   As we can see, after we compute `word`, we can change the string 
+   which invalidates `word` which is an index.
+   If we use this value at the end of the program to extract 
+   the first word of the string, we would get an error. 
+
+   The main problem is that the index is not connected to the state 
+   of *s*. 
+   Furthermore, if we wanted to extract the second word, the 
+   implementation would be even more prone to bugs since we would 
+   need to return two indices.
+
+   To solve this, Rust uses *_string slices_*. 
+
+   $ String Slices
+   A String slice is a reference to a part of a `String`. Slices 
+   are special kinds of references because they are *fat* pointers - 
+   i.e. pointers with metadata. In this case, the metadata is the 
+   length of the slice. So the entire fat pointer contains a pointer
+   to the beginning of the range and a length of the range.
 
 
-** Ownership Recap
+   An example of string slices:
+   @code rust 
+   fn main() {
+       let s = String::from("hello world");
+
+       let hello: &str = &s[0..5];
+       let world: &str = &s[6..11];
+       let s2: &String = &s; 
+   }
+   @end
+   As we can see, slices are specified with a start and end index and 
+   have a type which is `&str`.
+
+   Since slices are references, they change the permissions on 
+   referenced data.
+   For example, when we create the slice `hello` of `s`, `s` loses 
+   *WO* permissions.
+
+** Range Syntax
+
+    Slices use Rust's range syntax `..` which is very handy. 
+    If you want to start an index at zero or finish at the end, you
+    can omit the first and last values respectively.
+
+    @code rust
+    let s = String::from("hello");
+
+    let len = s.len()
+
+    // these two are the same
+    let slice = &s[0..2];
+    let slice = &s[..2];
+
+    // these two are the same
+    let slice = &s[3..len];
+    let slice = &s[3..];
+
+    // these two are the same
+    let slice = &s[0..len];
+    let slice = &s[..];
+    @end
+    ---
+
+   Now we can rewrite the `first_word` function using slices:
+
+   @code rust
+   fn first_word(s: &String) -> &str {
+       let bytes = s.as_bytes();
+
+       for (i, &item) in bytes.iter().enumerate() {
+           if item == b' ' {
+               return &s[0..i];
+           }
+       }
+
+       &s[..]
+   }
+   @end
+   Once we find the index, we return a slice of the string. If there 
+   are no spaces, we return a slice of the whole string!
+
+   This could also be easily extended for a `second_word` function.
+
+   Now, we are safer since the compiler will ensure that the slice,
+   which is a reference, will remain valid throughout the lifetime 
+   of the string!
+   So if we tried to mutate the string *while* the slice is active, 
+   we would get a compiler error.
+
+** String Literals Are Slices
+    String literals are stored inside the binary. In other words, 
+    they are slices of the binary. 
+    So in the code below, `s` is a slice pointing to that specific 
+    point in the binary. This is why string literals are immutable.
+    @code rust 
+    let s = "Hello World"
+    @end
+** String Slices as Parameters
+    An improvement on the `first_word` function is to change the signature 
+    from 
+
+    @code rust 
+    fn first_word(s: &String) -> &str {
+    @end
+
+    to
+
+    @code rust
+    fn first_word(s: &str) -> &str {
+    @end
+
+    Why? Because this function is more general and can work with strings 
+    and string slices. If we have a string slice `&str`, we can pass it 
+    directly. On the other hand, if we have a `String`, we can pass a 
+    reference to the string or a string slice to the whole string - they 
+    are equivalent.
+    @code rust
+    fn main() {
+        let my_string = String::from("hello world");
+
+        // `first_word` works on slices of `String`s, whether 
+        // partial or whole
+        let word = first_word(&my_string[0..6]);
+        let word = first_word(&my_string[..]);
+
+        // `first_word` also works on references to `String`s, 
+        // which are equivalent to whole slices of `String`s
+        let word = first_word(&my_string);
+
+        let my_string_literal = "hello world";
+
+        // `first_word` works on slices of string literals, whether partial or whole
+        let word = first_word(&my_string_literal[0..6]);
+        let word = first_word(&my_string_literal[..]);
+
+        // Because string literals *are* string slices already,
+        // this works too, without the slice syntax!
+        let word = first_word(my_string_literal);
+    }
+    @end
+
+** Other Slices
+    We also have more general slice types. For example, we can have 
+    an array slice: 
+
+    @code rust
+    let a = [1, 2, 3, 4, 5];
+
+    let slice = &a[1..3];
+
+    assert_eq!(slice, &[2, 3]);
+
+    @end
+    The slice has type `&[i32]` and it works in the same way as a 
+    string slice - i.e they are fat pointers. 
+
+    We can use slices for all sorts of collections.
+
+    *_An advantage of slices over index-based ranges is that the slice 
+    cannot be invalidated while it's being used_*.
+
+* Ownership Recap
+  We summarize the most important points discusses in this section.
+
+  Rust avoids the use of Garbage Collection which improves performance 
+  and predictability (looking at you python!).
+  This is done by deallocating the memory of owning pointers once they 
+  go out of scope.
+
+** Ownership at Runtime
+   - Rust allocates *local* variables in stack frames, which are allocated 
+     when a function is called and deallocated when the call ends.
+   - Local variables can hold either data or pointers.
+   - Pointers can be created either through boxes (pointers *owning* data) 
+     or through references (*non-owning* pointers).
+** Ownership at Compile-time
+   - Rust tracks *RWO* permissions on each path. It requires that the 
+     path has the appropriate permissions to perform a given operation.
+   - A paths permission can be changed if it is *moved* or *borrowed*.
+   - A *move* of a variable with a non-copyable type requires *RO*
+     permissions. Once the move is done, it permanently eliminates 
+     *all* permissions on the variable, preventing it from being reused.
+   - *Borrowing* a variable *temporarily* removes *some* of the permissions.
+   -- An *immutable borrow* creates an immutable reference and disables 
+      the borrowed data from being mutated or moved.
+   -- A *mutable borrow* creates a mutable reference, which disables the 
+      borrowed data from being read, written, or moved. So it is 
+      effecitively useless for some time.
+** Connecting Ownership Between Compile-time and Runtime
+   Rust permissions are designed to prevent undefined behavior. 
+   - One case of undefined behavior is *use-after-free* where freed 
+     memory is read or written. Immutable borrows remove the *W* permission 
+     to avoid this.
+   - Another case is *double-free*. Dereferences of references of 
+     non-copyable data do not have *O* permissions to avoid double 
+     frees.
