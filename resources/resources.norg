@@ -3,15 +3,11 @@
     - {https://www.assemblyai.com/blog/deepminds-alphatensor-explained/}[Deep Mind Alpha Tensor Explained]
 ** Deep Learning
    - {https://horace.io/brrr_intro.html}[Making Deep Learning Go Brrr From First Principles]
-
 * Linux
 ** System
    - {https://linuxjourney.com/}[Linux Journey]
 ** Mounting
    - {https://unix.stackexchange.com/questions/3192/what-is-meant-by-mounting-a-device-in-linux}[What is meant by mounting a device in linux?]
-
-
-
 * Programming
 ** C
    - {https://www.assemblyai.com/blog/deepminds-alphatensor-explained/}[What Every C Programmer Should Know About Undefined Behavior]
@@ -58,7 +54,6 @@
    - {https://fasterthanli.me/series/advent-of-code-2022}[Amos Advent Of Code In Rust]
 ** Mixing Programming Languages
    - {https://blog.frankel.ch/rust-from-python/}[Calling Rust From Python]
-
 * Tools
 ** Debugger
   - {https://www.debuggingbook.org/#}[The Debugging Book]
@@ -67,11 +62,9 @@
 ** Programming Practice
    - {https://exercism.org/}[Exercism]
    - {https://www.codewars.com/}[Code Wars]
-
 * Blogs
   - [Amos's Blog] - A blog discussing Rust and how computers work.
   - [Julia Evans]{https://jvns.ca/} - A blog for exploring interesting topics
-
 * Misc 
 ** Blue Blocking Glasses
    - {https://optimizeyourbiology.com/blue-blocker-database}[Find The Best Blue Blocking Glasses]
