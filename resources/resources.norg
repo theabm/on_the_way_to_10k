@@ -6,7 +6,9 @@
 * Linux
 ** System
    - ( ) {https://linuxjourney.com/}[Linux Journey]
-** Mounting
+** Software 
+   - {https://suckless.org/}[Suckless.org]
+** Questions
    - (x) {https://unix.stackexchange.com/questions/3192/what-is-meant-by-mounting-a-device-in-linux}[What is meant by mounting a device in linux?]
 * Programming
 ** C
@@ -57,11 +59,16 @@
 * Tools
 ** Debugger
   - ( ) {https://www.debuggingbook.org/#}[The Debugging Book]
-** Vim
-   - ( ) {https://www.barbarianmeetscoding.com/boost-your-coding-fu-with-vscode-and-vim/dedication}[Boost Your Coding Fu with VsCode and VIM]
 ** Programming Practice
    - ( ) {https://exercism.org/}[Exercism]
    - ( ) {https://www.codewars.com/}[Code Wars]
+   - ( ) {https://www.techinterviewhandbook.org/grind75}[Grid 75 Questions]
+* Vim
+   - ( ) {https://www.barbarianmeetscoding.com/boost-your-coding-fu-with-vscode-and-vim/dedication}[Boost Your Coding Fu with VsCode and VIM]
+** LaTeX in Vim
+   - {https://www.ejmastnak.com/tutorials/vim-latex/prerequisites/}[Suggested Prerequisites For Writing LaTeX in Vim]
+   - {https://castel.dev/post/lecture-notes-1/}[How I'm Able To Take Notes In Mathematics Lectures Using LaTeX and Vim]
+   - {http://www.benbrastmckie.com/tools#access}[Tools For Academic Writing]
 * Blogs
   - (+) [Amos's Blog] - A blog discussing Rust and how computers work.
   - (+) [Julia Evans]{https://jvns.ca/} - A blog for exploring interesting topics
@@ -72,6 +79,7 @@
    - (-) {https://developers.google.com/tech-writing/overview}[Technical Writing]
 ** Poetry
    - {https://johnlisle.us/wp/stedman-history/ballad-of-sir-andrew-barton/}[Ballad Of Sir Andres Barton]
+
 
 
 
