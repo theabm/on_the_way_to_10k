@@ -1,0 +1,5 @@
+A /struct/ is a custom data type that lets you group together 
+and name multiple related values that make up a meaningful group.
+
+We have already seen that one method to achieve this are *Tuples*. 
+We will discuss when it is appropriate to choose one or the other.

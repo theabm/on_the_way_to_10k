@@ -44,6 +44,11 @@
 **** {:rust/ownership:# Fixing Ownership Errors}[Fixing Ownership Errors]
 **** {:rust/ownership:# The Slice Type}[The Slice Type]
 **** {:rust/ownership:# Ownership Recap}[Ownership Recap]
+*** {:rust/structs:}[Using Structs to Structure Related Data]
+**** {:rust/structs:# Defining and Instantiating Structs}[Defining and Instantiating Structs]
+**** {:rust/structs:# An Example Program Using Structs}[An Example Program Using Structs] 
+**** {:rust/structs:# Method Syntax}[Method Syntax]
+
 
 ** {:haskell/haskell:}[Haskell]
 
@@ -56,6 +61,25 @@
 *** {:neorg/todo:}[To-Do Items]
 *** {:neorg/journals_summaries:}[Journals And Summaries]
 *** {:neorg/automation:}[Automation]
+
+** Latex
+*** Latex Basics
+*** Working with LaTeX
+*** Document Structure
+*** Logical Structure
+*** Document Classes
+*** Extending LaTeX
+*** Using Graphics
+*** LaTeX Tables
+*** Cross-Referencing
+*** Mathematics
+*** Fonts & Spacing
+*** Citations & References
+*** Structuring Sources
+*** Fonts & Unicode Engines
+*** Error Handling
+*** Help & Documentation
+
 
 ** Org
 
