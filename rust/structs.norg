@@ -248,5 +248,191 @@ our programs to take full advantage of Rust's compile-time checking.
    Be aware of the borrow checkers limitations, since rust may sometimes 
    assume more fields are borrowed than they actually are.
 
+* An Example Program Using Structs
+
+  To understand when we might want to use structs lets write a program 
+  that calculates the area of a rectangle.
+
+  We use single variables first and then use structs.
+
+  @code rust 
+  fn main() {
+      let width1 = 30;
+      let height1 = 50;
+
+      println!(
+      "The area of the rectangle is {} square pixels.",
+      area(width1, height1)
+  );
+  }
+
+  fn area(width: u32, height: u32) -> u32 {
+      width * height
+  }
+  @end
+
+  This program does what we want, but it has some pitfalls. The two 
+  values are not related at all coceptually, and the `area` function 
+  takes two parameters, rather than a "rectangle". 
+
+  We can refactor with tuples:
+  @code rust
+  fn main() {
+      let rect1 = (30, 50);
+
+      println!(
+      "The area of the rectangle is {} square pixels.",
+      area(rect1)
+  );
+  }
+
+  fn area(dimensions: (u32, u32)) -> u32 {
+      dimensions.0 * dimensions.1
+  }
+  @end
+  Although better, the code still has some drawbacks. There is no 
+  naming and it is unclear what we are doing by simply reading.
+
+  Furthermore, for the area, changing the order of width and heigh doesn't 
+  matter, but for some other operation it may make a difference. 
+  With this method we have to keep track that the first index is the width 
+  and the second one is the height. If we were to change this in the 
+  definition of the tuple, we would need to change it everywhere else. 
+  This is very error prone. 
+
+
+  We can refactor using structs:
+  @code rust
+  struct Rectangle {
+      width: u32,
+      height: u32,
+  }
+
+  fn main() {
+      let rect1 = Rectangle {
+          width: 30,
+          height: 50,
+      };
+
+      println!(
+      "The area of the rectangle is {} square pixels.",
+      area(&rect1)
+  );
+  }
+
+  fn area(rectangle: &Rectangle) -> u32 {
+      rectangle.width * rectangle.height
+  }
+  @end
+  Now our code is much clearer and flexible. If we were to change the 
+  order of our field names, it wouldn't matter. Also, since we are 
+  naming the fields, the definition of area is much clearer.
+
+  It would be nice to be able to print an instance of `Rectangle` to be 
+  able to visualize all the fields and debug our program.
+  If we simply use the `println!` macro, it wont work because the 
+  struct doesn't have the `std::fmt::Display` method implemented, which 
+  the `println!` macro uses by default.
+  All primitive types implement this method by default. 
+
+  However the compiler error tells us to use `{:\?}` instead of `{}`.
+  Putting the `:\?` specifier tells `println!` to use the `Debug` format.
+  The `Debug` trait enables us to print our struct in a way that is 
+  useful to see its values.
+
+  When trying to use this, we still get an error!
+  `Rectangle doesn't implement Debug`
+
+  However, it tells us how to fix it:
+  `add \#[derive(Debug)] to Rectangle or manually impl Debug for Rectangle`
+
+  Rust does include functionality to print out debugging information, 
+  but we have to explicitly ask for it. 
+  To do this, we add the outer attribute `\#[derive(Debug)]` just 
+  before the struct definition, as shown below:
+  @code rust
+  #[derive(Debug)]
+  struct Rectangle {
+      width: u32,
+      height: u32,
+  }
+
+  fn main() {
+      let rect1 = Rectangle {
+          width: 30,
+          height: 50,
+      };
+
+      println!("rect1 is {:?}", rect1);
+  }
+  @end
+  Now the code with `{:\?}` compiles. It is not the prettiest, but it 
+  works.
+
+  For larger structs, it's useful to have output that is easier to read. 
+  For these cases, we can use `{:\#\?}` instead of `{:\?}`.
+
+  Another way to print out a value using the `Debug` format is to use 
+  the `dbg!` macro, which takes ownerhsip of an expression (as opposed 
+  to `println!` which takes a reference), prints the file and line 
+  number of where that `dbg!` macro call occurs in your code along 
+  with the resultant value of that expression, and returns ownership 
+  of the value.
+
+  However, the `dbg!` macro prints to `stderr` rather than `stdout` which 
+  is where `println!` prints.
+
+  Here is an example:
+  @code rust
+  #[derive(Debug)]
+  struct Rectangle {
+      width: u32,
+      height: u32,
+  }
+
+  fn main() {
+      let scale = 2;
+      let rect1 = Rectangle {
+          // print debug info for width field
+          // note that since dbg! gives back ownership, 
+          // the width field will get the same value 
+          // as if we didnt have the dbg! call there. 
+          width: dbg!(30 * scale),
+          height: 50,
+      };
+
+      // on the other hand, we dont want dbg! to take ownership 
+      // of rect1, otherwise it becomes unusable, so we pass a 
+      // reference.
+      dbg!(&rect1);
+  }
+  @end
+  We can see that the program will print the value of the width
+  and the value of the struct using the pretty printing.
+  The `dbg!` macro is very useful to understand what is going on in your 
+  code.
+
+  In addition to the `Debug` trait, Rust has provided a number of 
+  traits for us to use with the `derive` attribute that can add 
+  useful behavior to our custom types. 
+
+  These are discussed in Appendix C.
+
+  We will cover how to implemetn these traits with custom behavior as 
+  weel as how to create your own traits later.
+
+  Finally, our `area` function is very specific and works *only* with 
+  a `Rectangle` type. It would be nice to tie this behavior even closer 
+  to the `Rectangle` type. We can do this by turning the `area` function 
+  into an `area` *method* defined on our `Rectangle` type.
+
+
+
+
+
+* Method Syntax
+
+
+
 
 
