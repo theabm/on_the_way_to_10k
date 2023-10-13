@@ -60,4 +60,193 @@ our programs to take full advantage of Rust's compile-time checking.
       }
   }
   @end
+  It is annoying that we have to repeat the same names twice, such as 
+  `email:email` and `username:username`. If we had more fields, it would 
+  be cumbersome and error prone.
+
+  Rust provides a convenient shorthand for this.
+
+** Using The Field Init Shorthand
+   Since the parameter names of the function and the struct field names 
+   are _exactly_ the same in the previous snippet, we can use the 
+   */field init shorthand/* to rewrite it.
+   @code rust
+   fn build_user(email: String, username: String) -> User {
+       User {
+           active: true,
+           username,
+           email,
+           sign_in_count: 1,
+       }
+   }
+   @end
+   In this case, Rust will understand how we want to intialize the struct 
+   which avoids useless repetition.
+
+** Creating Instances from Other Instances with Struct Update Syntax
+   We may want to create a new instance of a struct that includes most 
+   of the values from another instance, but changes some.
+   We can do this through the */struct update syntax/*.
+
+   First we show how to do it manually:
+   @code rust
+   fn main() {
+       let user1 = User {
+           email: String::from("someone@example.com"),
+           username: String::from("someusername123"),
+           active: true,
+           sign_in_count: 1,
+       };
+
+       let user2 = User {
+           active: user1.active,
+           username: user1.username,
+           email: String::from("another@example.com"),
+           sign_in_count: user1.sign_in_count,
+       };
+   }
+   @end
+   In this case, we create `user2` to be the same as `user1` but with 
+   a different email.
+
+   Using the struct update syntax we can do the same with less code:
+   @code rust
+   let user2 = User {
+       // we first list the fields we want changed
+       email: String::from("another@example.com"),
+       // and *at the end* list the struct we wish to take 
+       // the remaining values from
+       ..user1
+   };
+   @end
+   The `..user1` must come last to specify that any remaining fields 
+   should get their values from the corresponding fields in `user1`. 
+
+   Note that in both cases, we are using `=` like an assignment. 
+   Since strings do not implement the `Copy` trait and we are 
+   assigning the same username to both users, ownership of the 
+   username is moved to `user2`. This means that `user1` is not 
+   usable after this operation. 
+   If we had given `user2` new string values for *both* username 
+   and email, then we could safely use both, since the types of 
+   `active` and `sign_in_count` implement the `Copy` trait.
+
+** Tuple Structs
+   Rust supports an intermediate type between Structs and Tuples - the 
+   */tuple struct/*. 
+   Tuple structs allow /naming/ of the type, but dont have field names -  
+   just the types.
+
+   They are useful when we want to give the whole tuple a name to 
+   differentiate from other tuples, but dont require naming fields. 
+
+   To define and instantiate:
+   @code rust 
+   // definition of two tuple structs with name Color and Point
+   // As we can see, we only declare the types of the fields, not 
+   // the names
+   struct Color(i32, i32, i32);
+   struct Point(i32, i32, i32);
+
+   fn main() {
+       // To instantiate:
+       let black = Color(0, 0, 0);
+       let origin = Point(0, 0, 0);
+   }
+   @end
+   Note that `black` and `origin` are different types because they are 
+   instances of different tuple structs.
+   *_Each struct you define is its own type, even though the fields 
+   within the struct might have the same types._*
+
+   In this case, a function that takes a `Color` type cannot take 
+   a `Point` type even though both are made up of three `i32` values.
+
+   For all other behavior, tuple structs are similar to tuples. We 
+   can destructure them into individual pieces and use a `.` operator 
+   to access individual values.
+
+** Unit-Like Structs Without Any Fields
+   We can also define structs that don't have any fields. 
+   They are called /*unit-like*/ structs because they behave similarly 
+   to `()` - aka the unit type. 
+
+   They are useful when you need to implement a trait on some type, 
+   but don't have any data that you want to store in the type 
+   itself. We will talk more about it later.
+
+   Here is an example:
+   @code rust
+   // to define it, simply use the struct keyword, the name, and a 
+   // semicolon. No curly brackets or parenthesis.
+   struct AlwaysEqual;
+
+   fn main() {
+       // to instantiate, just use the name and a semicolon. No curly 
+       // brackets or parenthesis.
+       let subject = AlwaysEqual;
+   }
+   @end
+   Imagine that later we’ll implement behavior for this type such that
+   every instance of AlwaysEqual is always equal to every instance of 
+   any other type, perhaps to have a known result for testing purposes.
+
+** Ownership of Struct Data
+   In the `User` struct definition in the first snippet, we used the 
+   owned `String` type rather than `&str` string slice type.
+
+   This is a deliberate choice because we want the struct to own all 
+   of its data and for the data to be valid as long as the entire 
+   struct is valid. 
+
+   However, it is also possible to store references to data owned by 
+   something else. To do so requires the use of /lifetimes/, a Rust 
+   feature that ensires that the data referenced by a struct is valid 
+   for as long as the struct is. 
+
+   This will be discusses later.
+
+** Borrowing Fields of a Struct
+   Similar to what we discusses in {:rust/ownership:# Fixing a Safe Program: Mutating Different Tuple Fields}[Different Tuple Fields],
+   the borrow checker will track ownership permissions at both struct-level 
+   and field-level. 
+
+   For example, if we borrow a field `x` of a `Point` struct, then 
+   both `p` and `p.x` temporarily lose their permissions, but not 
+   `p.y`
+   @code rust 
+   fn main() {
+       struct Point { x: i32, y: i32 }
+
+       let mut p = Point { x: 0, y: 0 };
+       let x = &mut p.x;
+       *x += 1;
+       println!("{}, {}", p.x, p.y);
+   }
+   @end
+   However, if we try to use `p` while `p.x` is mutably borrowed, 
+   we get a compile time error. 
+   For example, this is not valid:
+   @code rust 
+   struct Point { x: i32, y: i32 }
+
+   fn print_point(p: &Point) {
+       println!("{}, {}", p.x, p.y);
+   }
+
+   fn main() {
+       let mut p = Point { x: 0, y: 0 };
+       let x = &mut p.x;
+       print_point(&p);
+       *x += 1;
+   }
+   @end
+
+   In general, if you encounter an ownership error that involves a struct, 
+   you should consider which fields of your structure are supposed to 
+   be borrowed with which permissions.
+   Be aware of the borrow checkers limitations, since rust may sometimes 
+   assume more fields are borrowed than they actually are.
+
+
 
