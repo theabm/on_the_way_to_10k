@@ -428,6 +428,7 @@ our programs to take full advantage of Rust's compile-time checking.
 
 
 * Method Syntax
+
   Methods are similar to functions. 
   - We declare them with the `fn` keyword and a name. 
   - They can have parameters and a return value.
@@ -440,9 +441,11 @@ our programs to take full advantage of Rust's compile-time checking.
   instance of the struct the method is being called on.
 
 ** Defining Methods
+
    Let's change the `area` function that has a `Rectangle` instance 
    as a parameter and instead make an `area` method defined on the 
    `Rectangle` struct.
+
    @code rust 
    #[derive(Debug)]
    struct Rectangle {
@@ -469,6 +472,7 @@ our programs to take full advantage of Rust's compile-time checking.
    );
    }
    @end
+
    To define a method, we start and `impl` block for `Rectangle`. 
    Everything within this block is associated to the `Rectangle` type.
 
@@ -533,6 +537,7 @@ our programs to take full advantage of Rust's compile-time checking.
    We will discuss this later.
 
    Another example of a method is shown below.
+
    @code rust
    #[derive(Debug)]
    struct Rectangle {
@@ -570,6 +575,7 @@ our programs to take full advantage of Rust's compile-time checking.
    @end
 
 ** Associated Functions
+
    All functions defined witin an `impl` block are called associated 
    functions because they are associated to the type named after the 
    `impl`.
@@ -608,6 +614,7 @@ our programs to take full advantage of Rust's compile-time checking.
    This is more useful when using generic types and traits.
 
 ** Methods Calls are Syntactic Sugar for Function Calls
+
    All methods are syntactic sugar for calls using the `::` operator.
 
    @code rust
@@ -653,6 +660,7 @@ our programs to take full advantage of Rust's compile-time checking.
    @end
 
 *** Read and Writes with `&self` and `&mut self`
+
     If we make an owned rectangle with `let rect = Rectangle{...}`, 
     then rect has *RO* permissions. With these permissions, we can 
     call `area` and `max` methods.
@@ -668,6 +676,7 @@ our programs to take full advantage of Rust's compile-time checking.
         let max_rect = rect.max(other_rect);
     }
     @end
+
     Note that after calling `max` *both* `rect` and `other_rect` become 
     unusable because their ownership was moved to the variables in 
     the local stack of the `max` method.
@@ -730,13 +739,4 @@ our programs to take full advantage of Rust's compile-time checking.
 
     So, if you see an error "cannot move out of *self", it's usually the 
     case that we are making this mistake.
-
-
-
-
-
-
-
-
-
 
