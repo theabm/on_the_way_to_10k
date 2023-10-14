@@ -630,6 +630,106 @@ our programs to take full advantage of Rust's compile-time checking.
 
 ** Methods and Ownership
 
+   Methods must be called on structs that have the necessary permissions.
+   As an example, we use the three methods that take `&sefl`, `&mut self`,
+   and `self`.
+   @code rust
+   impl Rectangle {    
+       fn area(&self) -> u32 {
+           self.width * self.height
+       }
+
+       fn set_width(&mut self, width: u32) {
+           self.width = width;
+       }
+
+       fn max(self, other: Rectangle) -> Rectangle {
+           Rectangle { 
+               width: self.width.max(other.width),
+               height: self.height.max(other.height),
+           }
+       }
+   }
+   @end
+
+*** Read and Writes with `&self` and `&mut self`
+    If we make an owned rectangle with `let rect = Rectangle{...}`, 
+    then rect has *RO* permissions. With these permissions, we can 
+    call `area` and `max` methods.
+    @code rust
+    fn main() {
+        let rect = Rectangle {
+            width: 0,
+            height: 0
+        };
+        println!("{}", rect.area());
+
+        let other_rect = Rectangle { width: 1, height: 1 };
+        let max_rect = rect.max(other_rect);
+    }
+    @end
+    Note that after calling `max` *both* `rect` and `other_rect` become 
+    unusable because their ownership was moved to the variables in 
+    the local stack of the `max` method.
+
+    On the other hand, calling `set_width` will give a compilation 
+    error because we are missing *W* permissions.
+
+    This is because we try to mutably borrow an immutable variable.
+
+    We get a similar error if we try to call `set_width` on an 
+    immutable reference to a `Rectangle`, even if the underlying 
+    rectangle is mutable. 
+    This is because immutable borrows are not allowed to coexist with 
+    mutable borrows.
+
+*** Moves with self
+
+    Calling a method that expects `self` will move the input struct 
+    (unless the struct implements the `Copy` trait).
+
+    For example, as mentioned above, we cannot use a `Rectangle` after 
+    we pass it to `max`.
+
+    A similar issue occurs if we try to use a `self` method on a 
+    reference since the latter doesn't have *O* permissions.
+    If this was allowed, we would have a /double free/ bug.
+    @code rust
+    impl Rectangle {    
+        fn set_to_max(&mut self, other: Rectangle) {
+            *self = self.max(other);
+        }
+    }
+    @end
+
+*** Good Moves and Bad Moves
+
+    We may ask why does it matter if we move out of `\*self`? 
+    In this example, it is safe to do so because `Rectangle` doesn't
+    own any heap data.
+    We can get Rust to compile `set_to_max` by adding 
+    `\#[derive(Copy,Clone)]` to the definition of `Rectangle`.
+
+    In this case, `self.max(other)` no longer requires the *O* 
+    permission on `\*self` or `other` because we have made `Rectangle` 
+    copyable.
+
+    We may wonder, why isn't this done by default? 
+    Rust does this for stability across API changes. If the author 
+    of a library decided to add heap owned data, all code relying 
+    on that library would not compile.
+
+    To avoid this issue, API authors must explicitly add 
+    `#[derive(Copy)]` to indicate that they expect their struct 
+    to always have `Copy`.
+
+    In summary, the issue at hand is that we cannot call a `self` method 
+    on a reference `&self` or `&mut self` which is not allowed since 
+    `self` tries to take ownership from references which are non-owning 
+    pointers. If this was allowed, we would get a /double free/ error.
+
+    So, if you see an error "cannot move out of *self", it's usually the 
+    case that we are making this mistake.
 
 
 
