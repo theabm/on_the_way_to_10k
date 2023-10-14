@@ -427,10 +427,214 @@ our programs to take full advantage of Rust's compile-time checking.
   into an `area` *method* defined on our `Rectangle` type.
 
 
-
-
-
 * Method Syntax
+  Methods are similar to functions. 
+  - We declare them with the `fn` keyword and a name. 
+  - They can have parameters and a return value.
+  - They contain code that is executed when the method is called from 
+    elsewhere.
+
+  Unlike functions, methods are defined within the context of a struct 
+  (or an enum or trait).
+  *_Their first parameter is always `self`_*, which represents the 
+  instance of the struct the method is being called on.
+
+** Defining Methods
+   Let's change the `area` function that has a `Rectangle` instance 
+   as a parameter and instead make an `area` method defined on the 
+   `Rectangle` struct.
+   @code rust 
+   #[derive(Debug)]
+   struct Rectangle {
+       width: u32,
+       height: u32,
+   }
+
+   // how we define a method.
+   impl Rectangle {
+       fn area(&self) -> u32 {
+           self.width * self.height
+       }
+   }
+
+   fn main() {
+       let rect1 = Rectangle {
+           width: 30,
+           height: 50,
+       };
+
+       println!(
+       "The area of the rectangle is {} square pixels.",
+       rect1.area()
+   );
+   }
+   @end
+   To define a method, we start and `impl` block for `Rectangle`. 
+   Everything within this block is associated to the `Rectangle` type.
+
+   The `area` function is moved inside the `impl` block and the first 
+   parameter is changed to `&self` in the signature and in the body.
+   To call the function we use the /method syntax/ which uses the 
+   `.` operator on the instance, followed by the method name, 
+   parenthesis, and any arguments.
+
+   In the signature for `area` we use `&self` instead of 
+   `rectangle: &Rectangle`. The former is short for `self: &Self`. 
+
+   _Within an `imp` block, the type `Self` is an alias for the type 
+   that the `impl` block is for._
+
+   MEthods must have a parameter named `self` of type `Self` as the 
+   first parameter, so Rust lets you abbreviate this with only the name 
+   `self`. We still need to use the `&` in front of `self` to denote that 
+   this method borrows the `Self` instance, just as we did for 
+   `rectangle: &Rectangle`.
+
+   Methods can take ownership of `self`, borrow `self` immutably, or 
+   borrow `self` mutably.
+
+   If we wanted a mutable borrow we'd use `&mut self`. Having a method 
+   take ownership of `self` is rare and only done when the method 
+   transforms the instance into something else and we want to prevent 
+   the caller from using the original instance again.
+
+   The reason to use methods instead of functions is:
+   - use method syntax 
+   - avoid repeition of type of `self`
+   - organization - group all functions for type in one `impl` block rather 
+     than have them scattered and hard to find.
+
+   We can have methods that have the same name as a field of a struct.
+   @code rust
+   impl Rectangle {
+       fn width(&self) -> bool {
+           self.width > 0
+       }
+   }
+
+   fn main() {
+       let rect1 = Rectangle {
+           width: 30,
+           height: 50,
+       };
+
+       if rect1.width() {
+           println!("The rectangle has a nonzero width; it is {}", rect1.width);
+       }
+   }
+   @end
+
+   Methods with same name as fields usually return the value in the 
+   field and nothing else. These are called /getters/ and are not 
+   implemented automatically by Rust as in other languages.
+
+   Getters are useful because you can make the field private but the 
+   method public, thus enabling read-only access to that field.
+   We will discuss this later.
+
+   Another example of a method is shown below.
+   @code rust
+   #[derive(Debug)]
+   struct Rectangle {
+       width: u32,
+       height: u32,
+   }
+
+   impl Rectangle {
+       fn area(&self) -> u32 {
+           self.width * self.height
+       }
+
+       fn can_hold(&self, other: &Rectangle) -> bool {
+           self.width > other.width && self.height > other.height
+       }
+   }
+
+   fn main() {
+       let rect1 = Rectangle {
+           width: 30,
+           height: 50,
+       };
+       let rect2 = Rectangle {
+           width: 10,
+           height: 40,
+       };
+       let rect3 = Rectangle {
+           width: 60,
+           height: 45,
+       };
+
+       println!("Can rect1 hold rect2? {}", rect1.can_hold(&rect2));
+       println!("Can rect1 hold rect3? {}", rect1.can_hold(&rect3));
+   }
+   @end
+
+** Associated Functions
+   All functions defined witin an `impl` block are called associated 
+   functions because they are associated to the type named after the 
+   `impl`.
+
+   We can also define associated functions that don't have `self` as 
+   the first parameters (so, not a method), because they don't need 
+   an instance of the type to work with.
+   One example is `String::from`.
+
+   *_Associated functions that aren't methods are often constructors that 
+   return a new instance of the struct._*
+
+   They are often called `new` but this is not a special name and it's not 
+   built into the language. Below is an example.
+   @code rust
+   impl Rectangle {
+       fn square(size: u32) -> Self {
+           Self {
+               width: size,
+               height: size,
+           }
+       }
+   }
+   @end
+   The `Self` keyword in the return type and in the body are aliases 
+   for the type that appears after the `impl` keyword.
+
+   To call this associated function we use the `::` syntax with the 
+   struct name.
+   The `::` syntax is used for both associated functions and namespaces 
+   created by modules.
+
+** Multiple impl Blocks
+
+   Each struct is allowed to have multiple `impl` blocks. 
+   This is more useful when using generic types and traits.
+
+** Methods Calls are Syntactic Sugar for Function Calls
+   All methods are syntactic sugar for calls using the `::` operator.
+
+   @code rust
+   let mut r = Rectangle { 
+       width: 1,
+       height: 2
+   };
+   let area1 = r.area();
+   let area2 = Rectangle::area(&r);
+   assert_eq!(area1, area2);
+
+   r.set_width(2);
+   Rectangle::set_width(&mut r, 2);
+   @end
+
+   This shows that Rust automatically inserts the borrowing operator `&`.
+
+   Rust has no equivalent of `->` in C++. It automatically derenferences 
+   and references when using the dot operator as discussed previously.
+
+** Methods and Ownership
+
+
+
+
+
+
 
 
 
