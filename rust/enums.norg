@@ -1,0 +1,233 @@
+We look at */enums/*.
+
+They allow you to define a type by enumerating the possible variants. 
+
+* Defining an Enum
+  While structs give you a way to tie together related fields of data, 
+  enums give you a way of saying a value is a possible set of values.
+
+  Suppose we need to work with IP addresses. Today, we have two major 
+  standards: IPv4 and IPv6. 
+  Any IP address can be either v4 or v6, not both.  In both cases they 
+  are still an IP address, so they should be treated the same. This 
+  property makes enums appropriate because an enum value can only be 
+  one of its variants. However, they are described by the same type.
+
+  We can express this as follows:
+  @code rust
+  // enum definition 
+  enum IpAddrKind {
+      // here we list the two variants it can have
+      V4,
+      V6,
+  }
+  @end
+** Enum Values
+
+   We can create instances like this:
+
+   @code rust 
+   let four = IpAddrKind::V4;
+   let six = IpAddrKind::V6;
+   @end
+
+   The variants are namespaced under its identifier and we use `::` to 
+   separate the two.
+   However, both `IpAddrKind::V4` and `IpAddrKind::V6` are of the 
+   same type: `IpAddrKind`.
+   So we can write a function that takes any `IpAddrKind`:
+
+   @code rust 
+   fn route(ip_kind: IpAddrKind){}
+   route(IpAddrKind::V4);
+   route(IpAddrKind::V6);
+   @end
+
+** Storing Data in Enums
+
+   To store data with an Enum, we can do the following:
+   @code rust
+   fn main() {    
+       enum IpAddr {
+           // this says that each variant have associated String values
+           V4(String),
+           V6(String),
+       }
+
+       let home = IpAddr::V4(String::from("127.0.0.1"));
+
+       let loopback = IpAddr::V6(String::from("::1"));
+   }
+   @end
+   This new definition of the IpAddr enum says that both V4 and V6 
+   variants will have associated `String` values.
+
+   Also, we see that the name of each enum variant is a constructor for 
+   that instance of the enum.
+   Therefore, `IpAddrKind::V4()` is a function that takes a `String` and 
+   returns an instance of `IpAddrKind`.
+
+   Furthermore, each variant can have different types and amounts of 
+   associated data. For example:
+   @code rust
+   fn main() {
+       enum IpAddr {
+           V4(u8, u8, u8, u8),
+           V6(String),
+       }
+
+       let home = IpAddr::V4(127, 0, 0, 1);
+
+       let loopback = IpAddr::V6(String::from("::1"));
+   }
+   @end
+
+   Wanting to store an IP address is so common that the standard library 
+   has a `IpAddr` definition we can use! We need to bring it into scope 
+   to use it, but it is defined as follows:
+
+   @code rust
+   struct Ipv4Addr {
+       // --snip--
+   }
+
+   struct Ipv6Addr {
+       // --snip--
+   }
+
+   enum IpAddr {
+       V4(Ipv4Addr),
+       V6(Ipv6Addr),
+   }
+   @end
+
+   As we can see, the variants are constructed with custom structs.
+   This shows that you can put any kind of data inside an enum variant: 
+   strings, numeric types, structs, or other enums.
+
+   We could also do something more complex:
+
+   @code rust
+   enum Message {
+       // quit no data associated with it
+       Quit,
+       // has named fields, like a struct does
+       Move { x: i32, y: i32 },
+       // write includes a single string
+       Write(String),
+       // changecolor includes three i32 values
+       ChangeColor(i32, i32, i32),
+   }
+   @end
+
+   This is similar to defining different structs, except they are all 
+   grouped together under the same `Message` type, which makes it 
+   easier to define functions for this type.
+
+   *_We can also define `impl` blocks to define methods for enums._*
+
+** The Option Enum and Its Advantages Over Null Values
+
+   `Option` is another enum defined by the standard library. 
+   It encodes the common scenario in which a value could be something 
+   or nothing.
+
+   For example, if we request the first item in a non-empty list, you 
+   would get a value. If you request the first item in an empty list, 
+   you would get nothing.
+
+   Expressing this concept in terms of the type system means that the 
+   compiler can check whether you have handled all the cases you should 
+   be handling. This prevents common bugs.
+
+   Rust doesn't have the null feature that other languages have. /Null/ 
+   represents there is no value. In languages with Null, a variable can 
+   always be in two states: null or not-null.
+
+   The problem with Null is that if you try to use a null value as a  
+   not-null value, you will get an error.
+   However, the concept of Null is useful.
+
+   For this reason, Rust does not have Null, but it has an enum that
+   can encode the concept of a value being present or absent. This 
+   is `Option<T>`. The `<T>` is a generic type parameter. 
+   @code rust
+   enum Option<T> {
+       None,
+       Some(T),
+   }
+   @end
+
+   The `<T>` means that the `Some` variant can hold one piece of data 
+   of any type. Each concrete type that gets used in place of `T` makes 
+   the overall `Option<T>` type a different type.
+
+   This type is so useful it is included in the prelude. 
+   Its variants are also included in the prelude and can be used 
+   without the `Option::` prefix.
+
+   Here are some examples:
+   fn main() {
+   @code rust
+   // of type Option<i32>
+   let some_number = Some(5);
+   // of type Option<char>
+   let some_char = Some('e');
+
+   // we can't use None without type annotation because 
+   // the compiler needs to know what T stands for.
+   let absent_number: Option<i32> = None;
+   }
+   @end
+
+   Why is having `Option<T>` any better than having null?
+
+   Since `Option<T>` and `T` are different types, the compiler won't 
+   let us use an `Option<T>` value as if it were definitely a 
+   valid value. 
+
+   For example, this won't compile:
+   @code rust
+   let x: i8 = 5;
+   let y: Option<i8> = Some(5);
+
+   let sum = x + y;
+   @end
+   The error message tells us that the compiler doens't understand how 
+   to add an `i8` and an `Option<i8>` because they are different types.
+
+   When we have a value of a type like `i8` in Rust, the compiler 
+   will ensure that we always have a valid value. We can proceed 
+   confidently without having to check for null before using that 
+   value. Only when we have an `Option<i8>` (or whatever type of value 
+   we’re working with) do we have to worry about possibly not having
+   a value, and the compiler will make sure we handle that case 
+   before using the value.
+
+
+   Basically, we have to convert an `Option<T>` to `T` before we can 
+   do `T` operations with it. This helps catch issues with null such 
+   as assuming something isn't null when it is.
+
+   Also, to have a value that can possibly be null requires us to 
+   explicitly use `Option<T>`. When we use this type, the compiler 
+   requires us to explicitly handle the case when the value is null.
+
+   Everywhere else that the value isn't `Option<T>`, we can safely assume 
+   that the value isn't null. This is a deliberate design choice of Rust 
+   to increase safety.
+
+   So how do we get the `T` value out of a `Some` variant? The 
+   `Option<T>` enum has a lot of methods that are useful.
+
+   In general, to use an `Option<T>` value, you want to have code 
+   that will handle each variant. You want some code that will run 
+   only when you have `Some(T)`, and this code is allowd to use the 
+   inner `T`. You also want some code to run only if you have a `None`
+   variant, and that code doesn't have a `T` value available.
+
+   The match expressions is a control flow construct that does just
+   this.
+
+
+
