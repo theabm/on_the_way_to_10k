@@ -52,14 +52,14 @@
 **** {:rust/enums:# Defining an Enum}[Defining an Enum]
 **** {:rust/enums:# The match Control Flow Construct}[The match Control Flow Construct]
 **** {:rust/enums:# Concise Control Flow with if let}[Concise Control Flow with if let]
-**** {:rust/enums:# Ownership Inventory \#1}[Ownership Inventory \#1]
 *** Managing Growing Projects with Packages, Crates, and Modules
 **** Packages and Crates
 **** Defining Modules to Control Scope and Privacy
 **** Paths for Referring to an Item in the Module Tree
 **** Bringing Paths Into Scope with the use Keyword
 **** Separating Modules into Different Files
-
+*** {:rust/ownership_inventory:# Ownership Inventory}[Ownership Inventory]
+**** {:rust/ownership_inventory:# Ownership Inventory \#1}[Ownership Inventory \#1]
 
 
 ** {:haskell/haskell:}[Haskell]
