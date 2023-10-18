@@ -58,9 +58,6 @@
 **** Paths for Referring to an Item in the Module Tree
 **** Bringing Paths Into Scope with the use Keyword
 **** Separating Modules into Different Files
-*** {:rust/ownership_inventory:# Ownership Inventory}[Ownership Inventory]
-**** {:rust/ownership_inventory:# Ownership Inventory \#1}[Ownership Inventory \#1]
-
 
 ** {:haskell/haskell:}[Haskell]
 

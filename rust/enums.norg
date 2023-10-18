@@ -583,18 +583,3 @@ They allow you to define a type by enumerating the possible variants.
   Otherwise, if the function needs to return a value for each 
   condition, then a match is most appropriate.
 
-
-
-
-
-
-   
-
-
-
-
-
-
-
-
-
