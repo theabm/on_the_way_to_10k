@@ -3,6 +3,7 @@ We look at */enums/*.
 They allow you to define a type by enumerating the possible variants. 
 
 * Defining an Enum
+
   While structs give you a way to tie together related fields of data, 
   enums give you a way of saying a value is a possible set of values.
 
@@ -59,6 +60,7 @@ They allow you to define a type by enumerating the possible variants.
        let loopback = IpAddr::V6(String::from("::1"));
    }
    @end
+
    This new definition of the IpAddr enum says that both V4 and V6 
    variants will have associated `String` values.
 
@@ -69,6 +71,7 @@ They allow you to define a type by enumerating the possible variants.
 
    Furthermore, each variant can have different types and amounts of 
    associated data. For example:
+   
    @code rust
    fn main() {
        enum IpAddr {
@@ -204,7 +207,6 @@ They allow you to define a type by enumerating the possible variants.
    a value, and the compiler will make sure we handle that case 
    before using the value.
 
-
    Basically, we have to convert an `Option<T>` to `T` before we can 
    do `T` operations with it. This helps catch issues with null such 
    as assuming something isn't null when it is.
@@ -226,8 +228,303 @@ They allow you to define a type by enumerating the possible variants.
    inner `T`. You also want some code to run only if you have a `None`
    variant, and that code doesn't have a `T` value available.
 
-   The match expressions is a control flow construct that does just
+   The `match` expressions is a control flow construct that does just
    this.
+
+* The match Control Flow Construct
+
+   Rust has a powerful control flow construct called `match` that allows
+   you to compare a value against a series of patterns and then 
+   execute code based on which pattern matches.
+
+   As we will see, the patterns are very flexible.
+
+   The power of `match` comes from the expressiveness of the patterns 
+   and fact that the compiler confirms that all possible cases are 
+   handled.
+
+   When we use a `match` expression, we execute the code of the *first* 
+   pattern that is matched.
+   An example of match is shown below:
+   @code rust
+   enum Coin {
+       Penny,
+       Nickel,
+       Dime,
+       Quarter,
+   }
+
+   // function returns value of coin in cents
+   fn value_in_cents(coin: Coin) -> u8 {
+       match coin {
+           Coin::Penny => 1,
+           Coin::Nickel => 5,
+           Coin::Dime => 10,
+           Coin::Quarter => 25,
+       }
+   }
+   @end
+   Let's analyze the snippet in detai.
+
+   First we have a `match` keyword followed by an expression, which in 
+   this case is the value of `coin`. This may seem similar to a conditional 
+   expression used with an `if`, but there's a difference: for `if` 
+   the condition needs to evaluate to a Boolean, while for `match` it 
+   can be any type. In this case, the type is the `Coin` enum.
+
+   Next, we have the `match` /*arms*/. An arm has two parts: a pattern 
+   and some code, separated by `=>`. In the first arm, the pattern is 
+   `Coin::Penny`, and the code is just the value `1`. We separate the 
+   arms with a comma.
+
+   As mentioned above, the `match` expression compares the value 
+   of the expression against the pattern of each arm in order. It 
+   execues the first pattern that matches.
+
+   The code associated with each arm is also an expression, and the 
+   resultant value of the matching arm is what gets returned from the 
+   whole `match` expression.
+
+   If the code for each arm is long, we use curly braces, and the comma 
+   separator becomes optional.
+
+** Patterns That Bind To Values
+
+   Another useful feature of `match` arms, is that they can bind 
+   to the parts of the values that match the pattern.
+   This can be used to extract values out of enum variants.
+
+   @code rust
+   #[derive(Debug)]
+   enum UsState {
+       Alabama,
+       Alaska,
+       // --snip--
+   }
+
+   enum Coin {
+       Penny,
+       Nickel,
+       Dime,
+       // now quarted includes information about the 
+       // state found on the quarter
+       Quarter(UsState),
+   }
+   @end
+
+   If we want to extract the state, we can deconstruct the pattern 
+   for `Quarter` as follows:
+
+   @code rust
+   fn value_in_cents(coin: Coin) -> u8 {
+       match coin {
+           Coin::Penny => 1,
+           Coin::Nickel => 5,
+           Coin::Dime => 10,
+           // now `state` binds to the value of that quarters 
+           // state and can be used in the code for this arm
+           Coin::Quarter(state) => {
+               println!("State quarter from {:?}!", state);
+               25
+           }
+       }
+   }
+   @end
+
+   As we can see, adding a variable `state` to the pattern allows the 
+   variable to bind to the value of that quarter's state when it is 
+   matched. This can then be used in the code for that arm.
+
+** Matching with Option\<T\>
+
+   Previously, we wanted to extract the inner `T` value out of `Some`
+   when using `Option<T>`. We can do this using `match`.
+   For example suppose we have an `Option<i32>` and we want to add 1 
+   to the value if it is present. We could do:
+
+   @code rust
+   fn plus_one(x: Option<i32>) -> Option<i32> {
+       match x {
+           None => None,
+           Some(i) => Some(i + 1),
+       }
+   }
+
+   let five = Some(5);
+   let six = plus_one(five);
+   let none = plus_one(None);
+   @end
+
+   This patterns is used frequently in Rust: we match against an enum, 
+   bind a variable to the data inside, and then execute code based on it.
+
+** Matches Are Exhaustive
+
+   One important aspect of `match` is that the arms' patterns must cover 
+   all possibilities. Consider this version of `plus_one`:
+   @code rust 
+   fn plus_one(x: Option<i32>) -> Option<i32> {
+       match x {
+           Some(i) => Some(i + 1),
+       }
+   }
+
+   @end
+   Since we don't handle the `None` case, this code would cause a bug.
+   Luckily, Rust doesn't allow this code to compile. The error is: 
+   "non-exhaustive patterns".
+
+   Matches in Rust are *exhaustive*: we must exhaust every last 
+   possibility in order for the code to be valid.
+   In the case of `Option<T>`, Rust prevents us from forgetting 
+   to explicitly handle the `None` case. This protects us from assuming 
+   we always have a value, which keeps us safe from bugs caused by null.
+
+** Catch-all Patterns and the _ Placeholder
+
+   Using enums, we can decide to take special actions for a few 
+   particular values, but for all other values take one default 
+   action.
+
+   For example:
+   @code rust
+   let dice_roll = 9;
+   match dice_roll {
+       3 => add_fancy_hat(),
+       7 => remove_fancy_hat(),
+       other => move_player(other),
+   }
+
+   fn add_fancy_hat() {}
+   fn remove_fancy_hat() {}
+   fn move_player(num_spaces: u8) {}
+   @end
+
+   In this case, if the roll is 3 or 7, we do something specific. If 
+   the roll is anything else, we take a default action. 
+
+   The last arm covers every other possible value, and the pattern 
+   is the variable `other`. This variable will bind to the value of the 
+   dice roll, and we can use it in the function.
+
+   If we want a catch-all but don't want to bind the variable because 
+   we won't use it, we can use `_` which tells Rust that we won't use 
+   the variable, thus preventing warnings about unused variables.
+
+   In both cases, the matching is exhaustive because the catch-all 
+   pattern matches all possibilities. Catch-all patterns *must* be listed
+   last, otherwise the other patterns will never be matched, causing 
+   Rust to complain.
+
+   An example using `_` is shown below:
+   @code rust
+    let dice_roll = 9;
+    match dice_roll {
+        3 => add_fancy_hat(),
+        7 => remove_fancy_hat(),
+        _ => reroll(),
+    }
+
+    fn add_fancy_hat() {}
+    fn remove_fancy_hat() {}
+    fn reroll() {}
+   @end
+
+   In this case for all other dice values, we are just rerolling, so 
+   we don't need to use the value, which is why we use `_`.
+
+   We can also do the following:
+   @code rust
+   let dice_roll = 9;
+   match dice_roll {
+       3 => add_fancy_hat(),
+       7 => remove_fancy_hat(),
+       _ => (),
+   }
+
+   fn add_fancy_hat() {}
+   fn remove_fancy_hat() {}
+   @end
+   In this case, if we roll anything other than a 3 or 7, we don't 
+   do anything. This is expressed by returning the unit value in the 
+   catch-all pattern.
+
+** How Matches Interact with Ownership
+   If an enum contains non-copyable data like a String, then you 
+   should be careful with whether a match will move or borrow that 
+   data. 
+
+   For example, this program using `Option<String>` will compile:
+   @code rust
+   fn main() {
+       let opt: Option<String> = 
+       Some(String::from("Hello world"));
+
+       match opt {
+           Some(_) => println!("Some!"),
+           None => println!("None!")
+       };
+
+       println!("{:?}", opt);
+   }
+   @end
+
+   But if we replace `_` with a variable name like `Some(s)`, then 
+   it will *not* compile.
+   @code rust
+   fn main() {
+       let opt: Option<String> = 
+       Some(String::from("Hello world"));
+
+       match opt {
+           // _ became s
+           Some(s) => println!("Some: {}", s),
+           None => println!("None!")
+       };
+
+       println!("{:?}", opt);
+   }
+   @end
+   This is because `opt` was moved into `s`, so it has lost *R* 
+   permissions. 
+
+   If we want to use the contents of `opt` inside a match, and still be 
+   able to use it later, then we have to match to a reference, 
+   as shown below:
+   @code rust
+   fn main() {
+       let opt: Option<String> = 
+       Some(String::from("Hello world"));
+
+       // opt became &opt
+       match &opt {
+           Some(s) => println!("Some: {}", s),
+           None => println!("None!")
+       };
+
+       println!("{:?}", opt);
+   }
+   @end
+   Rust will "push down" the reference from the outer enum,
+   `&Option<String>`, to the inner field, `&String`. Therefore, 
+   `s` has type `&String`, and `opt` can be used after the match.
+
+   To better understand the pushing down mechanism, see this 
+   {https://doc.rust-lang.org/reference/patterns.html#binding-modes}[section].
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
 
 
 
