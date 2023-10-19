@@ -52,12 +52,17 @@
 **** {:rust/enums:# Defining an Enum}[Defining an Enum]
 **** {:rust/enums:# The match Control Flow Construct}[The match Control Flow Construct]
 **** {:rust/enums:# Concise Control Flow with if let}[Concise Control Flow with if let]
-*** Managing Growing Projects with Packages, Crates, and Modules
-**** Packages and Crates
-**** Defining Modules to Control Scope and Privacy
-**** Paths for Referring to an Item in the Module Tree
-**** Bringing Paths Into Scope with the use Keyword
-**** Separating Modules into Different Files
+*** {:rust/crates:}[Managing Growing Projects with Packages, Crates, and Modules]
+**** {:rust/crates:# Packages and Crates}[Packages and Crates]
+**** {:rust/crates:# Defining Modules to Control Scope and Privacy}[Defining Modules to Control Scope and Privacy]
+**** {:rust/crates:# Paths for Referring to an Item in the Module Tree}[Paths for Referring to an Item in the Module Tree]
+**** {:rust/crates:# Bringing Paths Into Scope with the use Keyword}[Bringing Paths Into Scope with the use Keyword]
+**** {:rust/crates:# Separating Modules into Different Files}[Separating Modules into Different Files]
+*** {:rust/collections:}[Common Collections]
+**** {:rust/collections:# Storing Lists of Values with Vectors}[Storing Lists of Values with Vectors]
+**** {:rust/collections:# Storing UTF-8 Encoded Text with Strings}[Storing UTF-8 Encoded Text with Strings]
+**** {:rust/collections:# Storing Keys with Associated Values in Hash Maps}[Storing Keys with Associated Values in Hash Maps]
+
 
 ** {:haskell/haskell:}[Haskell]
 
