@@ -55,7 +55,101 @@ Furthermore we will discuss scopes and encapsulation.
   most only one library crate. It must contain at least one crate, 
   either library or binary.
 
-  When we run `cargo new`
+  When we run `cargo new` and use `ls` to see what Cargo creates, we 
+  see that there's a /Cargo.toml/ file, which gives us a package.
 
+  There's also a /src/ directory that contains /main.rs/. If we open 
+  /Cargo.toml/ we see there is no mention of /src/main.rs/. Cargo 
+  follows a convention that /src/main.rs/ is the crate root of a 
+  binary crate with the same name as the package.
 
+  Cargo knows that if the package directory contains /src/lib.rs/, the 
+  package contains a library crate with the same name as the package, 
+  and /src/lib.rs/ is its crate root.
+
+  Cargo passes the crate root files to `rustc` to build the llibrary 
+  or the binary.
+
+  If we run `cargo new my-project` then we only have a /src/main.rs/, 
+  meaning it only contians a binary crate named `my-project`.
+  If a package contains /src/main.rs/ and /src/lib.rs/ it has two crates: 
+  a binary and a library, both with the same name as the package.
+
+  A package can have multiple binary crates by placing files in the 
+  /src/bin/ directory: each file will be a separate binary crate.
+
+  For example, suppose that we have the following structure for the 
+  package `foobar`.
+
+  - foobar
+  --- Cargo.toml
+  --- build.rs
+  --- src/
+  ------ main.rs
+  ------ util.rs
+  ------ lib.rs
+  ------ bin/
+  --------- alt.rs
+            The package
+
+  This package contains 3 crates. 
+  ~ main.rs: produces a binary crate  
+  ~ lib.rs: produces a library crate 
+  ~ bin/alt.rs: produces a binary crate
+
+  The `util.rs` would be presumably used as a module within one of 
+  these crates, but it is not a special filename recognized by Rust.
+  So it would not be its own crate. `build.rs` is a build script.
+
+* Defining Modules to Control Scope and Privacy
+
+  Now we talk about modules and other parts of the module system: 
+  - /paths/ that allow you to name items
+  - the `use` keyword that brings a path into scope 
+  - the `pub` keyword to make items public
+  - the `as` keyword
+  - external packages
+  - the `glob` operator
+
+  First we list some rules for easy reference:
+  ~ *Start from the crate root*: The compiler first looks in the crate 
+    root file (/src/lib.rs/ for a library crate or /src/main.rs/ for 
+    a binary crate) for code to compile.
+  ~ *Declaring modules*: In the crate root file, we can declare new
+    modules. Say you declare a /garden/ module with `mod garden;`. The 
+    compiler will look for the module's code in these places.
+  -- Inline, within curly brackets that replace the semicolon following 
+    `mod garden`.
+  -- In the file /src/garden.rs/
+  -- In the file /src/garden/mod.rs/
+  ~ *Declaring submodules*: In any file other than the crate root, you  
+    can delcare submodules. For example, you may declare `mod vegetables;`
+    in /src/garden.rs/. The compile will look for the submodule's code 
+    within the directory named for the parent module in these places:
+  -- Inline, following `mod vegetables` with curly brackets
+  -- In the file /src/garden/vegetables/
+  -- In the file /src/garden/vegetables/mod.rs
+  ~ *Paths to code in modules*: Once a module is part of your crate, 
+    you can refer to code in that module from anywhere else in that 
+    same crate, _*as long as the privacy rules allow it*_. To do so, we use 
+    the path in the code.
+    For example, an `Asparagus` type in the garden vegetables module, would 
+    be found at `crate::garden::vegetables::Asparagus`.
+  ~ *Private vs Public*: Code within a module is *private* from its parent 
+    modules by default. To make a module public, declare it with `pub mod`
+    instead of `mod`. To make items within a public module public as well, 
+    use `pub` before their declarations.
+  ~ *The `use` keyword*: Within a scope, the `use` keyword creates 
+    shortcuts to items to reduce repetition of long paths. In any scope 
+    that can refer to `crate::garden::vegetables::Asparagus`, you can 
+    creaate a shortcut with `use crate::garden::vegetables::Asparagus`.
+    And from then on, you only need to write `Asparagus` to make use of 
+    that type in the scope.
+
+  Earlier, we mentioned that /src/main.rs/ and /src/lib.rs/ are called 
+  /crate roots/. The reason for their name is that the contents of 
+  either of these two files form a module named /crate/ at the root 
+  of the crate’s module structure, known as the module tree.
+
+* Paths for Referring to an Item in the Module Tree
 
