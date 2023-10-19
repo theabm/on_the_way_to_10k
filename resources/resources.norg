@@ -34,6 +34,8 @@
    - ( ) {https://google.github.io/comprehensive-rust/}[A Rust course developed by Android team at Google]
    - ( ) {https://matklad.github.io/2023/03/26/zig-and-rust.html}[Zig and Rust]
    - ( ) {https://kobzol.github.io/rust/python/2023/05/20/writing-python-like-its-rust.html}[Writing Python Like Its Rust]
+   - ( ) {https://www.arewelearningyet.com/}[Are we learning yet? - Rust machine learning ecosystem]
+   - ( ) {https://www.rust-lang.org/what/embedded}[Embedded Rust]
 ** ATS Programming Language
    - {https://www.cs.bu.edu/~hwxi/atslangweb/}[The ATS Programming Language]
 ** Haskell
