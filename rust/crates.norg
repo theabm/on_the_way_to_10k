@@ -152,4 +152,155 @@ Furthermore we will discuss scopes and encapsulation.
   of the crate’s module structure, known as the module tree.
 
 * Paths for Referring to an Item in the Module Tree
+  We need a path to tell Rust where an item is in a module tree.
+
+  It can take two forms:
+  ~ An absolute path starting from the crate root. For code from an 
+    external crate, it begins with the crate name. For code from the 
+    current crate, it starts with `crate`.
+  ~ A relative path starting from the current module and uses `self`, 
+    `super`, or an identifier in the current module.
+
+  The analogy is the same as a file system. Instead of `/` to indicate 
+  the root directory, we use `crate::`. 
+  And if we want to use a relative path, instead of `./module` we use 
+  `module/` directly. Note that `module` must be at the same level of 
+  the current module we are calling from (similar to a filesystem).
+
+  We generally prefer to specify absolute paths.
+
+  However, if we need to remember that in Rust all items are private 
+  to parent modules by default. Items in parent modules cannot use 
+  items in child modules, but items in child modules can use items 
+  in their ancestor modules. Siblings modules also can access each 
+  other.
+
+  This is because child modules wrap and hide their implementation 
+  details, but the child modules can see the contextin which they're 
+  defined.
+
+  Rust chose this so that hiding inner implementation details is the 
+  default. This way, you know which parts of the inner code you can 
+  change without breaking outer code.
+
+  Therefore, just using the correct path may cause a compile error 
+  if the function is private. To expose inner parts of a child module 
+  to outer ancestor modules, we use the `pub` keyword.
+
+** Exposing Paths with the pub Keyword
+
+   An important concept is that making a module public with `pub`
+   allows code in its ancestor modules to *refer* to it, not *access* its 
+   inner code. 
+
+   To make specific items accessible *within* a public module, 
+   we need to mark them as `pub` as well.
+
+   Therefore, a module marked as `pub` is useless if none of its inner 
+   items are marked `pub`. 
+
+   A module can access a sibling module not marked as `pub` because 
+   they are siblings.
+
+** Best Practices for Packages with a Binary and a Library
+
+   As mentioned, a package can contain both a /src/main.rs/ binary crate 
+   root as well as a /src/lib.rs/ library crate root. Both crates 
+   will have the package name as default.
+
+   The module tree should be defined in /src/lib.rs/. Then, any public 
+   items can be used in the binary crate by starting paths with the  
+   name of the package. The binary crate becomes a user of the library 
+   crate just like a completely external crate would use the library  
+   crate: it can only use the public API. 
+
+   This helps design a good API since you are also thinking as a client 
+   of the library.
+
+** Starting Relative Paths with super
+
+   We can construct relative paths that begin in the parent module, rather
+   than the current module or the crate root, by using `super` at the 
+   start of the path. 
+   This is like `..` in a filesystem.
+
+** Making Structs and Enums Public
+
+   Using `pub` with structs and enums requires a bit of additional care. 
+
+*** Structs
+
+    If we use `pub` before a struct definition, we make the struct public, 
+    but it's fields will still be private.
+    To make the field public, we need to mark them with `pub`.
+
+    This also holds true for struct tuples.
+
+    We also need to mark methods inside `impl` blocks as `pub` if we 
+    want them to be public.
+
+    *_If a struct has a private field, we need to provide a public 
+    associated function that constructs an instance of it._*
+    Otherwise, since there is a private field we cannot access, we would 
+    not be able to create an instance.
+    @code rust
+    mod back_of_house {
+        pub struct Breakfast {
+            pub toast: String,
+            seasonal_fruit: String,
+        }
+
+        impl Breakfast {
+            pub fn summer(toast: &str) -> Breakfast {
+                Breakfast {
+                    toast: String::from(toast),
+                    seasonal_fruit: String::from("peaches"),
+                }
+            }
+        }
+    }
+
+    pub fn eat_at_restaurant() {
+        // Order a breakfast in the summer with Rye toast
+        let mut meal = back_of_house::Breakfast::summer("Rye");
+        // Change our mind about what bread we'd like
+        meal.toast = String::from("Wheat");
+        println!("I'd like {} toast please", meal.toast);
+
+        // The next line won't compile if we uncomment it; we're not allowed
+        // to see or modify the seasonal fruit that comes with the meal
+        // meal.seasonal_fruit = String::from("blueberries");
+    }
+    @end
+
+*** Enums
+    If we make an enum public, all of its variants are then public.
+    We only need `pub` before the `enum` keyword.
+    @code rust
+    mod back_of_house {
+        pub enum Appetizer {
+            Soup,
+            Salad,
+        }
+    }
+
+    pub fn eat_at_restaurant() {
+        let order1 = back_of_house::Appetizer::Soup;
+        let order2 = back_of_house::Appetizer::Salad;
+    }
+    @end
+    Enums are not very useful unless their variants are public. 
+    It would be annoying ot have to annotate each variant with `pub`
+    in every case, so the default for enum variants is to be public.
+
+    The last thing to discuss regarding `pub` is the keyword `use`. 
+    First we discuss `use` and then how it combines with `pub`.
+
+
+
+
+
+
+
+    ~
 
