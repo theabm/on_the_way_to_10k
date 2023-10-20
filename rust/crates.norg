@@ -152,6 +152,7 @@ Furthermore we will discuss scopes and encapsulation.
   of the crate’s module structure, known as the module tree.
 
 * Paths for Referring to an Item in the Module Tree
+
   We need a path to tell Rust where an item is in a module tree.
 
   It can take two forms:
@@ -160,6 +161,24 @@ Furthermore we will discuss scopes and encapsulation.
     current crate, it starts with `crate`.
   ~ A relative path starting from the current module and uses `self`, 
     `super`, or an identifier in the current module.
+
+  An example is shown:
+  @code rust
+  // this example doesn't compile because of missing pub keywords
+  mod front_of_house {
+      mod hosting {
+          fn add_to_waitlist() {}
+      }
+  }
+
+  pub fn eat_at_restaurant() {
+      // Absolute path
+      crate::front_of_house::hosting::add_to_waitlist();
+
+      // Relative path
+      front_of_house::hosting::add_to_waitlist();
+  }
+  @end
 
   The analogy is the same as a file system. Instead of `/` to indicate 
   the root directory, we use `crate::`. 
@@ -201,6 +220,43 @@ Furthermore we will discuss scopes and encapsulation.
 
    A module can access a sibling module not marked as `pub` because 
    they are siblings.
+
+   We show an example below:
+   @code rust
+   mod front_of_house {
+       pub mod hosting {
+           pub fn add_to_waitlist() {}
+       }
+   }
+
+   pub fn eat_at_restaurant() {
+       // Absolute path
+       crate::front_of_house::hosting::add_to_waitlist();
+
+       // Relative path
+       front_of_house::hosting::add_to_waitlist();
+   }
+   @end
+   In the absolute path, we start with crate, the root of our crate’s 
+   module tree. The `front_of_house` module is defined in the crate 
+   root. While `front_of_house` isn’t public, because the 
+   `eat_at_restaurant` function is defined in the same module as 
+   `front_of_house` (that is, `eat_at_restaurant` and `front_of_house` are 
+   siblings), we can refer to `front_of_house` from `eat_at_restaurant`. 
+   Next is the `hosting` module marked with `pub`. We can access the 
+   parent module of `hosting`, so we can access `hosting`. Finally, the 
+   `add_to_waitlist` function is marked with `pub` and we can access its 
+   parent module, so this function call works!
+
+   In the relative path, the logic is the same as the absolute path 
+   except for the first step: rather than starting from the crate 
+   root, the path starts from front_of_house. The front_of_house 
+   module is defined within the same module as eat_at_restaurant, 
+   so the relative path starting from the module in which 
+   eat_at_restaurant is defined works. Then, because hosting and 
+   add_to_waitlist are marked with pub, the rest of the path works, 
+   and this function call is valid!
+
 
 ** Best Practices for Packages with a Binary and a Library
 
@@ -296,11 +352,317 @@ Furthermore we will discuss scopes and encapsulation.
     The last thing to discuss regarding `pub` is the keyword `use`. 
     First we discuss `use` and then how it combines with `pub`.
 
+* Bringing Paths into Scope with the use Keyword
 
+  To avoid repeating the path - relative or absolute - to call a function 
+  every time, we can use the `use` keyword which creates a shortcut 
+  to the path that we can use.
 
+  @code rust
+  mod front_of_house {
+      pub mod hosting {
+          pub fn add_to_waitlist() {}
+      }
+  }
 
+  // we bring hosting module into scope 
+  // to specify inner items, just use hosting 
+  // keyword
+  use crate::front_of_house::hosting;
+  // one could also write 
+  // use crate::front_of_house::hosting::add_to_waitlist;
+  // and later simply use add_to_waitlist().
+  // however, the first way is prefereable, as we discuss below
 
+  pub fn eat_at_restaurant() {
+      // use hosting keyword only
+      hosting::add_to_waitlist();
+  }
+  @end
 
+  Adding `use` and a pth in a scope is similar to creating a symbolic 
+  link in the filesystem.
 
-    ~
+  By adding `use::crate::front_of_house` in the crate root, `hosting`
+  is now a valid name in that scope, as if it had been defined as 
+  a module there.
+
+  Paths brought into scope with `use` also check privacy, like any 
+  other paths.
+
+  `use` only creates the shortcut for the particular scope in which 
+  it occurs. 
+  For example, this program won't compile since `customer` is a 
+  different scope than where `use` is called.
+
+  @code rust
+  mod front_of_house {
+      pub mod hosting {
+          pub fn add_to_waitlist() {}
+      }
+  }
+
+  use crate::front_of_house::hosting;
+
+  mod customer {
+      pub fn eat_at_restaurant() {
+          hosting::add_to_waitlist();
+      }
+  }
+  @end
+
+  The error says that `use` is no longer used in its scope.
+  To fix it, put `use` within the customer module too, or 
+  reference the shortcut in the parent module with `super::hosting`
+  within the child `customer`.
+
+** Creating Idiomatic use Paths
+
+   It is prefereable to bring a function scope with `use` by specifying 
+   the parent module rather than the full path to the function. 
+
+   In the first case, we have to specify the parent module when calling 
+   the function, which makes it clear that the functio is not locally 
+   defined, while minimizing repetition.
+
+   In the second case, it is not clear where the function is defined.
+
+*** Enums, Structs, and other items
+
+    When bringing structs, enums, and other items with `use`, its 
+    better to specify the full path.
+
+    For example, this is how we would bring the `HashMap` struct into 
+    scope:
+
+    @code rust
+    use std::collections::HashMap;
+
+    fn main() {
+        let mut map = HashMap::new();
+        map.insert(1, 2);
+    }
+    @end
+
+    There's no particular reason for this. It's just the way people 
+    have been doing things.
+
+    The only exception is if we are bringing two items with the same 
+    name into scope.
+    To do this, we could bring the parent modules into scope and then 
+    specify the type. For example:
+    @code rust
+    use std::fmt;
+    use std::io;
+
+    fn function1() -> fmt::Result {
+        // --snip--
+    }
+
+    fn function2() -> io::Result<()> {
+        // --snip--
+    }
+    @end
+
+** Providing New Names with the as Keyword
+
+   Another solution to the problem of bringing two items with the same 
+   name into scope is to use the `as` keyword.
+   This allows us to define a local name or /alias/ for the type.
+   @code rust
+   use std::fmt::Result;
+   use std::io::Result as IoResult;
+
+   fn function1() -> Result {
+       // --snip--
+   }
+
+   fn function2() -> IoResult<()> {
+       // --snip--
+   }
+   @end
+
+** Re-exporting Names with pub use
+
+   When we bring a name into scope with the `use` keyword, the name 
+   available in the new scope is private. 
+
+   To enable the code that calls our code to refer to that name as if
+   it had been defined in that code's scope, we can combine `pub` 
+   and `use`. This is called /re-exporting/ because we're bringing 
+   an item into scope but also making that item available for others 
+   to bring into their scope.
+
+   An example is shown below:
+   @code rust
+   mod front_of_house {
+       pub mod hosting {
+           pub fn add_to_waitlist() {}
+       }
+   }
+
+   pub use crate::front_of_house::hosting;
+
+   pub fn eat_at_restaurant() {
+       hosting::add_to_waitlist();
+   }
+   @end
+
+   Before this change, external code would have to call the 
+   `add_to_waitlist` function by using the path 
+   `restaurant::front_of_house::hosting::add_to_waitlist()`. Now 
+   that this pub use has re-exported the `hosting` module to the 
+   root module, external code can now use the path 
+   `restaurant::hosting::add_to_waitlist()` instead.
+
+   Re-exporting is useful when the internal structure of your code 
+   is different from how programmers calling your code would think 
+   about the domain.
+
+   With `pub use`, we can write our code with one structure but
+   expose a different structure.
+
+** Using External Packages
+
+   When using an external package, we have to add it to /Cargo.toml/ 
+   as a dependency.
+   For example, to use the `rand` package, we add: 
+
+   @code rust
+   // we need to specify the version
+   rand = "0.8.5"
+   @end
+
+   This makes Cargo download `rand` and any dependencies and make it 
+   available for our project.
+
+   To bring `rand` definitions into scope, we do something like this:
+   @code rust
+   // bring Rng trait into scope
+   use rand::Rng;
+
+   fn main() {
+       // use thread_rng from rand
+       let secret_number = rand::thread_rng().gen_range(1..=100);
+   }
+   @end
+
+   All Rust packages are available at {crates.io} and pulling any 
+   of them into your packages involves these same steps:
+   ~ listing them in /Cargo.toml/
+   ~ Use `use` keyword to bring items from their crates into scope
+
+   The standard library is shipped with Rust so we dont need to add it
+   to /Cargo.toml/. However, we do have to use `use` to bring items 
+   into scope.
+
+** Using Nested Paths to Clean Up Large use Lists
+
+   If we are using multiple items defined in the same crate or module, 
+   listing each item can take up a lot of space and be repetitive. 
+
+   For example:
+   @code rust 
+   // --snip--
+   use std::cmp::Ordering;
+   use std::io;
+   // --snip--
+   @end
+
+   To avoid this, we can use /nested paths/. This allows us to do this 
+   in one line by specifying the common part of the path, followed by 
+   `::` and then curly brackets around a list of the parts of the path 
+   that differ.
+
+   For example:
+   @code rust
+   // --snip--
+   use std::{cmp::Ordering, io};
+   // --snip--
+   @end
+
+** The Glob Operator
+
+   If we want to bring *all* public items defined in a path into scope, 
+   we can specify that path followed by the `*` glob operator.
+
+   For example:
+   @code rust
+   use std::collections::*;
+   @end
+
+   This brings all public items defined in `std::collections` into the 
+   current scope.
+
+   However, with this method we can't know all the names that are brought 
+   into scope. This can cause name clashing so be careful.
+
+* Separating Modules into Different Files
+
+  So far, all the examples have defined multiple modules in one file.
+
+  When modules get large, we separate them into different files to be 
+  better organized.
+
+  For example, we could move `front_of_house` into another file.
+  Our /main/lib.rs/ will look like this:
+  @code rust
+  // this code wont compile until we create the /src/front_of_house.rs
+  // file
+
+  // module declaration
+  mod front_of_house;
+
+  pub use crate::front_of_house::hosting;
+
+  pub fn eat_at_restaurant() {
+      hosting::add_to_waitlist();
+  }
+  @end
+
+  We then create a /src/front_of_house.rs/ file which looks like:
+  @code rust 
+  pub mod hosting {
+      pub fn add_to_waitlist() {}
+  }
+  @end
+  Note that you only need to load a file using a mod declaration 
+  once in your module tree. Once the compiler knows the file is part 
+  of the project (and knows where in the module tree the code resides 
+  because of where you’ve put the mod statement), other files in your 
+  project should refer to the loaded file’s code using a path to 
+  where it was declared, as covered in the “Paths for Referring to an 
+  Item in the Module Tree” section. In other words, mod is not an 
+  “include” operation that you may have seen in other programming 
+  languages.
+
+  Next, we’ll extract the `hosting` module to its own file. The process 
+  is a bit different because `hosting` is a child module of 
+  `front_of_house`, not of the root module. We’ll place the 
+  file for `hosting` in a new directory that will be named for its 
+  ancestors in the module tree, in this case /src/front_of_house\//.
+
+  To start moving `hosting`, we change /src/front_of_house.rs/ to 
+  contain only the declaration of the hosting module:
+  @code rust
+  // file src/front_of_house.rs
+  pub mod hosting;
+  @end
+  Then we create a /src/front_of_house/ directory and a file `hosting.rs` 
+  to contain the definitions made in the `hosting` module:
+  @code rust
+  // file src/front_of_house/hosting.rs
+  pub fn add_to_waitlist() {}
+  @end
+
+  If we instead put `hosting.rs` in the /src/ directory, the compiler 
+  would expect the `hosting.rs` code to be in a `hosting` module 
+  declared in the crate root, and not declared as a child of the 
+  `front_of_house` module. The compiler’s rules for which files to 
+  check for which modules’ code means the directories and files 
+  more closely match the module tree.
+
+  The `mod` keyword declares modules, and _Rust looks in a file with
+  the same name as the module for the code that goes into that module._
+
 
