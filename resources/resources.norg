@@ -1,6 +1,6 @@
 * AI
 ** Reinforcement Learning
-    - ( ) {https://www.assemblyai.com/blog/deepminds-alphatensor-explained/}[Deep Mind Alpha Tensor Explained]
+   - ( ) {https://www.assemblyai.com/blog/deepminds-alphatensor-explained/}[Deep Mind Alpha Tensor Explained]
 ** Deep Learning
    - ( ) {https://horace.io/brrr_intro.html}[Making Deep Learning Go Brrr From First Principles]
 * Linux
@@ -36,6 +36,7 @@
    - ( ) {https://kobzol.github.io/rust/python/2023/05/20/writing-python-like-its-rust.html}[Writing Python Like Its Rust]
    - ( ) {https://www.arewelearningyet.com/}[Are we learning yet? - Rust machine learning ecosystem]
    - ( ) {https://www.rust-lang.org/what/embedded}[Embedded Rust]
+   - ( ) {https://cheats.rs/#language-sugar}[Rust Cheat Sheet]
 ** ATS Programming Language
    - {https://www.cs.bu.edu/~hwxi/atslangweb/}[The ATS Programming Language]
 ** Haskell
@@ -50,9 +51,11 @@
    - ( ) {https://teachyourselfcs.com/}[Teach Yourself Computer Science]
 ** Languages
    - ( ) {https://www.scattered-thoughts.net/writing/implementing-interactive-languages/}[Implementing Interactive Languages]
-   -- ( ) {https://www.scattered-thoughts.net/#mvs}[Full Blog]
+   - ( ) {https://www.scattered-thoughts.net/#mvs}[Full Blog]
 ** Risc V
    - ( ) {https://punkx.org/overflow/}[Projekt Overflow]
+** x86
+   - {https://www.youtube.com/watch?v=KrksBdWcZgQ}[Breaking the x86 Instruction set]
 ** Advent Of Code
    - ( ) {https://adventofcode.com/}[Advent of Code]
    - ( ) {https://fasterthanli.me/series/advent-of-code-2022}[Amos Advent Of Code In Rust]
@@ -60,7 +63,7 @@
    - ( ) {https://blog.frankel.ch/rust-from-python/}[Calling Rust From Python]
 * Tools
 ** Debugger
-  - ( ) {https://www.debuggingbook.org/#}[The Debugging Book]
+   - ( ) {https://www.debuggingbook.org/#}[The Debugging Book]
 ** Programming Practice
    - ( ) {https://exercism.org/}[Exercism]
    - ( ) {https://www.codewars.com/}[Code Wars]
@@ -71,9 +74,16 @@
    - {https://www.ejmastnak.com/tutorials/vim-latex/prerequisites/}[Suggested Prerequisites For Writing LaTeX in Vim]
    - {https://castel.dev/post/lecture-notes-1/}[How I'm Able To Take Notes In Mathematics Lectures Using LaTeX and Vim]
    - {http://www.benbrastmckie.com/tools#access}[Tools For Academic Writing]
+* Server Stuff
+  -- {https://www.cuttingcords.com/home/ultimate-server/getting-started}[Ultimate Server Part 1]
+  -- {https://selfhosted-survey-2023.deployn.de/apps}[Most used services in hosting]
+* Privacy
+  -- {https://ssd.eff.org/}[Surveillance Self Defense]
+  -- {https://www.privacyguides.org/en/}[Privacy Guides]
+  -- {https://www.cyber.gov.au/protect-yourself/resources-protect-yourself/personal-security-guides/personal-cyber-security-first-steps}[Personal Cyber Security: First Steps]
 * Blogs
-  - (+) [Amos's Blog] - A blog discussing Rust and how computers work.
-  - (+) [Julia Evans]{https://jvns.ca/} - A blog for exploring interesting topics
+   - (+) [Amos's Blog] - A blog discussing Rust and how computers work.
+   - (+) [Julia Evans]{https://jvns.ca/} - A blog for exploring interesting topics
 * Misc 
 ** Blue Blocking Glasses
    - (x) {https://optimizeyourbiology.com/blue-blocker-database}[Find The Best Blue Blocking Glasses]
