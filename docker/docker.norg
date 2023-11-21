@@ -1,0 +1,279 @@
+*_Docker and Kubernetes_*
+
+* Docker 
+
+  Docker is based on containers. A container is a unit of deployment 
+  that contains everything needed for the code to run, i.e. the code, 
+  the runtime, system tools, and system libraries.
+
+  The advantage is that it is faster to deploy because they are small 
+  microservice. They use fewer resources and we can fit more of them 
+  in the same host. They are portable and are isolated from each other,
+  so if one fails, it doesnt take the whole system down with it.
+
+  Containers are made of /layers/. You start with base OS, add 
+  customizations, and add your application. 
+
+  Each layer is downloaded individually and Docker uses 
+  a local cache to keep track of which layers have already been 
+  downloaded, so if a layer is already present, it won't be downloaded 
+  again.
+
+  One of the goals of creating container images is to create them 
+  with the smallest amount of layers possible. 
+  We can only write on the top layer, which is read write, while 
+  the lower ones are read only. 
+
+  The /container registry/ is a centralized repository that 
+  stores the container images we create. An image is a specification 
+  that allows us to build a container. The conceptual idea is 
+  similar to Github. In the case of Docker we use Docker Hub. 
+
+  Finally, an orchestrator is used to manage and monitor the 
+  containers we have created. One of the most popular examples is 
+  Kubernetes.
+
+** What is Docker?
+
+   Docker provides an open source container runtime. It supports 
+   Mac, Windows, and Linux. It provides a command line tool to create 
+   and manage containers. It uses a dockerfile format for building 
+   containers. 
+
+** Get Started with Docker 
+
+   The easiest way to get started is to download Docker Engine. 
+
+   A lot of tutorials online suggest to use Docker Desktop, which 
+   is a proprietary solution that Docker proposes for fast and easy 
+   utilization. It bundles up some tools and runs everything 
+   in a virtual machine in order to create a stable experience across 
+   different machines. 
+
+   However, since there is no real advantage to using Docker Desktop, 
+   we recommend to learn the to use Docker through the CLI, which can 
+   be achieved through using only Docker Engine, which is open source.
+
+** Commands Cheat Sheet
+
+*** Trouble Shooting
+
+    @code bash
+    #  Display system information
+    docker info
+    # display the systems version
+    docker version
+    # Log into a Docker Registry
+    docker login 
+    @end
+
+*** Running Containers
+
+    @code bash
+    #  pull/download an image from a registry.
+    docker pull [imageName]
+
+    #  execute an image in memory as a container. 
+    # If the image is not present in memory, it will be downloaded 
+    # automatically. 
+    docker run [imageName]
+
+    #  run a container in the background, giving back control 
+    # to the user. This is called detached mode.
+    docker run -d [imageName]
+
+    #  start stopped containers.
+    docker start [containerName]
+
+    #  list running containers.
+    docker ps
+
+    #   list running and stopped containers.
+    docker ps -a
+
+    #  stop containers but the container will still be in memory.
+    docker stop [containerName]
+
+    #  kill containers that may be stuck in memory. 
+    # Usually, we dont use this command.
+    docker kill [containerName]
+
+    #  get image info, useful for debugging.
+    docker image inspect [imageName]
+
+    @end
+
+    Note that the imageName is the name of the image as we find it in 
+    the container registry. The containerName is the name of the 
+    running container.
+
+    So we run an image using its name and then interact with it 
+    using the container name. The run command has an optional flag 
+    `--name [name]` to name a container. If this is not specified, 
+    Docker will autogenerate one for us.
+
+    We can set limit on memory and cpus that the container can use 
+    when we use the `run` command. 
+    @code bash
+    #  Specifies the max memory.
+    docker run --memory="256m" nginx
+
+    #  Specifies the max CPUs.
+    docker run --cpus=".5" nginx
+
+    @end
+
+    The full command to run a container is something like:
+
+    @code bash
+    docker run --publish 80:80 --name webserver nginx
+    @end
+
+    In this case, `nginx` is the name of the image in the registry, 
+    `webserver` is the name we want to give to the running instance 
+    of the container, `--publish 80:80` maps a port from the local 
+    host to the port that the container is listening to.
+
+    Then, we can execute some additional commands:
+    @code bash
+    # list the containers
+    docker ps
+
+    # stop the container
+    docker stop webserver
+
+    # remove the container from memory
+    docker rm webserver
+    @end
+
+*** Attach Shell
+
+    We can attach a shell to a container with the `-it` flag: 
+    @code bash
+    # attach shell
+    docker run -it [containerName] -- /bin/bash
+    # attach shell to a running container
+    docker container exec -it [containerName] -- bash
+    @end
+    When we do this, we attach a terminal which brings us "inside" 
+    the container. Note that the terminal prompt changes!
+
+*** Cleaning Up
+
+    @code bash 
+    # removes containers from memory. First it must be in a stopped 
+    # state!
+    docker rm [containerName]
+    # removes all stopped containers 
+    docker rm $(docker ps -a -q)
+    # the images that we pull are caches locally. This command 
+    # lists these images 
+    docker images
+    # deletes the image from the machine
+    docker rmi [imageName]
+    # removes all images not in use by any container
+    # use with caution!
+    docker system prune -a
+    @end
+
+**** Example
+     As a first example we run the nginx container. The command 
+     used is:
+     @code bash
+     # we run nginx, give it the name webserver, map our local port 
+     # 8080 to the port 80 of the container, and run in detached mode.
+     docker run -d -p 8080:80 --name webserver nginx
+     @end
+
+     If we run:
+     @code bash
+     docker ps
+     @end
+     We see our running instance. 
+
+     Finally, if we access `localhost:8080` in the web-browser, 
+     we will see a page from nginx.
+     If we run the command 
+     @code bash
+     docker images
+     @end
+     We will see that nginx is one of the cached images. If we have 
+     pulled other images, we will also see those.
+
+     Now, we want to attach a bash shell to our running container.
+     To do this, we use the command:
+     @code bash
+     docker container exec -it webserver bash
+     @end
+     And we see that the command prompt in the terminal changes!
+     The new command is `root@some-id:/#` where `some-id` is an 
+     id for the container.
+
+     Here we can run any linux CLI commands which is very useful 
+     for debugging.
+     To get out of this bash shell, we simply type
+     @code bash
+     exit
+     @end
+     To stop the running container, we use the stop command and we list 
+     the container */name/* not the image name.:
+     @code bash
+     docker stop webserver
+     @end
+     However, after this command, the container is still in memory. 
+
+     If we type `docker ps` we don't see it anymore since it is no 
+     longer a running container. However, if we type `docker ps -a` 
+     we see that it is listed with an "exited" status.
+
+     To remove the container from memory, we use the `rm` command.
+     @code bash
+     docker rm webserver
+     @end
+     Now, the container is not longer in memory. However, the image 
+     that was used is still in our machine. If we type `docker images`
+     we can see that `nginx` is still listed. This image takes up space!
+
+     If we want to remove the image to clear up some space, we can 
+     use the `rmi` command with the imageName:
+     @code bash
+     # note we use the imageName!
+     docker rmi nginx
+     @end
+
+*** Building Containers
+    @code bash
+    # Builds an image using a Dockerfile located in the same folder
+    docker build -t [name:tag] .
+    # Builds an image using a Dockerfile located in a different folder
+    docker build -t [name:tag] -f [filePath]
+    # Tag an existing image. Used to let you assign a name to an image.
+    # the tagging has two parts: a name and a tag
+    # the tag is usually used to specify the version number
+    docker tag [imageName] [name:tag]
+    @end
+*** Dockerfiles
+
+    A Dockerfile is a text file that lists the steps to build an
+    image.
+    The simplest Dockerfile is two lines:
+    @code 
+
+    FROM nginx:alpine
+    COPY . /usr/share/nginx/html
+
+    @end
+    52:00
+
+
+
+
+
+
+
+
+
+
+
+
+
