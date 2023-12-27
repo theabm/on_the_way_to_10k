@@ -4,7 +4,7 @@ description:
 authors: andres
 categories: 
 created: 2023-10-11T13:54:53+0100
-updated: 2023-10-11T13:55:00+0100
+updated: 2023-12-27T17:11:26+0100
 version: 1.1.1
 @end
 
@@ -55,13 +55,14 @@ version: 1.1.1
 
 * Using Cargo
 
-  Cargo is Rust's build system and package manager. It is used to manage 
-  Rust projects since it:
+  Cargo is Rust's build system and package manager. It is used to 
+  manage Rust projects since it:
   - builds your code 
   - downloads libraries your code depends on - a.k.a dependencies
   - building these libraries
 
-  Furthermore, Cargo comes preinstalled with rust if you use official installers.
+  Furthermore, Cargo comes preinstalled with rust if you use 
+  official installers.
 
   Check your version by running: 
   @code bash

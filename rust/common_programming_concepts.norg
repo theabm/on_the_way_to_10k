@@ -4,12 +4,12 @@ description:
 authors: andres
 categories: 
 created: 2023-10-11T13:53:08+0100
-updated: 2023-10-11T13:54:41+0100
+updated: 2023-12-27T22:01:36+0100
 version: 1.1.1
 @end
 
-In this section we cover some basic programming concepts and describe them 
-in the context of Rust. We will see:
+In this section we cover some basic programming concepts and describe 
+them in the context of Rust. We will see:
 - variables 
 - basic types 
 - functions 
@@ -18,8 +18,8 @@ in the context of Rust. We will see:
 
 * Variables and Mutability 
 
-  By default variables are immutable. This is one of the main design choices 
-  of rust to encourage safety and easy concurrency.
+  By default variables are immutable. This is one of the main design 
+  choices of rust to encourage safety and easy concurrency.
 
   However, variables can still be made to be mutable.
   Consider the following example:
@@ -33,9 +33,9 @@ in the context of Rust. We will see:
   @end
   This code does not compile and we get an immutability error.
 
-  Immutability is helpful because it prevents bugs that occur when we operate 
-  under the assumption that variables are constant but in reality get changed 
-  throughout the code. 
+  Immutability is helpful because it prevents bugs that occur when 
+  we operate under the assumption that variables are constant but 
+  in reality get changed throughout the code. 
 
   However, mutability is necessary in an imperative paradigm.  
   To make a variable mutable, add the `mut` keyword.
@@ -51,9 +51,9 @@ in the context of Rust. We will see:
 
   This code now compiles.
 
-  One last subtlety: Rust does not require a variable declared only with 
-  `let` to be initialized as long as it is assigned only once. Therefore, 
-  this is allowed:
+  One last subtlety: Rust does not require a variable declared 
+  only with `let` to be initialized as long as it is assigned 
+  only once. Therefore, this is allowed:
 
   @code rust
   fn main() {
@@ -65,28 +65,32 @@ in the context of Rust. We will see:
 
 ** Constant variables
 
-   We can create constant variables with the `const` keyword instead of `let`. 
-   They are different from immutable variables in the following: 
+   We can create constant variables with the `const` keyword instead 
+   of `let`. They are different from immutable variables in the 
+   following: 
    - const variables cannot be used with `mut`
    - const variables must always be type annotated.
-   - const variables must *_always_* be known at compile time. 
-     On the other hand, immutable variables can be known at run-time. 
+   - const variables must *_always_* be known at compile-time. 
+     On the other hand, immutable variables can be known 
+     at run-time. 
+
+   The last point is perhaps the most important difference.
 
    Some useful facts about constants:
 
    ~ The naming convention is MY_CONST_VARIABLE_NAME.
-   ~ The operations we can use for const expressions are limited by the 
-     compiler.
-   ~ Constants are valid throughout the entire run-time of the code and exist 
-     within the scope in which they are declared. 
-   ~ They can be used in the global scope (outside of a function) while `let`
-     can only be used in a function. 
+   ~ The operations we can use for const expressions are limited by 
+     the compiler.
+   ~ Constants are valid throughout the entire run-time of the code 
+     and exist within the scope in which they are declared. 
+   ~ They can be used in the global scope (outside of a function) 
+     while `let` can only be used in a function. 
 
 ** Shadowing 
 
-   In Rust we can redeclare variables with the same name and different type. 
-   This is called variable *_shadowing_* since the compiler only sees the second 
-   variable until its shadowed again or the scope ends.
+   In Rust we can re-declare variables with the same name and different
+   type. This is called variable *_shadowing_* since the compiler only 
+   sees the second variable until its shadowed again or the scope ends.
 
    An example:
    @code rust 
@@ -109,19 +113,20 @@ in the context of Rust. We will see:
    }
    @end
 
-   - Shadowing is different from marking a variable as `mut` because it allows 
-     us to perfom some transformations and then have that variable be 
-     immutable for the rest of the code. 
-     On the other hand, a `mut` variable can always be changed (even though 
-     we may not want it to).
+   - Shadowing is different from marking a variable as `mut` because 
+     it allows us to perfom some transformations and then have that 
+     variable be immutable for the rest of the code. 
+     On the other hand, a `mut` variable can always be changed 
+     even though we may not want it to. In other words, it is like 
+     having a constant value that we can carefully change when needed.
 
-   - The other difference is that since we are effectively creating a new 
-     variable, we can change its type. This can't be done if we just mark a 
-     variable as `mut` and then try to assign to it a different type without 
-     using the `let` keyword to overshadow.
+   - The other difference is that since we are effectively creating a 
+     new variable, we can change its type. This can't be done if we 
+     just mark a variable as `mut` and then try to assign to it a 
+     different type without using the `let` keyword to overshadow.
 
-   - A subtle note: when shadowing we can also change the mutability of a the 
-     variable.
+   - A subtle note: when shadowing we can also change the mutability 
+     of the variable.
 
    This code compiles:
    @code rust 
@@ -130,8 +135,8 @@ in the context of Rust. We will see:
    // spaces is now a number
    let spaces = spaces.len();
    @end 
-   Note that shadowing can work together with `mut`. The key is using `let` 
-   twice.
+   Note that shadowing also works if we use `let mut`. The key is just
+   to use `let` twice.
 
    This code does not compile:
    @code rust
@@ -145,8 +150,8 @@ in the context of Rust. We will see:
 
 * Data Types
 
-  Rust is a statically typed language - the type of all variables must be known 
-  at compile time. 
+  Rust is a statically typed language - the type of all variables must 
+  be known at compile time. 
   The compiler can usually infer the type. 
   If there are multiple possibilities, we need to use type annotations.
 
@@ -162,14 +167,15 @@ in the context of Rust. We will see:
    - integers 
    - floating point numbers 
    - booleans 
-   - charachters
+   - characters
 *** Integers
-    A whole number. The possible variants are: 8 bit, 16 bit, 32 bit, 64 bit, 128 
-    bit - all signed (i) or unsigned (u). So an unsigned 8 bit int is written as 
-    u8. 
-    There is also an architecture dependent int `arch` which can be isize or 
-    usize. This will be 64 bits if using 64 bit machine or 32 bit for 32 bit 
-    machine. 
+    A whole number. The possible variants are: 8 bit, 16 bit, 32 bit, 
+    64 bit, 128 bit - all signed (i) or unsigned (u). So an unsigned 
+    8 bit integer is written as u8. 
+    There is also an architecture dependent int `arch` which can be 
+    isize or usize. This will be 64 bits if using 64 bit machine or 
+    32 bit for 32 bit machine. 
+
     *_Literals_*
     ~ Decimals: can use `_` separator `98_222`
     ~ Hex: `0xff`
@@ -186,29 +192,34 @@ in the context of Rust. We will see:
      exits with an error. 
 
      When compiling in `release` mode, rust does *not* include checks 
-     for overflow that cause panic. Instead, if overflow occurs, it wil 
-     do two's complement wrapping. So for u8, a value of 256 is mapped to 0, 
-     257 is mapped to 1, etc.
+     for overflow that cause panic. Instead, if overflow occurs, 
+     it will do two's complement wrapping. So for u8, a value of 
+     256 is mapped to 0, 257 is mapped to 1, etc.
      Relying on this behaviour is considered an error.
 
-     To explicitly handle the possibility of overflow, you can use these 
-     families of methods provided by the standard library for primitive numeric
-     types:
+     To explicitly handle the possibility of overflow, you can use 
+     these families of methods provided by the standard library 
+     for primitive numeric types:
 
-     - Wrap in all modes with the wrapping_* methods, such as wrapping_add.
-     - Return the None value if there is overflow with the checked_* methods.
-     - Return the value and a boolean indicating whether there was overflow 
-       with the overflowing_* methods.
+     - Wrap in all modes with the wrapping_* methods, such as 
+       wrapping_add.
+
+     - Return the None value if there is overflow with the 
+       checked_* methods.
+
+     - Return the value and a boolean indicating whether there 
+       was overflow with the overflowing_* methods.
+
      - Saturate at the value’s minimum or maximum values with the 
        saturating_* methods.
 
 *** Floating point types
 
-    Rust has two primitive types for floating point numbers, namely `f32` and 
-    `f64`. 
+    Rust has two primitive types for floating point numbers, namely 
+    `f32` and `f64`. 
 
-    The default is `f64` (double precision) since on most modern machines it is 
-    just as fast and allows greater precision.
+    The default is `f64` (double precision) since on most modern 
+    machines it is just as fast and allows greater precision.
 
 *** Boolean type
 
@@ -227,19 +238,18 @@ in the context of Rust. We will see:
     A `char` is 4 bytes long and represents a Unicode Scalar Value, 
     which can encode more than ASCII.
 
-
 ** Compound Types
 
-   Compound types group multiple values of possibly multiple types together 
-   to form a new type. 
+   Compound types group multiple values of possibly multiple types 
+   together to form a new type. 
 
 *** Tuple Type
 
-    A tuple groups many possibly different types together. They have a fixed 
-    length that must be known at compile time. 
+    A tuple groups many possibly different types together. They 
+    have a fixed length that must be known at compile time. 
 
-    They are created by writing a comma separated list of values inside 
-    parenthesis. 
+    They are created by writing a comma separated list of values 
+    inside parenthesis. 
 
     @code rust
     fn main() {
@@ -248,8 +258,9 @@ in the context of Rust. We will see:
     }
     @end
 
-    Note that the tuple type is determined by both the length of the tuple 
-    as well as the types of the elemnts inside it (and the order). 
+    Note that the tuple type is determined by both the length of the 
+    tuple as well as the types of the elements inside 
+    it and the order of the elements. 
 
     This is similar to what happens in Haskell.
 
@@ -290,9 +301,11 @@ in the context of Rust. We will see:
 
     Contrary to a tuple, the elements of an array must be of the same 
     type. 
-    Unlike arrays in other languages, arrays in Rust have a fixed length.
+    Unlike arrays in other languages, arrays in Rust have a 
+    fixed length.
 
-    They are written as comma separated values within square brackets:
+    They are written as comma separated values within square 
+    brackets:
     @code rust 
     fn main() {
         // array with type annotation
@@ -306,11 +319,12 @@ in the context of Rust. We will see:
     Arrays are useful if you want to allocate in the stack rather than 
     the heap. 
 
-    On the other hand, if we want an array that is allocated in the heap which
-    can dynamically grow and shrink, we must use the `vector` type, which is 
-    provided by the standard library. 
+    On the other hand, if we want an array that is allocated in the 
+    heap which can dynamically grow and shrink, we must use the 
+    `vector` type, which is provided by the standard library. 
 
-    These concepts are similar to static and dynamic arrays in C and C++.
+    These concepts are similar to static and dynamic arrays in C
+    and C++.
 
     To access an element in the array, we can use indexes. 
     @code rust
@@ -336,55 +350,58 @@ in the context of Rust. We will see:
      In other words, Rust inserts run-time checks to make sure we don't 
      access out of bound elements. 
 
-     These checks cannot be done only at compile time since we cannot know 
-     what the user will try to enter. 
+     These checks cannot be done only at compile time since we cannot 
+     know what the user will try to enter. 
 
-     This is one example of Rust's memory safety since in other languages, we 
-     could access the out of bound index and get undefined behavior.
-     Rust protects you against this by panicking and exiting the code immediately 
-     rather than allowing this to happen.
+     This is one example of Rust's memory safety since in other 
+     languages, we could access the out of bound index and get 
+     undefined behavior. Rust protects you against this by panicking
+     and exiting the code immediately rather than allowing this to
+     happen.
 
 * Functions
 
   Rust uses snake case for functions and variable names.
+  An example of snake case: "snake_case"
 
   We have seen `fn` to declare functions. 
 
-  Rust doesn't care where we define functions, as long as they are defined 
-  somewhere in a visible scope to the caller.
+  Rust doesn't care where we define functions, as long as they are 
+  defined somewhere in a visible scope to the caller.
 
-  Functions can have `parameters` that take on concrete values which are 
-  called `arguments`.
+  Functions can have `parameters` that take on concrete values 
+  which are called `arguments`.
 
   We _must_ declare the type of each parameter in a function signature. 
 
 ** Statements and Expressions
 
-   - *_Statements_*: are instructions that perform some action and do not return 
-     a value.
+   - *_Statements_*: are instructions that perform some action and 
+     do not return a value.
    - *_Expressions_*: evaluate to a resultant value. 
 
    @code rust
-   // function definitions are also statements
+   // function definitions are statements
    fn main() {
        // a statement
        let y = 6;
    }
    @end
 
-   In the example above, the `let y = 6` statement does not retun a value. 
-   So we cannot do something like `let x = (let y = 6)` since the last 
-   `let` statement does not return a value so `x` cannot bind to anything. 
-   This can be done in a language like C with `x=y=6`, since assignments 
-   return a value. 
-   Function *definitions* are also statements! Because we are just stating 
-   that the function is doing something. 
+   In the example above, the `let y = 6` statement does not retun 
+   a value. So we cannot do something like `let x = (let y = 6)` 
+   since the last `let` statement does not return a value so `x`
+   cannot bind to anything. This can be done in a language like 
+   C with `x=y=6`, since assignments return a value. 
 
-   On the other hand, expressions evaluate to some value. And we can 
-   mix statements and expressions! The `6` in `let y = 6` is an expression
-   that evaluates to `6`. *Calling* a function is an expression since 
-   functions in result _always_ return a value. Calling a macro is an 
-   expression as well.
+   Function *definitions* are also statements! Because we are just
+   stating that the function is doing something. 
+
+   On the other hand, expressions evaluate to some value. We can 
+   mix statements and expressions! The `6` in `let y = 6` is an 
+   expression that evaluates to `6`. *Calling* a function is an 
+   expression since functions in result _always_ return a value. 
+   Calling a macro is an expression as well.
 
    New scope blocks are expressions:
 
@@ -409,17 +426,19 @@ in the context of Rust. We will see:
 
 *** Functions with Return Values
 
-    Rust functions can return a values to the caller. We always need 
+    Rust functions can return values to the caller. We always need 
     to declare the type of the returned value with an arrow `->`.
 
     The return value in a function can be: 
     - explicit with the `return` statement 
-    - _implicit by returning the evaluation of the last expression in the function body_.
+    - implicit by *returning the evaluation of the last expression 
+    in the function body*.
 
     The latter is most common in Rust.
 
-    Note that functions that do not explicitly return anything or have an 
-    expression inside the body still implicitly return a `unit`.
+    Note that functions that do not explicitly return anything or 
+    have an expression inside the body still implicitly return 
+    a `unit`.
 
 * Control Flow
 
@@ -471,8 +490,8 @@ in the context of Rust. We will see:
 
    Note that the returned values from both branches of the 
    `if` expression must be of the same type since Rust must know 
-   the type of each variable at compile time. If they were of different 
-   types, the compiler cannot infer the type. 
+   the type of each variable at compile time. If they were of 
+   different types, the compiler cannot infer the type. 
 
    Also, if we want to use `if` as an expression, we *need* to include 
    an `else` block so that the compiler knows what to do in both cases. 
@@ -568,7 +587,7 @@ in the context of Rust. We will see:
    println!("{}", x)
    @end 
 
-   However, this is not valide for the compiler: 
+   However, this is not valid for the compiler: 
    @code rust 
    let x;
    while true { x = 1; break; }

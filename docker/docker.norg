@@ -242,6 +242,7 @@
      @end
 
 *** Building Containers
+
     @code bash
     # Builds an image using a Dockerfile located in the same folder
     docker build -t [name:tag] .
@@ -252,10 +253,12 @@
     # the tag is usually used to specify the version number
     docker tag [imageName] [name:tag]
     @end
+
 *** Dockerfiles
 
     A Dockerfile is a text file that lists the steps to build an
     image.
+
     The simplest Dockerfile is two lines:
     @code 
 
@@ -263,7 +266,46 @@
     COPY . /usr/share/nginx/html
 
     @end
-    52:00
+    The `FROM` command specifies the base image. When building an image
+    we must always start from something already existing.
+
+    In this case, an image with the nginx webserver using the alpine 
+    version. 
+
+    The `COPY` copies everything from the current folder to a folder 
+    inside the container.
+
+    If we wanted to build and run:
+    @code bash
+    # build from the directory that contains the Dockerfile
+    docker build -t webserver-image:v1 . 
+    # run
+    docker run -d -p 8080:80 webserver-image:v1
+    # display
+    curl localhost:8080
+    @end
+
+    Lets look at a more complex example that creates an image 
+    that runs a nodejs app.
+
+    @code
+    FROM alpine 
+    RUN apk add -update nodejs nodejs-npm
+    COPY . /src
+    RUN npm install 
+    EXPOSE 8080
+    ENTRYPOINT ["node", "./app.js"]
+    @end
+
+    `FROM` specifies the base image.
+    With `RUN`, we run the package manager inside the container to 
+    install nodejs and npm.
+    Next we copy all the local files into a folder called `/src` inside 
+    the container.
+    We use the `RUN` command to do an `npm install`.
+    We then add some metadata by telling the container to listen to 
+    port 8080.
+    Finally, we tell the container what to run when starting up.
 
 
 
@@ -276,4 +318,12 @@
 
 
 
+
+
+
+
+
+
+
+    CHECK OUT: PORTAINER, LAZYDOCKER
 

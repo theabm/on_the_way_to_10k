@@ -1,5 +1,8 @@
-Understanding Ownership 
+
+Understanding *_Ownership_*
+
 ___
+
 * What Is Ownership?
 
   Ownership is a discipline for ensuring the safety of Rust programs. 
