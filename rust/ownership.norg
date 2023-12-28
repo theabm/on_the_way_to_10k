@@ -443,7 +443,7 @@ ___
    at the end we would have two owners of the heap data which would 
    cause a double free. 
    For this reason, to *move* data, as in line 3, we need *O* permissions, 
-   which `v2` does not have. Hence this code will not compile.
+   which `*v2` does not have. Hence this code will not compile.
 
 
 ** Mutable References Provide Unique and Non-Owning Access to Data
@@ -486,7 +486,7 @@ ___
    Notice the difference between having *W* permissions for 
    `num` and for `\*num`. In the first case, it means we can 
    assign `num` to be a reference to something else. In the second 
-   case, it means we can change that the reference points to. 
+   case, it means we can change what the reference points to. 
 
    To have *W* permissions for `num`, we need simply to write 
    `let mut num = &v[2]`. To have *W* permissions for `\*num`
