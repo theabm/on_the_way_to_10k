@@ -486,14 +486,14 @@ ___
    Notice the difference between having *W* permissions for 
    `num` and for `\*num`. In the first case, it means we can 
    assign `num` to be a reference to something else. In the second 
-   case, it means we can change what the reference points to. 
+   case, it means we can change the content being referenced.
 
    To have *W* permissions for `num`, we need simply to write 
    `let mut num = &v[2]`. To have *W* permissions for `\*num`
    we need to make `num` a *mutable reference*.
 
-   *_Mutable references can also be temporarily downgraded to read-only 
-   references_*
+   *Mutable references can also be temporarily downgraded to read-only 
+   references*
 
    Lets look at the following snippet:
    @code rust 
@@ -513,8 +513,8 @@ ___
    reference's *lifetime* - the range of code from the birth of 
    the reference to its death.
 
-   When we have control flow the lifetime of a reference can be 
-   different inside the different branches.
+   When we use control flow constructs such as `if`, the lifetime of a 
+   reference can be different inside the different branches.
 
 ** Data Must Outlive All Of Its References
 
@@ -542,7 +542,7 @@ ___
    function. 
    For this, Rust needs a different mechanism.
 
-   - References that are input or output of a function.
+   - References that are input or output of a function:
      Whenever an expression uses an input reference or returns an output 
      reference, Rust checks the *_Flow_* (*F*) permission.
      Unlike *RWO* permissions, *F* does not change throughout the body 
@@ -639,14 +639,29 @@ ___
    }
    @end
 
-   - Return a string literal which lives forever (indicated by `\'static`):
+   - Return a string literal which lives forever (indicated by `\'static`). This 
+     is a good solution if we never intend to change the string, which means 
+     heap allocation is unecessary.
    @code rust 
    fn return_a_string() -> &'static str {
        "Hello world"    
    }
    @end
 
+   - Use /Reference Counted Smart Pointers/ (more on this later).
+
+   - Provide a "slot" inside another string to store the new string. In this 
+     case the programmer is responsible for making sure there is enough space. 
+   @code rust
+   fn return_a_string(output: &mut String) {
+    output.replace_range(.., "Hello world");
+   }
+   @end
+
+   The best solution depends on the application we are designing. 
+
 ** Fixing an Unsafe Program: Not Enough Permissions
+
    Another common issue is trying to mutate read-only data or trying to 
    drop data behind a reference.
 
@@ -660,6 +675,7 @@ ___
 
    // ideally: ["Ferris", "Jr."] => "Ferris Jr. Esq."
    @end
+
    This program doesn't compile because `name.push()` requires *W* 
    permissions, which it doesn't have. This is a good thing, because 
    this operation could invalidate references outside of the 
@@ -681,6 +697,7 @@ ___
    ~ Clone the input so we can act on it freely.
 
 ** Fixing an Unsafe Program: Copying vs. Moving Out of a Collection
+
    A common confusion for Rust learners happens when copying data out of 
    a collection, like a vector. 
    For example:
@@ -692,10 +709,12 @@ ___
        let n: i32 = *n_ref;
    }
    @end
+
    The dereference operator `\*n_ref` expects just the *R* permission, 
    which the path `\*n_ref` has.
    But what happens if we change the type from `i32` to `String`?
    Then, it turns out we no longer have the right permissions.
+
    @code rust 
    fn main() {
        let v: Vec<String> = 
@@ -704,6 +723,7 @@ ___
        let s: String = *s_ref;
    }
    @end
+
    This program does not compile. Why? Because `v` owns the string and 
    references are non-owning pointers, so we cannot take ownership 
    from it. 
@@ -715,7 +735,8 @@ ___
    and so when we do an assignment, we do a *move*.
    On the other hand, `i32` implements the Copy Trait so the data 
    simply gets copied into another local variable. 
-   In general, *if a value does not own heap data, then it can be copied without a move.*
+   In general, *if a value does not own heap data, then it can be copied 
+   without a move.*
    For example: 
    - `i32` does not own heap data so it can be copied without a move
    - `String` does own heap data so it cannot be copied without a move 
@@ -725,9 +746,10 @@ ___
    we cannot have two of them overlap at the same time.
 
 ** Fixing a Safe Program: Mutating Different Tuple Fields
+
    One common issue of Rust is that it keeps track of permissions at 
    a fine-grained level. This may cause it to reject safe programs.
-   Let's first look at a snippet that passes the borrow checker:
+   Lets first look at a snippet that passes the borrow checker:
 
    @code rust 
    fn main() {
@@ -745,8 +767,8 @@ ___
    However, `name.1` still has *W* permissions, so doing `name.1.push_str()` 
    is valid.
 
-   However, Rust lose track of this. Suppose that we try to do the same thing 
-   through a function:
+   However, Rust can lose track of this. Suppose that we try to do the same 
+   thing through a function:
    @code rust 
    fn get_first(name: &(String, String)) -> &String {
        &name.0
@@ -762,16 +784,20 @@ ___
        println!("{first} {}", name.1);
    }
    @end
-   Now, `name.1.push_str()` will cause a compilation error. To understand 
-   this error, we have to remember that Rust only looks at the function 
-   signature and not the implementation. Therefore, Rust cannot 
-   understand from the function signature that we are only borrowing 
-   the first element of the tuple, so it removes permissions from both 
-   elements.
+
+   Now, `name.1.push_str()` will cause a compilation error. To 
+   understand this error, we have to remember that Rust only 
+   looks at the function signature and not the implementation.
+   Therefore, Rust cannot understand from the function signature 
+   that we are only borrowing the first element of the tuple, so 
+   it removes permissions from both elements.
+
    In the future, this program may compile, but for now, it doesn't.
 
 ** Fixing a Safe Program: Mutating Different Array Elements
+
    A similar problem arises when we borrow elements of an array. 
+
    @code rust 
    fn main() {
        let mut a = [0, 1, 2, 3];
@@ -780,6 +806,7 @@ ___
        println!("{a:?}");
    }
    @end
+
    In this case, the Borrow Checker does not contain different paths 
    for `a[0]`, `a[1]`, etc. It uses a *single* path `a[_]` that represents 
    /all/ indexes of `a`.
@@ -790,6 +817,7 @@ ___
 
    So the following program will give be rejected by the compiler because 
    Rust already gave *R* permissions to `x`.
+
    @code rust 
    fn main() {
        let mut a = [0, 1, 2, 3];
@@ -806,12 +834,12 @@ ___
 
    /Slices/ let you reference a contiguous sequence of elements 
    in a collection rather than the whole collection. 
-   *_A slice is a kind of reference, so it is a non-owning pointer._*
+   *A slice is a kind of reference, so it is a non-owning pointer.*
 
    Lets explain why they are useful.
 
    Imagine we have a string of words separated by spaces and we want a 
-   functio that returns the first word in this string. If there 
+   function that returns the first word in this string. If there 
    are no spaces, it should return the whole string.
 
    How can we do this? 
@@ -842,8 +870,9 @@ ___
        s.clear();    
    }
    @end
+
    As we can see, after we compute `word`, we can change the string 
-   which invalidates `word` which is an index.
+   which invalidates `word` which is an index to the string.
    If we use this value at the end of the program to extract 
    the first word of the string, we would get an error. 
 
@@ -853,7 +882,7 @@ ___
    implementation would be even more prone to bugs since we would 
    need to return two indices.
 
-   To solve this, Rust uses *_string slices_*. 
+   To solve this, Rust uses *string slices*. 
 
    $ String Slices
    A String slice is a reference to a part of a `String`. Slices 
@@ -933,6 +962,7 @@ ___
    we would get a compiler error.
 
 ** String Literals Are Slices
+
     String literals are stored inside the binary. In other words, 
     they are slices of the binary. 
     So in the code below, `s` is a slice pointing to that specific 
@@ -940,7 +970,9 @@ ___
     @code rust 
     let s = "Hello World"
     @end
+
 ** String Slices as Parameters
+
     An improvement on the `first_word` function is to change the signature 
     from 
 
@@ -985,6 +1017,7 @@ ___
     @end
 
 ** Other Slices
+
     We also have more general slice types. For example, we can have 
     an array slice: 
 
@@ -1001,41 +1034,57 @@ ___
 
     We can use slices for all sorts of collections.
 
-    *_An advantage of slices over index-based ranges is that the slice 
-    cannot be invalidated while it's being used_*.
+    *An advantage of slices over using indexes with ranges is that the slice 
+    cannot be invalidated while it's being used*.
 
 * Ownership Recap
+
   We summarize the most important points discusses in this section.
 
   Rust avoids the use of Garbage Collection which improves performance 
   and predictability (looking at you python!).
+
   This is done by deallocating the memory of owning pointers once they 
   go out of scope.
 
 ** Ownership at Runtime
+
    - Rust allocates *local* variables in stack frames, which are allocated 
      when a function is called and deallocated when the call ends.
+
    - Local variables can hold either data or pointers.
+
    - Pointers can be created either through boxes (pointers *owning* data) 
      or through references (*non-owning* pointers).
+
 ** Ownership at Compile-time
+
    - Rust tracks *RWO* permissions on each path. It requires that the 
      path has the appropriate permissions to perform a given operation.
+
    - A paths permission can be changed if it is *moved* or *borrowed*.
+
    - A *move* of a variable with a non-copyable type requires *RO*
      permissions. Once the move is done, it permanently eliminates 
      *all* permissions on the variable, preventing it from being reused.
+
    - *Borrowing* a variable *temporarily* removes *some* of the permissions.
+
    -- An *immutable borrow* creates an immutable reference and disables 
       the borrowed data from being mutated or moved.
+
    -- A *mutable borrow* creates a mutable reference, which disables the 
       borrowed data from being read, written, or moved. So it is 
       effecitively useless for some time.
+
 ** Connecting Ownership Between Compile-time and Runtime
+
    Rust permissions are designed to prevent undefined behavior. 
+
    - One case of undefined behavior is *use-after-free* where freed 
      memory is read or written. Immutable borrows remove the *W* permission 
      to avoid this.
+
    - Another case is *double-free*. Dereferences of references of 
      non-copyable data do not have *O* permissions to avoid double 
      frees.

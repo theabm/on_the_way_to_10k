@@ -1,3 +1,9 @@
+
+Enums and Pattern Matching
+
+___
+
+
 We look at */enums/*.
 
 They allow you to define a type by enumerating the possible variants. 
@@ -145,9 +151,9 @@ They allow you to define a type by enumerating the possible variants.
 
    Rust doesn't have the null feature that other languages have. /Null/ 
    represents there is no value. In languages with Null, a variable can 
-   always be in two states: null or not-null.
+   always be in two states: Null or Not-null.
 
-   The problem with Null is that if you try to use a null value as a  
+   The problem with Null is that if you try to use a Null value as a  
    not-null value, you will get an error.
    However, the concept of Null is useful.
 
@@ -170,8 +176,8 @@ They allow you to define a type by enumerating the possible variants.
    without the `Option::` prefix.
 
    Here are some examples:
-   fn main() {
    @code rust
+
    // of type Option<i32>
    let some_number = Some(5);
    // of type Option<char>
@@ -196,7 +202,7 @@ They allow you to define a type by enumerating the possible variants.
 
    let sum = x + y;
    @end
-   The error message tells us that the compiler doens't understand how 
+   The error message tells us that the compiler doesn't understand how 
    to add an `i8` and an `Option<i8>` because they are different types.
 
    When we have a value of a type like `i8` in Rust, the compiler 
@@ -224,7 +230,7 @@ They allow you to define a type by enumerating the possible variants.
 
    In general, to use an `Option<T>` value, you want to have code 
    that will handle each variant. You want some code that will run 
-   only when you have `Some(T)`, and this code is allowd to use the 
+   only when you have `Some(T)`, and this code is allowed to use the 
    inner `T`. You also want some code to run only if you have a `None`
    variant, and that code doesn't have a `T` value available.
 

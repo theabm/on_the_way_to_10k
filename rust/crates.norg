@@ -1,15 +1,20 @@
-When you write larget programs, organizing code becomes important. 
+
+Managing Growing Projects with Packages, Crates, and Modules
+
+___
+
+When you write larger programs, organizing code becomes important. 
 
 It is convenient to group code with related functionality to clarify 
 what part of the code implements a certain feature.
 
 In this section we cover Rust's /module system/: 
-~ Packages: A Cargo Feature that lets you build, test, and share 
+~ *Packages*: A Cargo Feature that lets you build, test, and share 
   crates.
-~ Crates: A tree of modules that produces a library or executable.
-~ Modules and use: Let you conntrol the organization, scope, 
+~ *Crates*: A tree of modules that produces a library or executable.
+~ *Modules* and *use*: Let you control the organization, scope, 
   and privacy of paths.
-~ Paths: A way of naming an item, such as a struct, function,
+~ *Paths*: A way of naming an item, such as a struct, function,
   or module.
 
 Furthermore we will discuss scopes and encapsulation.
@@ -67,7 +72,7 @@ Furthermore we will discuss scopes and encapsulation.
   package contains a library crate with the same name as the package, 
   and /src/lib.rs/ is its crate root.
 
-  Cargo passes the crate root files to `rustc` to build the llibrary 
+  Cargo passes the crate root files to `rustc` to build the library 
   or the binary.
 
   If we run `cargo new my-project` then we only have a /src/main.rs/, 
@@ -90,7 +95,6 @@ Furthermore we will discuss scopes and encapsulation.
   ------ lib.rs
   ------ bin/
   --------- alt.rs
-            The package
 
   This package contains 3 crates. 
   ~ main.rs: produces a binary crate  
@@ -119,11 +123,11 @@ Furthermore we will discuss scopes and encapsulation.
     modules. Say you declare a /garden/ module with `mod garden;`. The 
     compiler will look for the module's code in these places.
   -- Inline, within curly brackets that replace the semicolon following 
-    `mod garden`.
+     `mod garden`.
   -- In the file /src/garden.rs/
   -- In the file /src/garden/mod.rs/
   ~ *Declaring submodules*: In any file other than the crate root, you  
-    can delcare submodules. For example, you may declare `mod vegetables;`
+    can declare submodules. For example, you may declare `mod vegetables;`
     in /src/garden.rs/. The compile will look for the submodule's code 
     within the directory named for the parent module in these places:
   -- Inline, following `mod vegetables` with curly brackets
@@ -142,7 +146,7 @@ Furthermore we will discuss scopes and encapsulation.
   ~ *The `use` keyword*: Within a scope, the `use` keyword creates 
     shortcuts to items to reduce repetition of long paths. In any scope 
     that can refer to `crate::garden::vegetables::Asparagus`, you can 
-    creaate a shortcut with `use crate::garden::vegetables::Asparagus`.
+    create a shortcut with `use crate::garden::vegetables::Asparagus`.
     And from then on, you only need to write `Asparagus` to make use of 
     that type in the scope.
 
@@ -188,15 +192,14 @@ Furthermore we will discuss scopes and encapsulation.
 
   We generally prefer to specify absolute paths.
 
-  However, if we need to remember that in Rust all items are private 
+  However, we need to remember that in Rust all items are private 
   to parent modules by default. Items in parent modules cannot use 
   items in child modules, but items in child modules can use items 
   in their ancestor modules. Siblings modules also can access each 
   other.
 
   This is because child modules wrap and hide their implementation 
-  details, but the child modules can see the contextin which they're 
-  defined.
+  details but they can see the context in which they're defined.
 
   Rust chose this so that hiding inner implementation details is the 
   default. This way, you know which parts of the inner code you can 
@@ -295,8 +298,8 @@ Furthermore we will discuss scopes and encapsulation.
     We also need to mark methods inside `impl` blocks as `pub` if we 
     want them to be public.
 
-    *_If a struct has a private field, we need to provide a public 
-    associated function that constructs an instance of it._*
+    *If a struct has a private field, we need to provide a public 
+    associated function that constructs an instance of it.*
     Otherwise, since there is a private field we cannot access, we would 
     not be able to create an instance.
     @code rust
@@ -330,6 +333,7 @@ Furthermore we will discuss scopes and encapsulation.
     @end
 
 *** Enums
+
     If we make an enum public, all of its variants are then public.
     We only need `pub` before the `enum` keyword.
     @code rust
@@ -422,7 +426,7 @@ Furthermore we will discuss scopes and encapsulation.
    the parent module rather than the full path to the function. 
 
    In the first case, we have to specify the parent module when calling 
-   the function, which makes it clear that the functio is not locally 
+   the function, which makes it clear that the function is not locally 
    defined, while minimizing repetition.
 
    In the second case, it is not clear where the function is defined.
@@ -662,7 +666,7 @@ Furthermore we will discuss scopes and encapsulation.
   check for which modules’ code means the directories and files 
   more closely match the module tree.
 
-  The `mod` keyword declares modules, and _Rust looks in a file with
-  the same name as the module for the code that goes into that module._
+  The `mod` keyword declares modules, and *Rust looks in a file with
+  the same name as the module for the code that goes into that module.*
 
 
