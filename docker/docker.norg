@@ -57,6 +57,7 @@
 ** Commands Cheat Sheet
 
 *** Trouble Shooting
+    Note: you may have to run some of these commands with root access.
 
     @code bash
     #  Display system information
@@ -70,35 +71,36 @@
 *** Running Containers
 
     @code bash
-    #  pull/download an image from a registry.
+    # pull/download an image from a registry.
     docker pull [imageName]
 
-    #  execute an image in memory as a container. 
+    # execute an image in memory as a container. 
     # If the image is not present in memory, it will be downloaded 
-    # automatically. 
-    docker run [imageName]
+    # automatically.  The --name option specifies the containerName
+    docker run [imageName] --name [containerName]
 
-    #  run a container in the background, giving back control 
+    # run a container in the background, giving back control 
     # to the user. This is called detached mode.
-    docker run -d [imageName]
+    # The --name option specifies the containerName
+    docker run -d [imageName] --name [containerName]
 
-    #  start stopped containers.
+    # start stopped containers.
     docker start [containerName]
 
-    #  list running containers.
+    # list running containers.
     docker ps
 
-    #   list running and stopped containers.
+    # list running and stopped containers.
     docker ps -a
 
-    #  stop containers but the container will still be in memory.
+    # stop containers but the container will still be in memory.
     docker stop [containerName]
 
-    #  kill containers that may be stuck in memory. 
+    # kill containers that may be stuck in memory. 
     # Usually, we dont use this command.
     docker kill [containerName]
 
-    #  get image info, useful for debugging.
+    # get image info, useful for debugging.
     docker image inspect [imageName]
 
     @end
@@ -193,33 +195,43 @@
 
      Finally, if we access `localhost:8080` in the web-browser, 
      we will see a page from nginx.
+
      If we run the command 
+
      @code bash
      docker images
      @end
+
      We will see that nginx is one of the cached images. If we have 
      pulled other images, we will also see those.
 
      Now, we want to attach a bash shell to our running container.
      To do this, we use the command:
+
      @code bash
      docker container exec -it webserver bash
      @end
+
      And we see that the command prompt in the terminal changes!
      The new command is `root@some-id:/#` where `some-id` is an 
      id for the container.
 
      Here we can run any linux CLI commands which is very useful 
      for debugging.
+
      To get out of this bash shell, we simply type
+
      @code bash
      exit
      @end
+
      To stop the running container, we use the stop command and we list 
      the container */name/* not the image name.:
+
      @code bash
      docker stop webserver
      @end
+
      However, after this command, the container is still in memory. 
 
      If we type `docker ps` we don't see it anymore since it is no 
@@ -241,7 +253,7 @@
      docker rmi nginx
      @end
 
-*** Building Containers
+*** Building Images and Containers
 
     @code bash
     # Builds an image using a Dockerfile located in the same folder
@@ -266,6 +278,7 @@
     COPY . /usr/share/nginx/html
 
     @end
+
     The `FROM` command specifies the base image. When building an image
     we must always start from something already existing.
 
@@ -306,6 +319,218 @@
     We then add some metadata by telling the container to listen to 
     port 8080.
     Finally, we tell the container what to run when starting up.
+
+** Persistent Data and Volumes
+
+   You usually don't store important data in containers since they 
+   are ephermal. 
+   However, it may be useful to store temporary data such as log 
+   file and other.
+
+   For persistent data, we have to store data outside of the container 
+   in what is called a /volume/. A volume maps an external folder 
+   to a local folder inside the container. 
+
+   There is still a small probability that the data will be lost, so we will
+   see how to create more robust solutions later on. 
+
+*** Creating Volumes (Cheat Sheet)
+    @code bash
+    # creates new volume
+    docker create volume [volumeName]
+    # lists the volumes
+    docker volume ls
+    # display the volume info
+    docker volume inspect [volumeName]
+    # deletes a volume
+    docker volume rm [volumeName]
+    # deletes all volumes not mounted. Be careful using this command!
+    docker volume prune
+    @end
+
+    To map a volume we can simply do: 
+    @code bash
+    docker volume create myvol
+    docker volume inspect myvol
+    docker volume ls 
+    docker run -d --name devtest -v myvol:/app nginx:latest
+    @end
+
+    We first create a volume name `myvol` and then we 
+    associate this volume to a 
+    local directory inside the container which we called `/app`.
+    Note that the mapping requires the use of the `-v` flag.
+
+    You can also map an external folder to test out your container.
+    However, using volumes is recomended. 
+
+    Note that volumes are a docker thing. Volumes persist across containers 
+    crashing, being stopped, and being removed. 
+    In fact, as a test, we could create a container that has a volume 
+    mapped to `/app`, attach a shell to it, write a test file inside 
+    `/app/test.txt`, exit the container, stop the container, remove 
+    the container, and then create another container that maps to the 
+    same volume. We will see that `/app` will contain the same 
+    `test.txt` that we had written before.
+
+    The data will be stored in the volume until I manually remove 
+    the volume using `docker volume rm myvol`.
+    Before removing a volume, we have to ensure that all containers 
+    using that volume are stopped.
+
+** YAML (YAML Aint Markup Language)
+
+   It is a way to serialize data so that is readable by humans. It is 
+   the file format used by docker compose and kubernetes.
+
+   YAML uses key-value pairs. Below we show some examples:
+   @code YAML
+   # comments are in hashtag
+   # note that the space after the colon is mandatory!
+   some_key: some_value
+   another_key: 100
+   a_third_key: strings dont need quotes
+   #nested sequences. Note that we indent with 2 spaces! this is 
+   # also super important.
+   a_nested_map:
+     key: some_value 
+     another_key: another_value
+     another_nested_map: 
+       hello: hello
+   # note the spacing 
+   a_sequence:
+     - item 1 
+     - item 2
+
+   @end
+
+   It is useful to use a YAML linter if possible to avoid missing 
+   spaces.
+
+** Docker Compose
+   Suppose than an app is composed of multiple containers. 
+
+   Youd need to use multiple `docker run` commands. It would 
+   be ideal to deploy the app using a single command. 
+
+   This is the goal of docker compose. It defines and runs 
+   multi-container applications using a single `docker-compose.YAML`
+   file.
+
+   It uses the docker CLI with some other commands which start 
+   with docker compose (if you're using docker compose v2, otherwise 
+   with docker compose v1 the commands are docker-compose).
+
+   Docker compose uses a YAML file that defines the containers we are 
+   interested in using. In the YAML, for each container, we usually 
+   specify settings such as where is the image, what ports we want it 
+   to listen to, and other options. 
+
+   Docker compose is great for small scale projects that don't require 
+   a full scale orchestrator such as Kubernetes. It is also good 
+   for testing your application before using Kubernetes. 
+
+*** Commands
+    @code bash
+    # build the images
+    docker compose build
+    # start the containers
+    docker compose start
+    # stop the containers 
+    docker compose stop
+    # build and start (detached mode)
+    docker compose up -d 
+    # list what is running
+    docker compose ps
+    # remove from memory
+    docker compose rm
+    # stop and remove what was created by up
+    docker compose down
+    # get the logs
+    docker compose logs
+    # run a command in a container
+    docker compose exec [container] bash
+    # run an instance as a project 
+    docker compose -p [projectName] up -d 
+    # list running projects
+    docker compose ls 
+    # copy files from the container to a destination
+    docker compose cp [containerID]:[SRC_PATH] [DEST_PATH]
+    # copy files from source to container destination
+    docker compose cp [SRC_PATH] [containerID]:[DEST_PATH]
+
+    @end
+
+    The docker compose file is located inside a folder. To launch 
+    the application, use `docker compose up -d`. If we run this 
+    command a second time, nothing will happen, because the application 
+    is already running. However, if we want to run a second instance 
+    of our application, we can use `docker compose -p test2 up -d` which 
+    uses the `-p` flag to specify a project name, allowing us to launch 
+    another instance of a project named `test2`. This is only possible 
+    in V2.
+
+** Push and Pull to Docker Hub
+
+   Docker Hub is the container registry of docker. We can both pull 
+   existing images as well as push our own. 
+   Lets see how to publish (i.e. push ) an image to Docker Hub.
+
+
+   @code bash
+   # make sure we have used docker login and that we are 
+   # logged in to use docker hub.
+
+   # we need to tag our image with the repository name which 
+   # is our username.
+   docker tag my_image my_username/my_image:latest
+   # push the image
+   docker push my_username/my_image:latest
+   # pull the image 
+   docker pull my_username/my_image:latest
+   @end
+
+   By default, this process makes our image public on Docker Hub. 
+   If we want to make it private, we need to change the settings 
+   in Docker Hub. 
+
+   To push another version, all we have to do is rebuild an image 
+   with a tag of a newer version and push it. Then, on Docker 
+   Hub, we can delete the previous version if needed.
+
+* Kubernetes
+
+  Kubernetes (K8s) is a popular orchestrator tool. It is used 
+  for service discovery, load balancing, storage orchestration, 
+  automated rollouts and roolbacks, self-healing, secret and 
+  configuration managemenent, use the same API everywhere.
+
+  What can K8s *can't* do: 
+  - deploy source code. 
+  - build your application.
+  - Provide application-level services.
+
+  We have a master node which is in charge of organizing the 
+  worker nodes. The worker nodes are the where we run the containers.
+
+  A container will run in a `pod`. A `pod` runs in a `node` and all 
+  the `nodes` form a `cluster`
+** Running K8s locally
+   We can run K8s locally by using one of the following tools:
+   - Docker Desktop
+   - MicroK8s
+   - Minikube
+   - Kind
+
+   Docker Desktop is limited to one node, while the other 3 are 
+   able to simulate multiple worker nodes. 
+
+
+
+
+
+
+
 
 
 
