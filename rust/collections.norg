@@ -1,0 +1,20 @@
+
+Common Collections
+
+___
+
+* Storing Lists of Values With Vectors
+
+  The type `Vec<T>` allows us to store values of the same type in 
+  contiguouos memory.
+
+  To create a new vector we can use
+
+@code rust
+
+@end
+
+
+
+
+
