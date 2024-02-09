@@ -64,6 +64,9 @@
 **** {:rust/collections:# Storing UTF-8 Encoded Text with Strings}[Storing UTF-8 Encoded Text with Strings]
 **** {:rust/collections:# Storing Keys with Associated Values in Hash Maps}[Storing Keys with Associated Values in Hash Maps]
 
+** Tracking
+*** {:tracking/2024:}[2024]
+
 
 ** {:haskell/haskell:}[Haskell]
 
@@ -76,27 +79,6 @@
 *** {:neorg/todo:}[To-Do Items]
 *** {:neorg/journals_summaries:}[Journals And Summaries]
 *** {:neorg/automation:}[Automation]
-
-** Latex
-*** Latex Basics
-*** Working with LaTeX
-*** Document Structure
-*** Logical Structure
-*** Document Classes
-*** Extending LaTeX
-*** Using Graphics
-*** LaTeX Tables
-*** Cross-Referencing
-*** Mathematics
-*** Fonts & Spacing
-*** Citations & References
-*** Structuring Sources
-*** Fonts & Unicode Engines
-*** Error Handling
-*** Help & Documentation
-
-
-** Org
 
 ** {:linux/linux:}[Linux]
 

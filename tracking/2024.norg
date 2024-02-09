@@ -1,0 +1,71 @@
+A list of goals that I wish to achieve in 2024. The list can be updated as the 
+year keeps advancing. However, the goal is not to remove but to add to the list.
+So any removals will be documented with strikethrough lines.
+
+Goals:
+- (-) Learn Rust.
+-- ( ) Write at least one medium project in Rust.
+-- (-) Finish the book
+-- ( ) Finish Rust for Rustaceans
+-- ( ) Learn about async and futures.
+- (-) Learn Haskell.
+-- ( ) Write at least one medium project in Haskell.
+-- (-) Watch Graham Hutton lessons
+--- (-) Functional Programming in Haskell
+--- ( ) Advanced Functional Programming in Haskell
+-- (-) Read Learn You a Haskell For Greater Good.
+- Learn Nix.
+-- (x) Read Nix Manual.
+-- (-) Read NixOS Manual.
+-- (-) Read NixPkgs Manual.
+-- (-) Nix Pills.
+-- (-) Nix dev.
+-- ( ) Make at least one contribution to NixPkgs
+-- ( ) Start contributing to nixvim.
+- (-) Learn Jax.
+-- (-) Finish series on Jax.
+-- ( ) Reimplement some papers using jax.
+-- ( ) Learn to use Haiku/Flax.
+- (-) Learn Docker and Kubernetes.
+-- (-) Learn theory.
+-- ( ) Learn to create a container for your own application.
+-- ( ) Set up a kubernetes cluster for personal services.
+- ( ) Learn to set up your own server.
+-- ( ) Services: pihole, vpn, jellyfin, cloud, webserver, instance of code completion llm.
+- (-) Learn networking.
+-- (-) Jeremy IT Lab: CCNA
+
+For AI: 
+- ( ) Learn more about transformers.
+- ( ) Implement your own pytorch library (Deep Learning Systems Course)
+- ( ) Learn more about LLMs
+- ( ) Contribute to some popular libraries.
+- ( ) Learn about DevOps tools (MLFlow)
+- ( ) Find a job? 
+
+* January
+** Rust
+   - Finished 6 chapters of the book.
+** Haskell
+   - 3 Lessons of Graham Huttons: Functional Programming in Haskell
+   - 4 Chapters of Learn you a Haskell for Greater Good.
+** Nix
+   - Read Nix Manual.
+   - First 6 of Nix Pills
+   - One third of Nix Dev
+** Learn Jax
+   - Watched this video from Aleksa Gordic.
+** Learn Docker and Kubernetes
+   - Watched this video about Docker and Kubernetes.
+   - Watched this video about Kubernetes 
+   - Watched this video about Docker.
+** Started Deep Learning Systems Course
+   -- Completed 4/24 lessons.
+** CCNA 
+   -- 2 videos from Jeremys IT Lab.
+
+* February
+
+
+
+

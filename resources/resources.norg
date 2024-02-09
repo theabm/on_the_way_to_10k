@@ -3,6 +3,13 @@
    - ( ) {https://www.assemblyai.com/blog/deepminds-alphatensor-explained/}[Deep Mind Alpha Tensor Explained]
 ** Deep Learning
    - ( ) {https://horace.io/brrr_intro.html}[Making Deep Learning Go Brrr From First Principles]
+   - ( ) {https://bzolang.blog/p/neural-computing-pt-1-sparse-distributed}[Neural Computing P1 - Sparse Distributed Memory]
+   - ( ) {https://bzolang.blog/p/neural-computing-pt-2-sparse-bit}[Neural Computing P2 - Sparse Distributed Memory]
+   - ( ) {https://www.youtube.com/watch?app=desktop&v=YAgjfMR9R_M&feature=youtu.be}[Lec: 13 - Attention] - A great resource to learn about attention and transformers.
+** Automatic Differentiation
+   - ( ) {https://blog.research.google/2023/04/beyond-automatic-differentiation.html?m=1}[Beyond Automatic Differentiation]
+   - ( ) {https://dlsyscourse.org/}[Deep Learning Systems] - A course on Deep Learning from a technical 
+         perspective. Teaches you to build your own autograd engine.
 * Linux
 ** System
    - ( ) {https://linuxjourney.com/}[Linux Journey]
@@ -11,6 +18,9 @@
 ** Questions
    - (x) {https://unix.stackexchange.com/questions/3192/what-is-meant-by-mounting-a-device-in-linux}[What is meant by mounting a device in linux?]
 * Programming
+  - ( ) {https://bernsteinbear.com/pl-resources/}[Programming Language Resources]
+  -- Talks about compilers, Lisp, Runtime and Runtime Optimization, Jit, Assembly. 
+  - ( ) {https://austinhenley.com/blog/challengingprojects.html}[Challenging Projects Every Programmer Should Try]
 ** C
    - ( ) {https://www.assemblyai.com/blog/deepminds-alphatensor-explained/}[What Every C Programmer Should Know About Undefined Behavior]
    - ( ) {https://blog.regehr.org/archives/213}[A Guide TO Undefined Behavior in C and C++, Part 1]
@@ -37,6 +47,21 @@
    - ( ) {https://www.arewelearningyet.com/}[Are we learning yet? - Rust machine learning ecosystem]
    - ( ) {https://www.rust-lang.org/what/embedded}[Embedded Rust]
    - ( ) {https://cheats.rs/#language-sugar}[Rust Cheat Sheet]
+   - ( ) {https://practice.course.rs/}[Rust By Practice]
+** Nix
+   - (-) {https://nixos.org/manual/nix/stable/}[Nix Manual]
+   - (-) {https://nixos.org/manual/nixpkgs/stable/}[NixPkgs Manual]
+   - (-) {https://nixos.org/manual/nixos/stable/}[NixOS Manual]
+   - (-) {https://nix.dev/}[Nix Dev]
+   - (-) {https://nixos.org/guides/nix-pills/}[Nix Pills]
+   - (-) {https://noogle.dev/}[Noogle - Find Nix Functions]
+   - (-) {https://flakm.com/posts/nixos_rust/01_start/}[Measure Twice Cut Once with NixOS] - Using NixOS to build a federated blogging platform. 
+   - (-) {https://tonyfinn.com/blog/nix-from-first-principles-flake-edition/}[Nix from First Principles - Flake Edition]
+   - (-) {https://nixos.asia/en/nix-first}[First Steps with Nix]
+   - (-) {https://nixcloud.io/tour/?id=introduction/nix}[A Tour Of Nix]
+** Jax
+   - (-) {https://www.youtube.com/watch?v=SstuvS-tVc0&list=PLBoQnSflObckOARbMK9Lt98Id0AKcZurq}[Jax Tutorial - Aleksa Gordic]
+   - (-) {https://jax.readthedocs.io/en/latest/autodidax.html}[Autodidax - Jax Core From Scratch]
 ** ATS Programming Language
    - {https://www.cs.bu.edu/~hwxi/atslangweb/}[The ATS Programming Language]
 ** Haskell
@@ -44,6 +69,7 @@
    - (-) {https://www.youtube.com/playlist?list=PLF1Z-APd9zK5uFc8FKr_di9bfsYv8-lbc}[Advanced Functional Programming In Haskell]
    - (-) {http://learnyouahaskell.com/}[Learn You a Haskell For Greater Good]
    - ( ) {https://www.cs.nott.ac.uk/~pszgmh/fold.pdf}[A Tutorial On The Universality And Expressiveness Of Fold]
+   - ( ) {http://learn.hfm.io/}[Learning Haskell]
 ** Computer Architecture
    - ( ) {https://www.nand2tetris.org/}[Nand2Tetris]
    - ( ) {https://www.eeweb.com/building-a-4-bit-computer-from-the-ground-up/}[Building a 4 Bit Computer From The Ground Up]
@@ -68,6 +94,9 @@
    - ( ) {https://exercism.org/}[Exercism]
    - ( ) {https://www.codewars.com/}[Code Wars]
    - ( ) {https://www.techinterviewhandbook.org/grind75}[Grid 75 Questions]
+** Git
+   - ( ) {https://v5.chriskrycho.com/essays/jj-init/}[jj-init - What if we could replace Git?]
+   - ( ) {https://ohmygit.org/}[An Open Source Game to Learn Git]
 * Vim
    - ( ) {https://www.barbarianmeetscoding.com/boost-your-coding-fu-with-vscode-and-vim/dedication}[Boost Your Coding Fu with VsCode and VIM]
 ** LaTeX in Vim
@@ -81,9 +110,14 @@
   -- {https://ssd.eff.org/}[Surveillance Self Defense]
   -- {https://www.privacyguides.org/en/}[Privacy Guides]
   -- {https://www.cyber.gov.au/protect-yourself/resources-protect-yourself/personal-security-guides/personal-cyber-security-first-steps}[Personal Cyber Security: First Steps]
+  -- {https://anonymousplanet.org/guide.html}[The Hitchhiker’s Guide to Online Anonymity]
 * Blogs
-   - (+) [Amos's Blog] - A blog discussing Rust and how computers work.
-   - (+) [Julia Evans]{https://jvns.ca/} - A blog for exploring interesting topics
+  -- (+) [Amos's Blog] - A blog discussing Rust and how computers work.
+  -- (+) [Julia Evans]{https://jvns.ca/} - A blog for exploring interesting topics
+  -- (+) [Patrick Kidger]{https://kidger.site/thoughts/just-know-stuff/} - Insane guy that talks about things you should know for a 
+         PhD in ML. Hopefully in a few years I can finish this list.
+  -- (+) [Sebastian Mestre]{https://sebmestre.blogspot.com/2023/11/en-writing-compiler-is-surprisingly.html?m=1} - Writing a Compiler Is Suprisingly Easy.
+  -- (+) [Xe]{https://xeiaso.net/blog/} - Blog by Xe on a bit of everything.
 * Misc 
 ** Blue Blocking Glasses
    - (x) {https://optimizeyourbiology.com/blue-blocker-database}[Find The Best Blue Blocking Glasses]
