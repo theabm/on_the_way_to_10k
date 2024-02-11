@@ -1,0 +1,352 @@
+Based on the beginner {https://www.youtube.com/watch?v=RGOj5yH7evk}[course] by FreeCodeCamp.org. 
+
+* What is Git 
+
+  A free and open source version control system. 
+
+  Version control allows programers to track and manage changes in their 
+  projects. 
+
+  Note: git is the software that tracks the changes to your program, while 
+  github is an online hosting service that stores remote versions of your 
+  projects. 
+
+* Git commands
+  - clone: bring a repository that is hosted somewhere like Github into a 
+    folder in your lcal machine. 
+  - add: track your files and changes in git. 
+  -- `git add .`: add all the untracked files to git.
+  -- `git add [filename]`: add specific file to be tracked.
+  - commit: save your files in git.
+  -- `git commit -m [commit message] -m [commit description]`: commit changes 
+     with a commit message and a commit description.
+  - push: upload git commits to a remote repository like Github.
+  - pull: downlod changes from remote repository to your local machine. This is 
+    the opposite of push.
+  - status: shows the status of all the files in the respository. It will show 
+    which files are untracked, staged, and commited.
+
+* Using git on local machine
+
+  First we have to make sure that git is installed in our machine.
+  This can be checked with 
+  @code bash
+  git --version
+  @end
+
+  The `.git` folder is the folder that stores all the changes, information and history 
+  of our repository. 
+
+* SSH Keys
+  In order to push to github we need to connect our remote github account to 
+  our local git.
+  We need to create an ssh key pair. We copy the public key and store it 
+  in our githubs account ssh and gpg keys -> ssh keys -> add new. 
+  In this way, when we try to connect to github, our key will be validated.
+
+* Pushing to github
+
+  Terminology: 
+  - `origin` : a shorthand name for the remote repository that a project was 
+    originally cloned from. More precisely, it is used instead of that original 
+    repository's URL - and thereby makes referencing much easier.
+  - `master`: this is the name of the branch that we want to push to.
+
+  The command `git push origin master` pushes the changes we have made to the 
+  master branch on origin.
+
+* Initiaizing a git repository
+
+  The command `git init` initializes a repository. We will see that by default 
+  we will be in the "master" branch. Usually the master branch is the default 
+  branch that github creates for all our projects and it is the branch that 
+  has the production code.
+
+  After initializing a repository, we can add the files we wish to track by 
+  doing `git add .` (to add all the files in the current repository).
+  then we can commit these files using 
+
+  `git commit -m "first commit" -m "commit description"`
+
+  If we do `git status` we will see that our changes have been added and 
+  commited. What happens if we try to do `git push origin master`?
+
+  We will see we get an error: 
+  `fatal: origin does not appear to be a git repository`
+  `fatal: Could not read from remote repository`
+
+  This error tells us that the remote repository a.k.a "the origin" for this
+  project is not setup. When we create a repository using `git clone` the 
+  remote repository is automatically set up to be the URL we cloned from. 
+  However, when we create a local repository with `git init`, github has no 
+  way of knowing what the remote repository URL is.
+
+  Remember that `origin` is just a shorthand for the URL of the remote repository 
+  we want to push changes to.
+
+  So we have to create that connection! 
+  First we create an empty repository in our Github account. 
+
+  Then we can do: 
+  @code bash
+  git remote add origin git@github.com/myusername/myrepositoryname.git
+  @end
+  Once we do this, by doing:
+
+  `git remove -v`
+
+  We will see all the remote URL that github is using for 
+  - Fetching: where it gets the changes from. This means that if someone else 
+    does a change to the remote github repository, by doing `git fetch` we will 
+    get those changes. Then, if we do `git merge`, we will merge those changes 
+    with our local copy. More on this later.
+  - Pushing: where it pushes our local changes. Essentially this is where our 
+    local changes will be pushed to. 
+
+  If we have done nothing else, the URLs for both fetching and pushing should be 
+  the same and we should see some output of the form:
+  @code bash
+  origin git@github.com/myusername/myrepositoryname.git (fetch)
+  origin git@github.com/myusername/myrepositoryname.git (push)
+  @end
+
+  Now that our origin is setup, we can use `git push origin master` again 
+  and we will see that we have no errors.
+
+  Often, you will see people simply writing `git push`. This is a shorthand 
+  for `git push origin master` which becomes available *_only_* after we 
+  have set up what is called "the upstream". The upstream is the default place 
+  github will use when we dont specify the location. In other words, if the 
+  upstream is set to origin, when we do `git push`, it will automatically default 
+  to using the origin master.
+
+  To set up the upstream, we can do:
+
+  `git push -u origin master`
+
+  which is equivalent to 
+
+  `git push --set-upstream origin master`
+
+  Which will push to origin master but also set up the upstream so that in 
+  the future I can simply write `git push` instead of `git push origin master`.
+  Note that it is recommended to get into the habit of specifying the location 
+  and branch of where you want to push or pull from.  This is a good practice 
+  that will help out clear any doubts in the future.
+
+* Git Branches
+
+  By default, all of our commits are on what is called the `master` branch.
+  
+  However, we can create other branches! 
+
+  Suppose we create a new "feature branch". What happens? 
+  Well, up until the point of creating of the branch, the code on master and 
+  the feature branch will be the same. 
+
+  As we make updates to the feature branch, those changes are only seen in 
+  the feature branch.
+  So if we make changes in the feature branch and commit those changes, and then 
+  switch back to the master branch, we wont see the changes we had made
+  on the feature branch. Each individual branch only knows about itself, so 
+  there is no way for them to know about changes in the other branch.
+
+  We can continue to change the code in the master branch and commit those 
+  changes.
+  If we switch back to the feature branch, once again, we wont see 
+  those changes. 
+
+  This essentially allows us to develop branches independently from one another.
+
+  Why is this useful? Because it allows us to work on other features that may 
+  break our main code base without affecting the master branch. In this way, we 
+  can work on the feature branch independently until the feature is complete 
+  and then we can "merge" our branch into the master branch.
+
+
+  Lets look at how to create branches in the terminal.
+
+  If we type in a new repository:
+
+  `git branch`
+
+  We see that we only have one branch named `master`. The star before it 
+  indicates that we are in that branch.
+
+  To create a new branch, we will use the `git checkout` command. This command 
+  is also used to switch between branches. To create a branch called 
+  "feature-branch" we use `git checkout` with the `-b` flag:
+
+  `git checkout -b feature-branch`
+
+  After running this command, we will see a message in stdout that tells us 
+  that we have switched to a new branch called 'feature-branch'.
+
+  If we type again:
+
+  `git branch`
+
+  We will see that now we have two branches: master and feature-branch, and the 
+  star before feature-branch indicates that we are currently on the 
+  feature-branch.
+
+  To switch back to the master branch we can type:
+
+  `git checkout master`
+
+  or more generally, to switch to a branch called branchName we type:
+
+  `git checkout branchName`
+
+* Merging Branches
+
+  Suppose that we create and switch to the `feature-branch`. In this branch, 
+  we make some changes to some files and we add and commit the changes. 
+
+  If we go back to the `master` branch, we see that those changes are not present.
+
+  How do we merge these changes into the `master` branch? 
+
+  We can do this using `git merge`. However, first we want to see the changes
+  we have made. 
+  We can do this using the `git diff` command.
+
+  We need to specify the branch we want to compare the current branch to, so
+  if we are in `master`, we would write:
+
+  `git diff feature-branch`
+
+  This will show the changes in our terminal.
+
+  Now, to merge these changes, we could use `git merge feature-branch` which 
+  would totally work. However, the most common workflow pattern you will see 
+  on github is to push the changes on the new branch to github and then making a 
+  pull request (PR).
+
+  To do this, we switch to our `feature-branch` and then try to do `git push`.
+  As explained before, since we are in a new branch and therefore we have not 
+  set up the upstream, we will get an error, which we do.
+
+  Git will complain that the upstream is not set up for this branch and needs 
+  to know to what branch to push to. It suggests the following fix:
+
+  `git push -u origin feature-branch`
+
+  This would tell git two things: push to a branch in the origin called 
+  `feature-branch` and set the upstream for the branch as the `feature-branch` 
+  in the remote repository. 90% of the time, the branch in the remote repository 
+  will have the same name as the branch in our local machine so this fix is 
+  fine.
+  Once we do this, we will see that github will also suggest to create a 
+  `pull request`.
+
+  QUESTION: IF THE BRANCH HAS NOT BEEN CREATED IN THE REMOTE WILL THIS CREATE IT?
+
+* Pull Requests
+
+  Pull requests are requests to have our code pulled into another branch. In our 
+  case we want our code in the `feature-branch` to be pulled into the `master` 
+  branch.
+
+  So we make a PR from the `feature-branch` to the `master` branch. Once 
+  we have made PR, anyone can review our code, comment on it, or ask for some 
+  changes.
+  After we make a PR, we can update our code by making additional commits, 
+  and pushing them to the branch. Once the PR is merged, we will generally delete 
+  the `feature-branch` and switch back to `master`. If we need to do new changes, 
+  we would create a new branch and repeat the procedure.
+
+  After the previous command, if we go on Github, we will see that it will have 
+  detected that a new branch has been pushed and it suggests to compare branches 
+  and create a pull request.
+
+  If we click, it takes us to a screen which shows us which branches are being  
+  compared. 
+  We will see a "base" branch and a "compare" branch which will be merged into 
+  the base branch (also look at the arrow which makes it clear which branch is 
+  being merged into which branch).
+
+  We also see that there is a title message and a description that is used to 
+  explain the PR. Once we have filled all the fields in a satisfyig manner, we 
+  can click on "create pull request" which will create the PR. 
+
+  This will then take us to a new window which gives details on the pull request 
+  that has been created. We will be able to see the conversation, the commits, 
+  the checks, and the diff of the files that are being changed.
+
+  Note that if we go on "Files Changed", we can see the diff between our 
+  branches. If we look on the side, we will see that there is a small "+" sign 
+  that appears when we hover on the changed code. This allows people to add 
+  comments/questions to the code that we are changing which is useful when 
+  working in groups.
+
+  Whenever comments are added they must be explicitly "resolved" - and we will 
+  see a button "resolve conversation" that appears under the comments. If we 
+  dont have full permissions on the repository, then all comments must first 
+  be resolved before merging the pull request. Otherwise, in this case, since 
+  we are the owners of our  repository and we have full powers, we can 
+  directly merge the PR.
+
+  Once we merge, the PR is merged and closed and we will see the changes in the 
+  master branch. 
+
+  If we go switch to the local master branch, we will see that the changes are 
+  not reflected. This is because we have to pull the updated version from Github 
+  with a `git pull`.
+  Note that if we don't have an upstream setup, git will complain. So we would 
+  have to do `git pull -u origin master` to pull from the master branch in 
+  origin and also to set the upstream.
+
+  After pulling the changes, we will see the new changes reflected in our local 
+  master branch.
+
+  Since we have merged the `feature-branch` branch into the `master` branch, 
+  we no longer have any real utility for the `feature-branch`, so we delete 
+  it with `git branch -d feature-branch`.
+
+
+* Merge Conflicts
+
+  In the examples we have talked about so far, we have not considered the possibility 
+  of conflicts/collisions. 
+  Collisions or conflicts usually happen when multiple people are working on the 
+  same project. 
+  Sometimes, multiple people will work on the separate branches and the master 
+  branch will get updated from different sources. So it is possible for multiple 
+  people to change the same files in the same place. In this case, git will 
+  not know what to do, and it will ask you to resolve the collision/conflict. 
+ 
+  This means we will manually have to choose which code to keep, change, or 
+  delete.
+
+  A typical scenario where this happens is when we are working on some feature 
+  in a `feature-branch`. In the meantime, the origin master branch gets 
+  updated (because other teams are also working on other features and PRs are 
+  getting merged). These changes won't be visible in our local master branch 
+  because we haven't pulled the changed from origin.
+
+  Since we want eventually want to merge our `feature-branch` as smoothly as 
+  possible, we don't want to fall too far behind master. So from our local master 
+  branch, we do a `git pull origin master` to get the latest changes.
+
+  Then, we want to propagate these changes to our local `feature-branch` so we 
+  can keep developing while also having the new changes. Therefore, we go into 
+  the `feature-branch` by doing `git checkout feature-branch`. Once there, 
+  we do a `git merge master` to merge the local master branch (with the new 
+  changes) into our local `feature-branch`. This can create some conflicts that 
+  we will need to resolve.
+
+  Note: the previous three paragraphs explain a typical use case of `git merge`. 
+  It is useful to explain this since before we had stated that the usual workflow 
+  is to push to a remote branch and then do a PR. Now we explained the typical 
+  use case of git merge (aka merging changes in origin to our local branches).
+
+
+
+
+
+
+
+
+
+
