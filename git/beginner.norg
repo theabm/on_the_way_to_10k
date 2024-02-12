@@ -319,33 +319,80 @@ Based on the beginner {https://www.youtube.com/watch?v=RGOj5yH7evk}[course] by F
   This means we will manually have to choose which code to keep, change, or 
   delete.
 
-  A typical scenario where this happens is when we are working on some feature 
-  in a `feature-branch`. In the meantime, the origin master branch gets 
-  updated (because other teams are also working on other features and PRs are 
-  getting merged). These changes won't be visible in our local master branch 
-  because we haven't pulled the changed from origin.
+  To illustrate this problem, create a branch called `feature-branch` and modify 
+  some file. Commit these changes and then switch back to `master`. Modify the 
+  same file in the same place with some other change and commit these changes 
+  as well. If we switch back to `feature-branch` and try to `git merge master` 
+  to merge the `master` branch into the `feature-branch` we will see that git 
+  will ask us to resolve the conflicts.
 
-  Since we want eventually want to merge our `feature-branch` as smoothly as 
-  possible, we don't want to fall too far behind master. So from our local master 
-  branch, we do a `git pull origin master` to get the latest changes.
+** Side note:
+   Previously, we had mentioned that it is preferred to create a PR and merge 
+   rather than do a `git merge`. So when is `git merge` used?
 
-  Then, we want to propagate these changes to our local `feature-branch` so we 
-  can keep developing while also having the new changes. Therefore, we go into 
-  the `feature-branch` by doing `git checkout feature-branch`. Once there, 
-  we do a `git merge master` to merge the local master branch (with the new 
-  changes) into our local `feature-branch`. This can create some conflicts that 
-  we will need to resolve.
+   A typical scenario is when we are working on some feature 
+   in a `feature-branch`. In the meantime, the origin master branch gets 
+   updated (because other teams are also working on other features and PRs are 
+   getting merged). These changes won't be visible in our local master branch 
+   because we haven't pulled the changed from origin.
 
-  Note: the previous three paragraphs explain a typical use case of `git merge`. 
-  It is useful to explain this since before we had stated that the usual workflow 
-  is to push to a remote branch and then do a PR. Now we explained the typical 
-  use case of git merge (aka merging changes in origin to our local branches).
+   Since we want eventually want to merge our `feature-branch` as smoothly as 
+   possible, we don't want to fall too far behind the origin `master`. So from 
+   our local `master` branch, we do a `git pull origin master` to get the latest 
+   changes.
 
+   Then, we want to propagate these changes to our local `feature-branch` so we 
+   can keep developing while also having the new changes. Therefore, we switch 
+   to the `feature-branch` by doing `git checkout feature-branch`. Once there, 
+   we do a `git merge master` to merge the local `master` branch (which has the 
+   new changes from the `origin master` branch) into our local `feature-branch`.
+   This can create some conflicts that we will need to resolve.
+   ---
 
+  So how do we fix conflicts? The majority of code editors have some nice 
+  git features which allow dealing with conflicts. We will usually see 
+  a file which shows the conflicts in different colors. Some useful terminology 
+  we might see is in the editor to fix our conflict:
 
+  $ current change 
+  The change in the current branch. In our example, since we did 
+  `git merge master` from the `feature-branch`, the "current" change 
+  corresponds to the change present in the `feature-branch`.
 
+  $ incoming change
+  The change in the branch that is being merged. In our example, this 
+  would be the change that is present in the `master` branch since this 
+  is the "incoming" branch.
 
+  To fix our conflict, we need to delete all non-code "conflict markers" that 
+  are added by git and then write the final code we want.
+  This will resolve the conflict, however, doing `git status` will show that 
+  we need to commit these new changes because we have fixed the conflict.
 
+* Undoing in Git
+
+  What if we made a mistake a mistake? 
+
+  If we added a file that we wish to unstage, we can do `git reset` or 
+  `git reset filename`, and this will unstage `filename`.
+
+  What if we want to undo a commit?
+
+  We can use `git reset HEAD~1`. `HEAD` is a pointer to the latest commit that 
+  git will look at. So in this way, we are telling git to reset the `HEAD` to 
+  one commit before the current `HEAD` (hence the ~1).
+  If we want to go back two commits, we would do `git reset HEAD~2` and so 
+  forth.
+
+  A useful command is `git log branchname` which will show the commit history 
+  of `branchname`. If we have checked out a branch, `git log` will show the 
+  commit history of the branch currently checkout out. If we have not checked 
+  out a branch, it will show the commit history of the entire repository.
+
+  `git log` will also show the commit `hash` which is a unique identifier for 
+  that specific commit. So, if we need to undo a lot of commits, instead of 
+  counting them and doing `git reset HEAD~#` we can do `git reset commit-hash`
+  for that specific commit.
 
 
 
