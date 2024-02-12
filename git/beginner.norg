@@ -378,22 +378,77 @@ Based on the beginner {https://www.youtube.com/watch?v=RGOj5yH7evk}[course] by F
 
   What if we want to undo a commit?
 
-  We can use `git reset HEAD~1`. `HEAD` is a pointer to the latest commit that 
-  git will look at. So in this way, we are telling git to reset the `HEAD` to 
-  one commit before the current `HEAD` (hence the ~1).
-  If we want to go back two commits, we would do `git reset HEAD~2` and so 
-  forth.
+  We can use `git reset HEAD~1`. 
 
-  A useful command is `git log branchname` which will show the commit history 
+** HEAD
+   It is important to understand `HEAD`. Every branch in git has a named 
+   head (lowercase) which points to the latest commit. By default, every new 
+   repository has a `master` head which points to the latest commit in the 
+   `master` branch. On the other hand, `HEAD` (uppercase) is an alias for 
+   the head in the currently checked-out branch. Whenever we switch branches, 
+   the HEAD changes to the latest commit in that branch.
+
+   So with the command `git reset HEAD~1`, we are telling git to reset the 
+   `HEAD` (the pointer to the latest commit in the current branch) to 
+   one commit before the current `HEAD` (hence the ~1).
+   If we want to go back two commits, we would do `git reset HEAD~2` and so 
+   forth.
+
+   ---
+  Another useful command is `git log branchname` which will show the commit history 
   of `branchname`. If we have checked out a branch, `git log` will show the 
-  commit history of the branch currently checkout out. If we have not checked 
+  commit history of the branch currently checked out. If we have not checked 
   out a branch, it will show the commit history of the entire repository.
 
-  `git log` will also show the commit `hash` which is a unique identifier for 
-  that specific commit. So, if we need to undo a lot of commits, instead of 
-  counting them and doing `git reset HEAD~#` we can do `git reset commit-hash`
-  for that specific commit.
+  When we run `git log` we will a lot of information for each commit. We will 
+  see the commit hash, the author of the commit, the time of the commit, and
+  the commit message. Furthermore, in front of *some* commit messages, we 
+  will see parenthesis such as `(HEAD->master)`, `(origin/master)`, 
+  `(feature-branch)` , or a combination of some sort such as 
+  `(HEAD->master, origin/master)`. This information tells us: 
 
+  - what commit the `heads` of all branches are pointing to. So 
+    `commit some-commit-hash (HEAD->master, origin/master)` tells us that both 
+    `master` and `origin/master` are pointing to the commit identified by 
+    `some-commit-hash`. 
+  - What commit `HEAD` is pointing to. This also tells us what is the currently 
+    checked out branch. So a message such as 
+    `commit some-commit-hash (HEAD->master, origin/master)` tells us that 
+    `HEAD` is pointing to `some-commit-hash` and the currently checked out branch 
+    is `master`.
 
+  Since `git log` also shows the commit hash, if we need to undo a lot of 
+  commits, instead of counting them and doing `git reset HEAD~#` we can do 
+  `git reset commit-hash` to reset to the commit for that specific hash.
+
+  Note that after we do a `git reset`, this _won't_ undo the changes in our 
+  code base. In fact, if we open our editor, we will see that our code is 
+  unchanged. However, those changes will be "new" to git. In other words, 
+  `git reset` only tells git to unstage any changes after the commit we reset 
+  to. 
+
+  On the other hand, if we want to undo changes in our code and get back to the 
+  same state as the commit, then we need to do a 
+  `git reset --hard some-commit-hash`. Be careful when doing this operation as 
+  it will delete all the work you have done after the commit identified by 
+  `some-commit-hash`.
+
+* Forking
+  In the Github interface, you will see that we can "fork" repositories that 
+  are not ours. 
+
+  Forking means that we will copy the entire repository (including all the 
+  branches) into our own user account which will in turn give us full control 
+  and permissions to make changes to that copy. 
+
+  Then, we can clone our fork of the repository, work on it, and update it in 
+  the same as we discussed above. 
+
+  Finally, once we have done some updates, we may want to integrate our changes 
+  into the original repository. To do this, we go to our forked repository, 
+  create a PR, and then select the original repository as the "base repository" 
+  (and maybe also select the branch if the repository has multiple of them). 
+  Then we select our own forked repository + branch as the "head repositoy" 
+  (which is the one we want to merge into the original one).
 
 
