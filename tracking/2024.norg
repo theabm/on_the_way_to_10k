@@ -5,7 +5,7 @@ So any removals will be documented with strikethrough lines.
 Goals:
 - (-) Learn Rust.
 -- ( ) Write at least one medium project in Rust.
--- (-) Finish the book
+-- (x) Finish the book
 -- ( ) Finish Rust for Rustaceans
 -- ( ) Learn about async and futures.
 - (-) Learn Haskell.
@@ -65,6 +65,16 @@ For AI:
    -- 2 videos from Jeremys IT Lab.
 
 * February
+** Rust
+   - (x) Finished the Rust book! 
+** Haskell 
+   - Currently on the 4th video of FP with Haskell. 
+   - Currently halfway on LYAHFGG
+** Nix
+   - Little progress.
+
+TOOK A TRIP TO IRAN for 10 days - progress has been slower.
+
 
 
 
