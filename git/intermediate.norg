@@ -1,0 +1,8 @@
+Based on: 
+
+* Crafting the perfect commit
+
+  The first step is to make changes that make sense and are contained to a 
+  single aspect. Cramming a lof of changes in the same commit is a bad 
+  practice and doesn't allow one to separate different changes in our 
+  development history.
