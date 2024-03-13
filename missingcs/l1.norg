@@ -1,0 +1,129 @@
+Intro and shell basics
+___
+
+* Why this course?
+  As computer scientists, we know that computers are awesome, but we often 
+  forget that there are tools that can make our work easier. 
+  This class aims at how to make the most of tools that are well known as
+  well as learning about new tools that are less known. 
+
+  Each of these notes are independent, however, they assume the knowledge of 
+  previous lectures.
+
+* The shell
+  The shell is the tool we use when we want to perform more advanced actions 
+  that the GUI does not offer.
+
+  In linux, the most popular shell is the "bash" shell.
+
+  This lecture will be focused on bash.
+
+** Shell commands - (new)
+   - `cd -` : cycle to the directory you were previously in.
+
+** Permissions
+
+   If you execute `ls -l`, you will see a list of all the files in  the 
+   current directory printed in long format. You see that there is information 
+   such as the user and group that owns the files and the permissions 
+   for three groups: for the owner of the file/directory, for the group that owns
+   the  file/directory, and for everyone else. For each of these three categories
+   there are three permissions that correspond to read, write, and execute:
+   - r: read permissions enabled
+   - w: write permissions enabled
+   - x: execute permissions enabled
+   - `-` : missing permission
+   So something like `r--rw---x` means that the user has read permissions, 
+   the group has read and write permissions and everyone else has execute 
+   permission.
+
+   Note that for files these permissions are easy to understand, while for 
+   directories: 
+   - read: means that you can see the contents of a directory
+   - write: means you can rename, create, or remove files in the directory
+   - execute: means you can enter or `cd` into the directory.
+
+** Streams
+   All shells have an input and output stream. The default input stream is the 
+   keyboard and terminal, while the output is the the terminal as well.
+
+   The shell gives us a way to redirect these streams using `>` and `<`.
+
+   @code bash
+  $ echo hello > hello.txt
+   @end
+
+   This will redirect the ouput stream of the command `echo hello` into 
+   the file hello.txt (creating it if it doesnt exist).
+
+   @code bash
+  $ cat < hello.txt
+   hello
+   @end
+
+   This will redirect the input stream of cat to be the contents of hello.txt.
+
+   We can chain both of these:
+   @code bash
+  $ cat < hello.txt > hello2.txt
+   @end
+   which is equivalent to the cp command but only using stream redirection.
+
+** The pipe operator
+   The pipe operator is `|` and it is inserted between two programs. The idea 
+   is that it makes the output of the program on the left the input for the 
+   program to the right of the pipe.
+
+   @code bash
+  $ ls -l / | tail -n1
+   @end
+   So we are listing the contencts of the root `/` directory and making the output 
+   the input to the tail command which only lists the last elements. 
+
+   We can even do something like this:
+   @code bash
+  $ ls -l / | tail -n1 > ls.txt
+   @end
+** Using the terminal
+   The root user has user id of 0. It is the administrator and it is allowed 
+   to do whatever it wants in a system.
+
+   Most of the time we will not be operating as the root because we may accidentally 
+   wreck our system.
+
+   To run commands as root, we can use `sudo`.
+
+   When is this useful? Lets look at an example. 
+
+   If we cd into `/sys`, and list using `ls` we will see an output that looks 
+   like files, but are not really files in our computer. They are various 
+   kernel parameters! Since they are exposed as files, we can use all of the 
+   tools used so far to interact with these parameters.
+
+   For example, we could want to change the brightness number in the brightness 
+   file by doing `cat 500 > brightness` we will get an error message saying 
+   "permission denied". To achieve this, we need to run the command as root. 
+
+   However, if we try to do `sudo cat 500 > brightness` we still get permission
+   denied! why? because the stream redirection is set up by the shell. The programs
+   themselves have no knoweldge of each other. So in this case, we are telling 
+   the shell "run the command sudo echo 500", "open the file brightness", 
+   "redirect the ouput of the first command into the second". However, the shell 
+   does all this! So the second command fails because it is trying to open 
+   the brightness file as a user, so it lacks the permissions needed.
+
+   To fix this, we need to do `# cat 500 > brightness`, where the `#` means 
+   run the entire thing as root.
+
+   Alternatively, we can do `sudo su` which opens a shell as root. We notice 
+   that the username changes to root and the prompt changes from `$` to `#`. 
+   Now if we do this, we dont get an error anymore.
+
+   The last alternative is that we could run `echo 500 | sudo tee brightness` 
+   which uses the `tee` command that writes the input stream to both 
+   the output stream and to another file.
+   In this case, we are using sudo for the tee program, which is in charge 
+   of opening the brightness file (which it can thanks to sudo).
+
+
+
