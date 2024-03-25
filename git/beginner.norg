@@ -371,7 +371,7 @@ Based on the beginner {https://www.youtube.com/watch?v=RGOj5yH7evk}[course] by F
 
 * Undoing in Git
 
-  What if we made a mistake a mistake? 
+  What if we made a mistake? 
 
   If we added a file that we wish to unstage, we can do `git reset` or 
   `git reset filename`, and this will unstage `filename`.
