@@ -8,12 +8,106 @@ ___
   The type `Vec<T>` allows us to store values of the same type in 
   contiguouos memory.
 
-  To create a new vector we can use
+  To create a new empty vector we can use
 
 @code rust
-
+let v: Vec<i32> =  Vec::new();
 @end
+    Note that we have to add a type annotation here because we are not inserting 
+  any data and the compiler needs to know all types at compile time. 
+  Vectors are implemented using "generics" which are covered later. 
 
+  However, most of the time, we create a vector that will hold values from 
+  the beginning. In this case, we don't need annotations since the compiler 
+  can infer the type. 
+  Lastly, we can use the handy `vec!` macro which creates a vector that holds 
+  the values we give it:
+@code rust
+let v = vec![1,2,3];
+  @end
+
+* Updating a Vector
+
+   To create a vector and then add elements we can use the `push` method. 
+@code rust
+let mut v =  Vec::new();
+v.push(5);
+v.push(6);
+   @end
+
+
+* Reading Elements of Vectors
+  To reference a value stored in a vector we can use 
+  - indexing 
+  - the `get` method.
+
+@code rust
+      let v = vec![1, 2, 3, 4, 5];
+
+    let third: &i32 = &v[2];
+    println!("The third element is {third}");
+
+    let third: Option<&i32> = v.get(2);
+    match third {
+        Some(third) => println!("The third element is {third}"),
+        None => println!("There is no third element."),
+    }
+
+  @end
+
+  We can use `&` and `[]` to obtain a reference to the element at the index value. 
+  On the other hand, the `get` method returns `Option<&T>` which indicates that 
+  it will be `None` if there is no such element and `Some(&T)` if it exists. 
+  Therefore, `get` will never panic.
+
+  Rust provides these two methods so that we can choose what should happen when 
+  we try to access a value outside the valid range. If we want the code to 
+  panic, we use `[]` while if we don't want this, we use `get`.
+
+  Of course, at all times, the borrow checker will ensure that any references 
+  remain valid. 
+
+  For example, the following code snippet won't compile
+@code rust
+  fn main() {
+    let mut v = vec![1, 2, 3, 4, 5];
+
+    let first = &v[0];
+
+    v.push(6);
+
+    println!("The first element is: {first}");
+  }
+  @end
+
+  This violates the principle of the borrow checker because immutable and mutable 
+  borrows cannot coexist. More specifically, the `push` method may invalidate 
+  reference because it could reallocate the memory to make space for the 
+  new value being pushed.
+
+* Iterating Over Values in a Vector
+
+  We can access each element of a vector using a `for` loop while creating *immutable*
+  references to the elements in the vector:
+@code rust
+      let v = vec![100, 32, 57];
+    for n_ref in &v {
+        // n_ref has type &i32
+        let n_plus_one: i32 = *n_ref + 1;
+        println!("{n_plus_one}");
+    }
+
+  @end
+
+  We can also iterate over mutable references to each element in a mutable vector
+  in order to change all the elements. 
+@code rust
+      let mut v = vec![100, 32, 57];
+    for n_ref in &mut v {
+        // n_ref has type &mut i32
+        *n_ref += 50;
+    }
+  @end
 
 
 
