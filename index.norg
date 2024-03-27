@@ -60,9 +60,9 @@
 **** {:rust/crates:# Paths for Referring to an Item in the Module Tree}[Paths for Referring to an Item in the Module Tree]
 **** {:rust/crates:# Bringing Paths Into Scope with the use Keyword}[Bringing Paths Into Scope with the use Keyword]
 **** {:rust/crates:# Separating Modules into Different Files}[Separating Modules into Different Files]
-*** {:rust/collections:}[Common Collections]
-**** {:rust/collections:# Storing Lists of Values with Vectors}[Storing Lists of Values with Vectors]
-**** {:rust/collections:# Storing UTF-8 Encoded Text with Strings}[Storing UTF-8 Encoded Text with Strings]
+*** Common Collections
+**** {:rust/collections/vectors:}[Storing Lists of Values with Vectors]
+**** {:rust/collections/strings:}[Storing UTF-8 Encoded Text with Strings]
 **** {:rust/collections:# Storing Keys with Associated Values in Hash Maps}[Storing Keys with Associated Values in Hash Maps]
 
 ** Tracking

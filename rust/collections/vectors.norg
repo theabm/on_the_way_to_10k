@@ -1,5 +1,5 @@
 
-Common Collections
+Common Collections - Vectors
 
 ___
 
@@ -110,5 +110,43 @@ v.push(6);
   @end
 
 
+* Using Iterators
 
+  We discuss iterators in more detail later. Broadly speaking, an iterator 
+  contains a pointer to data within the vector. 
+  This is illustrated by desugarizing a for-loop as follows:
+  @code rust
+  fn main() {
+      use std::slice::Iter;  
+      // create a vector
+      let mut v: Vec<i32>         = vec![1, 2];
+      // initialize iterator of the vector
+      // this initially points to the first element 
+      // so in this case it points to 1
+      // also note that this takes an immutable borrow of *v
+      let mut iter: Iter<'_, i32> = v.iter();
+      // we use next method on an iterator which returns 
+      // an option<&T> of the current element (in our case T = int32) 
+      // and then moves the iterator to the next element.
+      // to extract the item within the option we need to use unwrap.
+      let n1: &i32                = iter.next().unwrap();
+      let n2: &i32                = iter.next().unwrap();
+      // after two calls to next, the iterator has gone over the entire 
+      // length of the vector (len = 2) and a call to next will return 
+      // an option of none.
+      let end: Option<&i32>       = iter.next();
+  }
+  @end
+
+  Since iterators borrow the vector, if we have to do in-place operations, it 
+  is better to create an iterator over the indexes of the vector using a Range:
+@code rust
+  fn main() {
+use std::ops::Range; 
+let mut v: Vec<i32>        = vec![1, 2];
+let mut iter: Range<usize> = 0 .. v.len();
+let i1: usize              = iter.next().unwrap();
+let n1: &i32               = &v[i1];
+  }
+  @end
 
