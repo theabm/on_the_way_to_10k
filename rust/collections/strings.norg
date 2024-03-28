@@ -102,3 +102,39 @@ ___
 
 * Indexing into Strings
 
+  Rust does not allow to easily index into strings because of UTF-8. 
+  `String` is a wrapper around `Vec<u8>` and single characters in UTF-8 may 
+  take more than 1 byte. So indexing into a certain position may give invalid
+  results.
+
+  If you really have to index a string, there are two possibilities:
+  - slicing strings
+  - iterating over strings
+
+
+** Slicing Strings
+  The first method consists of using a range to create a slice containing 
+  particular bytes:
+@code rust
+  let hello = "Здравствуйте";
+
+  let s = &hello[0..4];
+  @end
+
+  Here, s will be a &str that contains the first 4 bytes of the string. 
+  Each of the characters is 2 bytes, which means s will be Зд
+  If we were to try to slice only part of a character’s bytes with 
+  something like &hello[0..1], Rust would panic at runtime in the same 
+  way as if an invalid index were accessed in a vector.
+
+  Use ranges to create string slices with caution since it could crash your 
+  program.
+** Iterating Over Strings
+   To iterate over strings at individual Unicode scalar values, use `chars`.
+   Calling `chars` on “Зд” separates out and returns two values of type char, 
+   and you can iterate over the result to access each element:
+@code rust
+   for c in "Зд".chars() {
+    println!("{c}");
+}
+   @end
