@@ -113,28 +113,39 @@ ___
 
 
 ** Slicing Strings
-  The first method consists of using a range to create a slice containing 
-  particular bytes:
-@code rust
-  let hello = "Здравствуйте";
+   The first method consists of using a range to create a slice containing 
+   particular bytes:
+   @code rust
+   let hello = "Здравствуйте";
 
-  let s = &hello[0..4];
-  @end
+   let s = &hello[0..4];
+   @end
 
-  Here, s will be a &str that contains the first 4 bytes of the string. 
-  Each of the characters is 2 bytes, which means s will be Зд
-  If we were to try to slice only part of a character’s bytes with 
-  something like &hello[0..1], Rust would panic at runtime in the same 
-  way as if an invalid index were accessed in a vector.
+   Here, s will be a &str that contains the first 4 bytes of the string. 
+   Each of the characters is 2 bytes, which means s will be Зд
+   If we were to try to slice only part of a character’s bytes with 
+   something like &hello[0..1], Rust would panic at runtime in the same 
+   way as if an invalid index were accessed in a vector.
 
-  Use ranges to create string slices with caution since it could crash your 
-  program.
+   Use ranges to create string slices with caution since it could crash your 
+   program.
 ** Iterating Over Strings
    To iterate over strings at individual Unicode scalar values, use `chars`.
    Calling `chars` on “Зд” separates out and returns two values of type char, 
    and you can iterate over the result to access each element:
-@code rust
+   @code rust
    for c in "Зд".chars() {
-    println!("{c}");
-}
+       println!("{c}");
+   }
    @end
+   This code will print out `З` and `д`.
+
+   Alternatively, we can iterate over the individual raw bytes that 
+   make up the string using the `bytes` method.
+   @code rust
+   for b in "Зд".bytes() {
+       println!("{b}");
+   }
+   @end
+   However, one must remember that valid Unicode scalar values may be made up 
+   of more than one byte.

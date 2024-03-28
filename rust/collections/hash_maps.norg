@@ -1,0 +1,51 @@
+
+Common Collections - Hash Maps
+
+___
+
+The type `HashMap<K,V>` stores a mapping of keys of type `K` to values of type
+`V` using a hashing function which determines how it places these keys and values 
+into memory.
+
+
+* Creating a New Hash Map
+  One way to create a hashmap is by using `new` and then adding elements with 
+  `insert`.
+  @code rust
+  use std::collections::HashMap;
+
+  let mut scores = HashMap::new();
+
+  scores.insert(String::from("Blue"), 10);
+  scores.insert(String::from("Yellow"), 50);
+
+  @end
+
+  Hashmaps are not used as frequently as vectors and strings so we need to 
+  explicitly bring it into scope.
+
+  Hashmaps:
+
+  - Store data in the heap like vectors.
+  - Are homogenous: all keys must have the same type as each other and all values 
+    must have the same type as each other.
+* Accessing Values in a Hash Map
+
+  To get a value we provide a key to the `get` method.
+  @code rust
+  use std::collections::HashMap;
+
+  let mut scores = HashMap::new();
+
+  scores.insert(String::from("Blue"), 10);
+  scores.insert(String::from("Yellow"), 50);
+
+  let team_name = String::from("Blue");
+  let score = scores.get(&team_name).copied().unwrap_or(0);
+  @end
+
+  The `get` method returns an `Option<&V>`. If there is no key in the 
+  hashmap, it will return `None`, otherwise it returns the value inside 
+  `Some`. To handle this, first we call `copied` to get an `Option<V>`, 
+  then we call `unwrap_or(0)` to retrieve the value inside `Some` or 0 if 
+  its the `None` variant.
