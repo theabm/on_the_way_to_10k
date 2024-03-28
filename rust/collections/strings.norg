@@ -4,3 +4,101 @@ Common Collections - Strings
 ___
 
 * Storing UTF-8 Encodings
+  Strings are somewhat complicated in Rust because of three factors: 
+  - Rust exposes possible errors
+  - Strings are a complicated data structure 
+  - UTF-8
+
+  Strings are part of a collection because they are implemented as a sequence 
+  of bytes plus some methods to ensure appropriate functionality. 
+
+* What is a String? 
+
+  There are two types of strings: 
+  - The string slice: `str` (most often seen as `&str`) which are references 
+    to some UTF-8 encoded string data stored elsewhere. 
+  - The `String` type: growable, mutable, owned, UTF-8 encoded. 
+
+* Creating A New String
+
+  Many of the operations on `Vec<T>` are available with `String` because 
+  it is implemented as a wrapper around a vector of bytes with some additional 
+  guarantees and functionality.
+
+  So to create a new empty string, we can use `new()`.
+  @code rust
+  let mut s = String::new();
+  @end
+
+  To create a new string with some initial data, we can use `to_string()` method 
+  which is available on any type that implements the `Display` trait, which 
+  string literals do.
+
+  @code rust
+  let data = "initial contents";
+
+  let s = data.to_string();
+
+  // the method also works on a literal directly:
+  let s = "initial contents".to_string();
+  // we can also use String::from to create a String from a string literal
+  let s = String::from("initial contents");
+
+  @end
+* Updating a String
+  A `String` can grow in size just like `Vec<T>` if you push more data into it.
+  You can also use the `+` operator or the `format!` macro to concatenate `String`
+  values.
+** Appending to a String with `push_str` and `push`
+
+   The `push_str` method takes a string slice (so it doesnt take ownership) 
+   while the `push` method takes a single character as a parameter and adds 
+   it to `String`.
+   @code rust
+   let mut s1 = String::from("foo");
+   let s2 = "bar";
+   s1.push_str(s2);
+   // s2 is still useable because push_str does not take ownership 
+   println!("s2 is {s2}");
+   // here we use push to add a single character to the string
+   let mut s = String::from("lo");
+   s.push('l');
+   @end
+** Concatenation with `+` and `format!` Macro
+   If we want to combine two existing strings, we can use `+`.
+   @code rust
+   let s1 = String::from("Hello, ");
+   let s2 = String::from("world!");
+   // note s1 has been moved here and can no longer be used
+   let s3 = s1 + &s2; 
+   @end
+   The reason `s1` is no longer valid after the addition and the reason we use 
+   a reference to `s2` has to do with the signature of the method that is called 
+   when we use `+`, which is `add`.
+   @code rust
+   // add is not defined exactly like this since it uses generics and associated 
+   // types, but this gives the idea.
+   fn add(self, s: &str) -> String { // ...
+   @end
+   As we can see, this method takes `&str` as the second parameter which explains
+   why we use `&s2`. However, `s2` is `String` not `str`, so why does it work? 
+   Because Rust uses /deref coercion/, which turns `&s2` into `&s2[..]`.
+
+   We also see that add takes ownership of `self` since it does not have a `&`. 
+   This means that `s1` becomes unusable after the addition.
+
+   If we want to concatenate multiple strings in more complex manners, the `+` 
+   operator can be cumbersome. Instead, it is more convenient to use `format!`
+   which works likes `println!` but instead of printing the output, it returns 
+   a `String` with the contents. Furthermore, `format!` does not take ownership 
+   of any of the arguments.
+   @code rust
+   let s1 = String::from("tic");
+   let s2 = String::from("tac");
+   let s3 = String::from("toe");
+
+   let s = format!("{s1}-{s2}-{s3}");
+   @end
+
+* Indexing into Strings
+
