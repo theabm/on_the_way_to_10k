@@ -47,5 +47,108 @@ into memory.
   The `get` method returns an `Option<&V>`. If there is no key in the 
   hashmap, it will return `None`, otherwise it returns the value inside 
   `Some`. To handle this, first we call `copied` to get an `Option<V>`, 
-  then we call `unwrap_or(0)` to retrieve the value inside `Some` or 0 if 
-  its the `None` variant.
+  then we call `unwrap_or(0)` to retrieve the value inside `Some` or 
+  return `0` if its the `None` variant.
+
+* Iterating over HashMaps
+  We can iterate over each key/value pair using a for loop:
+  @code rust
+  use std::collections::HashMap;
+
+  let mut scores = HashMap::new();
+
+  scores.insert(String::from("Blue"), 10);
+  scores.insert(String::from("Yellow"), 50);
+
+  for (key, value) in &scores {
+      println!("{key}: {value}");
+  }
+  @end
+
+* HashMaps and Ownership
+  For types the implement the `Copy` trait, the values are copied into the 
+  HashMap. For owned values, like `String` the values are moved and the hashmap 
+  becomes the owner of those values.
+
+  This is shown below:
+  @code rust
+  use std::collections::HashMap;
+
+  let field_name = String::from("Favorite color");
+  let field_value = String::from("Blue");
+
+  let mut map = HashMap::new();
+  map.insert(field_name, field_value);
+  // field_name and field_value are invalid at this point, try using them and
+  // see what compiler error you get!
+  @end
+
+  If we insert references to values into the hashmap, the values wont be moved. 
+  However, the values that the references point to must be valid for at least 
+  as long as the hash map is valid. 
+
+* Updating a Hashmap
+
+  Each unique key has a single associated value to it. So what do we do when we 
+  want to update an existing key? There are three cases:
+
+  ~ We disregard the old value and just insert the new value.
+  ~ We disregard the new value and keep the old value, only adding the new value 
+    if the key does not exist.
+  ~ We combine both old and new values.
+
+** Overwriting a value
+   To disregard the old value and simply replace a new one, we just have to 
+   insert with the same index:
+   @code rust
+   use std::collections::HashMap;
+
+   let mut scores = HashMap::new();
+
+   scores.insert(String::from("Blue"), 10);
+   scores.insert(String::from("Blue"), 25);
+
+   println!("{:?}", scores);
+   @end
+** Adding key/value pair only if a key is not present
+   It's common to add a value only if the key does not exist. If the key exists, 
+   we keep everything as is.
+
+   Hashmaps have a special method for this called `entry`. The return value 
+   is an enum called `Entry` which represents a value that might or might not 
+   exist. The `or_insert` method defined on `Entry` returns a mutable 
+   reference to the value if `Entry` exists or it inserts a value if it doesn't 
+   and returns a mutable reference to the inserted value.
+
+   In summary, to insert a value only if the key exists, we do this:
+   @code rust
+   use std::collections::HashMap;
+
+   let mut scores = HashMap::new();
+   scores.insert(String::from("Blue"), 10);
+
+   scores.entry(String::from("Yellow")).or_insert(50);
+   scores.entry(String::from("Blue")).or_insert(50);
+
+   println!("{:?}", scores);
+   @end
+** Updating a value based on the old value
+   Sometimes we want to combine the new value we want to insert and the 
+   old value that was present. This is the case when we are counting words 
+   for example.
+   @code rust
+   use std::collections::HashMap;
+
+   let text = "hello world wonderful world";
+
+   let mut map = HashMap::new();
+
+   for word in text.split_whitespace() {
+       let count = map.entry(word).or_insert(0);
+       *count += 1;
+   }
+
+   println!("{:?}", map);
+
+   @end
+

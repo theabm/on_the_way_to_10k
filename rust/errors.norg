@@ -1,0 +1,76 @@
+
+Error Handling
+
+___
+
+Rust classifies errors in two categories:
+- recoverable errors: in this case we just want to try the operation again
+- unrecoverable errors: a symptom of a bug. In this case, we want out code to 
+  immediately stop.
+
+Recoverable errors has the `Result<T,E>` enum while unrecoverable errors use the 
+`panic!` macro that stops execution. 
+
+First we talk about `panic!`.
+
+* Unrecoverable Errors with `panic!`
+
+  There are two ways to cause a panic: by taking an action that causes the code 
+  to panic (such as accessing an array past the end) or by calling the `panic!`
+  macro.
+
+  By default panic will print a failure message, unwind, clean up the stack, 
+  and quit. We can also set an evironment variable to display the call stack 
+  when a panic occurs to make debugging easier.
+
+
+** Unwinding the Stack or Aborting in Responde to a Panic
+   By default, when panic occurs, the program starts to `unwind`, which means 
+   Rust walks back up the stack and cleans up. This operation is a lot of work, 
+   so you have the alternative of immediately aborting, which ends the program 
+   without cleanup.
+
+   In this case, all memory used by the program will need to be cleaned up by 
+   the Operating System. If you need to make the binary as small as possible, 
+   you can switch from unwinding to aborting upon a panic by adding `panic = 'abort'`
+   to the appropriate [profile] section in Cargo.toml
+
+   ---
+
+  We show an example of using the `panic!` macro.
+@code rust
+  fn main() {
+    panic!("crash and burn");
+}
+  @end
+  If we run this program, we will see the error message "crash and burn" and 
+  the place in the source code where panic ocurred: `src/main.rs:2:5`, which 
+  indicates that it's line 2, 5th character in `src/main.rs`.
+
+  In this case, the line indicates is part of our code. However, in other cases, 
+  the `panic!` call might be in code that our code calls, so the filename and 
+  line number will be someone else's code where `panic!` is called, not the 
+  line of our code that eventually led to the panic. We can use the backtrace 
+  of the functions the `panic!` call came from to figure out the part of our code 
+  that is causing the problem.
+
+  For example, the following code will panic, but not from an explicit call to
+  `panic!` in our code.
+@code rust
+  fn main() {
+    let v = vec![1, 2, 3];
+    // trying to access an element out of range
+    v[99];
+}
+  @end
+
+  If we try to run this, we will not see the line of *our* code that causes 
+  the issue. To do this, we need to set the environment variable `RUST_BACKTRACE=1`
+  by running `RUST_BACKTRACE=1 cargo run`.
+
+  This will show the entire stack call, and we have to follow it from the top 
+  downwards until we arrive at a file we have written. In our case, we eventually 
+  find `src/main.rs:4:5` which tells us that the 4th line called code that 
+  caused a panic. 
+
+

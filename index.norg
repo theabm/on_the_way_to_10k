@@ -63,7 +63,8 @@
 *** Common Collections
 **** {:rust/collections/vectors:}[Storing Lists of Values with Vectors]
 **** {:rust/collections/strings:}[Storing UTF-8 Encoded Text with Strings]
-**** {:rust/collections:# Storing Keys with Associated Values in Hash Maps}[Storing Keys with Associated Values in Hash Maps]
+**** {:rust/collections/hash_maps:}[Storing Keys with Associated Values in Hash Maps]
+*** Error Handling
 
 ** Tracking
 *** {:tracking/2024:}[2024]
