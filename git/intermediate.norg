@@ -1,4 +1,4 @@
-Based on: 
+Based on {https://www.youtube.com/watch?v=Uszj_k0DGsg}[this] tutorial
 
 * Crafting the perfect commit
 
@@ -6,3 +6,88 @@ Based on:
   single aspect. Cramming a lof of changes in the same commit is a bad 
   practice and doesn't allow one to separate different changes in our 
   development history.
+
+  The staging area is useful for this because we can select individual files or 
+  part of files for a specific commit. 
+
+  To include a specific file, we so `git add filename`.
+  To see changes, we do `git diff filenmae`.
+
+  To add a specific part of a file to the staging area, we do `git add -p filename`
+  where `-p` brings us down to the patch level. Now git steps through every change
+  and asks us if we want to add that change to the staging area or not. Press 
+  `y` for yes and `n` for no.
+
+  Now, if we do `git status` we see that parts of the file have been staged for a
+  commit, while other parts are still not staged.
+
+  The second part to creating the perfect commit is to create a good commit 
+  message.
+  General advice: write something concise in the subject.
+  Hint: if you have trouble writing something concise, this might be an indication 
+  that you need to split it into more commits.
+
+  If we add an empty line after the subject, git knows this is the body of the 
+  commit message. 
+
+  If we do `git log` we see both the subject and the body of the commit.
+
+* Branching Strategies
+
+  Git leaves it up to you to decide how to branch. It is useful to write a 
+  written convention of how to structure branches. This helps to avoid 
+  mistakes and collisions.
+
+  When thinking about branches, you need to think about your release cycle. 
+  Here are two examples:
+
+** Always integrating
+   - few branches where everyone contributes.
+   - small commits.
+   - high-quality testing and qa standards.
+   - integration is very quick.
+
+** State Release and Feature branches
+   On the other hand of the spectrum we have this example.
+
+   - different branches fulfill different types of jobs
+   -- feature branch: develop features that get added to develop branch. This is 
+      a short lived branch that gets created and deleted often.
+   -- develop branch: another long running branch that contains the new features
+   -- main/master branch: contained by every git respository. It is long running 
+     and contains the stable release of your code.
+
+   In this setup, code gets added to the long running branches only through merges.
+
+   At every new release, the develop branch gets merged into the master branch and 
+   becomes the new stable release.
+
+
+* Pull Requests
+
+  Not a core git feature. They are provided by the git host platform 
+  (github, gitlab etc).
+
+  We want to use pull requests to communicate about code and review it.
+  This allows essentially for collaboration. You can invite others to review 
+  your work and give you feedback. 
+
+  Another important usecase for pull requests is to contribute to codebases where 
+  you dont have write access to. In this case, we also have to talk about forks.
+
+  A fork is a personal copy of that repository. We can fork a repository, 
+  make changes, and then suggest those changes via a pull request.
+
+  It is important to understand that pull requests are always based on branches, 
+  not individual commits.
+
+* Creating a pull request
+
+  To create a pull request first we create a branch by using `git branch test`.
+
+  We do some change. Commit, and then push the change to our own remote repository 
+  (our fork).
+
+  In the github interface, we will see that we can create a pull request.
+
+
