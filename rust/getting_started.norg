@@ -51,14 +51,14 @@ ___
 
 * Using Cargo
 
-  Cargo is Rust's build system and package manager. It is used to 
-  manage Rust projects since it:
+  Cargo is Rust's build system and package manager. It is used to manage Rust 
+  projects since it:
   - builds your code 
   - downloads libraries your code depends on - a.k.a dependencies
   - building these libraries
 
-  Furthermore, Cargo comes preinstalled with rust if you use 
-  official installers.
+  Furthermore, Cargo comes preinstalled with rust if you use official 
+  installers.
 
   Check your version by running: 
   @code bash
@@ -72,8 +72,8 @@ ___
    @code bash 
    cargo new hello_cargo 
    @end
-   This will create an initialized git repository named
-   `hello_cargo` where you will find the following structure:
+   This will create an initialized git repository named `hello_cargo` where you 
+   will find the following structure:
    - Cargo.toml
    - src directory
    -- main.rs 

@@ -25,6 +25,7 @@ First we talk about `panic!`.
 
 
 ** Unwinding the Stack or Aborting in Responde to a Panic
+
    By default, when panic occurs, the program starts to `unwind`, which means 
    Rust walks back up the stack and cleans up. This operation is a lot of work, 
    so you have the alternative of immediately aborting, which ends the program 
@@ -32,16 +33,16 @@ First we talk about `panic!`.
 
    In this case, all memory used by the program will need to be cleaned up by 
    the Operating System. If you need to make the binary as small as possible, 
-   you can switch from unwinding to aborting upon a panic by adding `panic = 'abort'`
-   to the appropriate [profile] section in Cargo.toml
+   you can switch from unwinding to aborting upon a panic by adding 
+   `panic = 'abort'` to the appropriate [profile] section in Cargo.toml
 
    ---
 
   We show an example of using the `panic!` macro.
-@code rust
+  @code rust
   fn main() {
-    panic!("crash and burn");
-}
+      panic!("crash and burn");
+  }
   @end
   If we run this program, we will see the error message "crash and burn" and 
   the place in the source code where panic ocurred: `src/main.rs:2:5`, which 
@@ -56,88 +57,90 @@ First we talk about `panic!`.
 
   For example, the following code will panic, but not from an explicit call to
   `panic!` in our code.
-@code rust
+  @code rust
   fn main() {
-    let v = vec![1, 2, 3];
-    // trying to access an element out of range
-    v[99];
-}
+      let v = vec![1, 2, 3];
+      // trying to access an element out of range
+      v[99];
+  }
   @end
 
   If we try to run this, we will not see the line of *our* code that causes 
-  the issue. To do this, we need to set the environment variable `RUST_BACKTRACE=1`
-  by running `RUST_BACKTRACE=1 cargo run`.
+  the issue. To do this, we need to set the environment variable 
+  `RUST_BACKTRACE=1` by running `RUST_BACKTRACE=1 cargo run`.
 
   This will show the entire stack call, and we have to follow it from the top 
-  downwards until we arrive at a file we have written. In our case, we eventually 
-  find `src/main.rs:4:5` which tells us that the 4th line called code that 
-  caused a panic. 
+  downwards until we arrive at a file we have written. In our case, we 
+  eventually find `src/main.rs:4:5` which tells us that the 4th line called 
+  code that caused a panic. 
 
 * Recoverable Errors with Result
-  Most errors aren't serious enough that we should call `panic!` to stop execution.
+
+  Most errors aren't serious enough that we should call `panic!` to stop 
+  execution.
   Rather, we want to be able to recover from these cases. 
 
   This can be done throughthe `Result` enum which is defined as having the `Ok`
   and the `Error` variants:
-@code rust
+  @code rust
   enum Result<T, E> {
-    Ok(T),
-    Err(E),
-}
+      Ok(T),
+      Err(E),
+  }
   @end
   The `T` represents the type of value that will be returned in a success case 
   within `Ok` and `E` represents the type of error returned in a failure case 
   within the `Err` variant.
 
-  We can use a match expression to handle the success and failure case, as shown 
-  below:
-@code rust
+  We can use a match expression to handle the success and failure case, as 
+  shown below:
+  @code rust
   use std::fs::File;
 
-fn main() {
+  fn main() {
       // returns a Result<std::fs::File, std::io::Error>
-    let greeting_file_result = File::open("hello.txt");
+      let greeting_file_result = File::open("hello.txt");
 
-    // we do a match on the result and deconstruct the variants
-    let greeting_file = match greeting_file_result {
-        Ok(file) => file,
-        Err(error) => panic!("Problem opening the file: {:?}", error),
-    };
+      // we do a match on the result and deconstruct the variants
+      let greeting_file = match greeting_file_result {
+          Ok(file) => file,
+          Err(error) => panic!("Problem opening the file: {:?}", error),
+      };
   }
   @end
 
   In this case, if the operation is successful, we will extract the file handle 
   from the `Ok` variant and assign it to `greeting_file`, otherwise, we have 
-  chosen to handle the error case by calling `panic!` (however, we could have done 
-  something else. The key is that we can recover from this error in any way we 
-  want!).
+  chosen to handle the error case by calling `panic!` (however, we could have 
+  done something else. The key is that we can recover from this error in any 
+  way we want!).
 
   If we want to take different actions based on the type of the error, then we 
   can use another inner match expression:
-@code rust
+  @code rust
   use std::fs::File;
-use std::io::ErrorKind;
+  use std::io::ErrorKind;
 
-fn main() {
-    let greeting_file_result = File::open("hello.txt");
+  fn main() {
+      let greeting_file_result = File::open("hello.txt");
 
-    let greeting_file = match greeting_file_result {
-        Ok(file) => file,
-        Err(error) => match error.kind() {
+      let greeting_file = match greeting_file_result {
+          Ok(file) => file,
+          Err(error) => match error.kind() {
               // if the error is that the file was not found, 
               // we create it and then return the handle to it.
               // if the creation fails, we panic.
-            ErrorKind::NotFound => match File::create("hello.txt") {
-                Ok(fc) => fc,
-                Err(e) => panic!("Problem creating the file: {:?}", e),
-            },
+              ErrorKind::NotFound => match File::create("hello.txt") {
+                  Ok(fc) => fc,
+                  Err(e) => panic!("Problem creating the file: {:?}", e),
+              },
               // for any other type of error(maybe we lack 
               // permissions to read), we panic.
-            other_error => {
-                panic!("Problem opening the file: {:?}", other_error);
-            }
-        },
-    };
+              other_error => {
+                  panic!("Problem opening the file: {:?}", other_error);
+              }
+          },
+      };
   }
   @end
 
@@ -155,34 +158,132 @@ fn main() {
   and eliminate a lot of these match expressions. 
   For example, here is a snippet that would achieve the same results as the one 
   above while being shorter and cleaner.
-@code rust
-  use std::fs::File;
-use std::io::ErrorKind;
 
-fn main() {
-    let greeting_file = File::open("hello.txt").unwrap_or_else(|error| {
-        if error.kind() == ErrorKind::NotFound {
-            File::create("hello.txt").unwrap_or_else(|error| {
-                panic!("Problem creating the file: {:?}", error);
-            })
-        } else {
-            panic!("Problem opening the file: {:?}", error);
-        }
-    });
+  @code rust
+  use std::fs::File;
+  use std::io::ErrorKind;
+
+  fn main() {
+      let greeting_file = File::open("hello.txt").unwrap_or_else(|error| {
+          if error.kind() == ErrorKind::NotFound {
+              File::create("hello.txt").unwrap_or_else(|error| {
+                  panic!("Problem creating the file: {:?}", error);
+              })
+          } else {
+              panic!("Problem opening the file: {:?}", error);
+          }
+      });
   }
   @end
 
-* Shortcuts for Panic on Error: `unwrap` and `expect`
+** Shortcuts for Panic on Error: `unwrap` and `expect`
 
+   Matching works well, but is very verbose. `Result<T,E>` has many methods 
+   defined on it which improve functionality. 
+   One such method is the `unwrap()` method, which returns the value inside the 
+   `Ok` variant if the result is `Ok`, or calls the `panic!` macro if the result is 
+   `Err`.
 
+   Similarly, `expect()` does the same thing, but allows us to specify the 
+   message shown when `panic!` is called.
 
+   The code below is functionally the same as the previous snippet!
+   @code rust
+   use std::fs::File;
 
+   fn main() {
+   // using unwrap()
+   let greeting_file = File::open("hello.txt").unwrap();
+   // using expect
+   let greeting_file = File::open("hello.txt").expect("File open failed.");
+   }
+   @end
+** Propagating Errors
+   Instead of handling the error within the function itself, it is usually 
+   good practice to return the error so that the calling function can choose 
+   how to handle it. 
+   @code rust
+   use std::fs::File;
+   use std::io::{self, Read};
 
+   fn read_username_from_file() -> Result<String, io::Error> {
+       let username_file_result = File::open("hello.txt");
 
+       let mut username_file = match username_file_result {
+       Ok(file) => file,
+       Err(e) => return Err(e),
+       };
 
+       let mut username = String::new();
 
+       match username_file.read_to_string(&mut username) {
+       Ok(_) => Ok(username),
+       Err(e) => Err(e),
+       }
+   }
+   @end
+   This pattern is so common that Rust has an operator `?` for it.
 
+** A shortcut for Propagating Errors: the `?` Operator
 
+   Below is a snippet that achieves the same functionality using the `?` operator.
+   @code rust
+   use std::fs::File;
+   use std::io::{self, Read};
+
+   fn read_username_from_file() -> Result<String, io::Error> {
+       let mut username_file = File::open("hello.txt")?;
+       let mut username = String::new();
+       username_file.read_to_string(&mut username)?;
+       Ok(username)
+   }
+   @end
+   The `?` operator behaves in the same way as the `match` construct:
+   if the value is `Ok` it extracts it, if the value is an `Err`, it returns 
+   early out of the function.
+
+   Furthermore, it has an additional behavior: error values that have the `?`
+   operator called on them go through the `from` function, defined in the `From`
+   trait in the standard library, which is used to convert values from one type 
+   into another. When the `?` operator calls the `from` function, the error 
+   type received is converted into the error type defined in the return type 
+   of the current function. This is useful when a function returns one error 
+   type to represent all the ways a function might fail, even if parts might 
+   fail for many different reasons.
+
+   We can shorten the code even more by chaining the calls:
+   @code rust
+   use std::fs::File;
+   use std::io::{self, Read};
+
+   fn read_username_from_file() -> Result<String, io::Error> {
+        let mut username = String::new();
+
+        File::open("hello.txt")?.read_to_string(&mut username)?;
+
+        Ok(username)
+   }
+   @end
+   Another possibility is to use `fs::read_to_string` which does exactly 
+   this entire functionality.
+
+   The `?` operator can only be used in functions whose return type is 
+   compatible with the value the `?` is used on.
+   Furthermore, it can also be used on functions that return an `Option`
+   type. The behavior is exactly the same: if the value is `None` it returns 
+   early, if its `Some` it extracts the value and continues.
+
+   Note that you can use the `?` operator on a `Result` in a function that returns 
+   `Result`, and you can use the `?` operator on an `Option` in a function that 
+   returns `Option`, but you can’t mix and match. The `?` operator won’t 
+   automatically convert a `Result` to an `Option` or vice versa; in those cases, 
+   you can use methods like the `ok` method on Result or the `ok_or` method on 
+   `Option` to do the conversion explicitly.
+
+   So far, all the `main` functions we’ve used return (). `main` can also return 
+   a `Result<(), E>`. If we declare `main` to return `Result<(), Box<dyn Error>>`
+   then we can return any error using the `?` operator (`Box<dyn Error` is a 
+   trait object, which we will cover later).
 
 * To `panic!` or Not to `panic!`
 
