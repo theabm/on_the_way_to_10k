@@ -287,4 +287,11 @@ First we talk about `panic!`.
 
 * To `panic!` or Not to `panic!`
 
+  In general, it is good practice to return a `Result` and allow the calling 
+  function to handle the case of an `Err` variant. For tests and prototype code,
+  it is more appropriate to panic. 
+  In fact, in tests, if a method fails, we want the entire test to fail. 
+  On the other hand, `unweap` and `expect` allow us to write prototypes before 
+  we are ready to handle errors!
+
 
