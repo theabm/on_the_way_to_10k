@@ -1,0 +1,126 @@
+Generics create definitions for items which we can reuse with different 
+concrete data types. Let's see how to define functions, structs, enums, and 
+methods using generics. Then we discuss how generics affect code performance.
+
+* In functions
+
+  An example of the way to define a generic function over a type `T` is 
+  shown below:
+@code rust
+fn my_function_name<T>(input1: T) -> T {
+    //...
+    // Of course, the inputs can be of type &T, or anything that uses the 
+    // type T, for example, Vec<T>.
+}
+  @end
+  If we have more than one generic type, we include it in `<>`, for example:
+@code rust
+fn my_function_name_2<T,A>(input1: T, input2: &A) -> T {
+    //...
+    // Of course, the inputs can be of type &T, or anything that uses the 
+    // type T, for example, Vec<T>.
+}
+  @end
+  We must be careful with the body of the function. Since we have a generic type, 
+  the compiler cannot make any assumptions on the core properties of the type. 
+  For example, if the body of the function involves a "comparison" between two 
+  values whose type is assumed to be "number-like", the compiler will reject 
+  this program. Why? Because the function is meant to work with *any* type, 
+  therefore, I could call it with a `File` type, for which the comparison would 
+  not make sense. To fix this, we have to restrict the behavior using `Traits`.
+
+* In Structs and Enums
+
+  We define structs using generics in a similar way:
+@code rust
+struct Point<T, U> {
+    x: T,
+    y: U,
+}
+
+fn main() {
+    let both_integer = Point { x: 5, y: 10 };
+    let both_float = Point { x: 1.0, y: 4.0 };
+    let integer_and_float = Point { x: 5, y: 4.0 };
+}
+  @end
+  Similarly, for enums, the `Result` enum is defined as follows:
+@code rust
+  enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+  @end
+  In other words, it is generic over two types.
+
+* In method definitions
+
+  We can also use generics when implementing methods for a generic type. 
+
+  If we want to implement a generic method, the signature is:
+@code rust
+  impl<T> Point<T> 
+  @end
+  Note, we *need* to write `<T>` after the `impl` because this makes it clear 
+  that we are defining a method for the generic `Point<T>`. Alternatively,
+  we can also define methods for concrete types (such as `i32`) by writing:
+@code rust
+  impl Point<i32>
+  @end
+  In this case, we don't need the generic type `<T>` after the `impl`.
+
+  Finally, we can also use *different* generic types in the method definition 
+  itself! Look at the following example:
+@code rust
+  struct Point<X1, Y1> {
+    x: X1,
+    y: Y1,
+}
+
+impl<X1, Y1> Point<X1, Y1> {
+    fn mixup<X2, Y2>(self, other: Point<X2, Y2>) -> Point<X1, Y2> {
+        Point {
+            x: self.x,
+            y: other.y,
+        }
+    }
+}
+
+fn main() {
+    let p1 = Point { x: 5, y: 10.4 };
+    let p2 = Point { x: "Hello", y: 'c' };
+
+    let p3 = p1.mixup(p2);
+
+    println!("p3.x = {}, p3.y = {}", p3.x, p3.y);
+  }
+  @end
+  The purpose of this example is to demonstrate a situation in which some 
+  generic parameters are declared with `impl` and some are declared with the 
+  method definition. Here, the generic parameters `X1` and `Y1` are declared after 
+  `impl` because they go with the struct definition. The generic parameters 
+  `X2` and `Y2` are declared after `fn mixup`, because they’re only relevant to the 
+  method.
+
+* Performance of Generics
+  Long story short, _we pay no performance_ for using generics because the 
+  compiler creates at compile time all the concrete instances of the types we 
+  use (of course, we pay in compilation time).
+  In other words, it does the opposite of what we do when we use generics to 
+  refactor code and avoid duplication. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
