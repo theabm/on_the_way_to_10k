@@ -1,0 +1,253 @@
+A `trait` defines functionality a particular type has and can share with other 
+types. We can use `traits` to define shared behavior in an abstract way. We can 
+use `trait bounds` to specify that a generic type can be any type that has 
+certain behavior.
+
+
+Note: Traits are similar to interfaces in other languages.
+
+* Defining Traits
+
+  Suppose we have two structs that contain text (a `NewsArticle` and a `Tweet`
+  struct). We want to dispay the text they contain, so we want to call a 
+  `summarize` method on both of these types. We define a trait called `Summary`
+  that will group the desired behavior:
+@code rust
+  pub trait Summary {
+    fn summarize(&self) -> String;
+  }
+  @end
+  We define a trait called `Summary` which is public, so other crates can use 
+  it. Inside, we declare all the methods that define the `Summary` "behavior", 
+  in this case, we only have  the `summarize` method. 
+  The `summarize` method is not implemented since each type that implements the 
+  `Summary` trait, must provide its own custom behavior for the body of the 
+  function.
+
+* Implementing a Trait on a Type
+
+  Implementing a trait for a type is similar to regular method implementations, 
+  the only difference is that after `impl` we list the trait name we are 
+  implementing:
+@code rust
+  pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct Tweet {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub retweet: bool,
+}
+
+impl Summary for Tweet {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+  }
+  @end
+  Once we have  implemented the trait for a type, we can use it as if it were a 
+  normal method, with the only difference that we have to bring the trait 
+  into scope.
+
+  We can implement any trait for any type, the only restriction is that one of 
+  these must be local to our own crate - to avoid collissions. 
+
+
+* Default Implementations
+    
+  Sometimes it is useful to have default implementations rather than having 
+  to define every method of a trait for every type that implements it.
+  Then, we can choose to keep the default or override it.
+  
+  To create a default implementation, we implement the method in the trait 
+  declaration:
+@code rust
+pub trait Summary {
+    fn summarize(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
+  @end
+  Then, to use the default implementation (for `NewsArticle` for example), 
+  we simply write:
+@code rust
+impl Summary for NewsArticle {}
+  @end
+  And then, everything works as usual. The syntax for overriding a default 
+  method is the same as that of implementing the method.
+
+  Default implementations can call other methods that have not yet been implemented. 
+  In this way, Traits can have complex functionality while requiring to 
+  implement only a small portion of methods.
+
+  Note however, that it isnt possible to call the default implementation from 
+  an overriden one.
+
+* Traits as Parameters
+  We can define functions to accept any type that implements a certain trait.
+  This  is shown in the example below which uses the `impl Trait` syntax:
+@code rust
+  pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+  }
+  @end
+  The function `notify` accepts any type that implements the `Summary` trait. 
+  In the body, we can call any method of the `Summary` trait, since we are 
+  guaranteed that the type implements it.
+  If we try to call this  function on a type that does not implement `Summary`
+  we get a compile error.
+
+** Trait Bound Syntax
+  The `impl Trait` syntax is syntactic sugar for a longer, more complex form 
+  which is known as `Trait Bound` syntax. 
+@code rust
+  pub fn notify<T: Summary>(item: &T) {
+    println!("Breaking news! {}", item.summarize());
+  }
+  @end
+  This second form allows more complex behaviors.
+
+  For example, if we have two types that implement `Summary` we can write:
+@code rust
+pub fn notify(item1: &impl Summary, item2: &impl Summary) {
+  @end
+  This is appropriate if `item1` and `item2` can possibly be of different types.
+  However, if we want to force them to be the same type, we have to use the 
+  trait bound syntax:
+@code rust
+pub fn notify<T: Summary>(item1: &T, item2: &T) {
+  @end
+
+** Specifying Multiple Trait Bounds with `+` Syntax
+
+  We can specify more than one trait bound with the `+` syntax. For example, 
+  if we want a type that implements both `Summary` and `Display`, we write:
+@code rust
+// Using impl Trait syntax
+pub fn notify(item: &(impl Summary + Display)) {
+    // ...
+}
+
+// or
+
+// Using Trait Bound syntax
+pub fn notify<T: Summary + Display>(item: &T) {
+    // ...
+}
+  @end
+** Clearer Trait Bounds With `where` Clause
+
+   Using too many trait bounds can reduce readability, especially if we have 
+   many generic types with various trait bounds. Rust provides another syntax 
+   to specify trait bounds, so instead of writing this:
+@code rust
+fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32 {
+    // ...
+}
+   @end
+
+We can write this:
+@code rust
+fn some_function<T, U>(t: &T, u: &U) -> i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{
+    // ...
+}
+   @end
+* Returning Types That Implement Traits
+
+  We can also use the `impl Trait` syntax in the return position of a function
+  to return a type that implements a trait.
+
+@code rust
+  fn returns_summarizable() -> impl Summary {
+    Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        retweet: false,
+    }
+  }
+  @end
+  This is especially useful in the context of iterators and closures, which we 
+  will see later.
+
+  However, one restriction is that we can only use this if we are returning a 
+  single type. For example, if the function had an if statement that returned 
+  either a `Tweet` or a `NewsArticle`, then the function will not compile. 
+
+  This is a limitation caused by how the `impl Trait` syntax is implemented 
+  in rust.
+
+  How to achieve this is shown in chapter 17.
+
+* Using Trait Bounds to Conditionally Implement Methods
+
+  When we are using generic types, we can conditionally implement methods if 
+  the type satisfies some trait bound. 
+  For example, we can have a `Pair<T>` which *always* implements the `new()` 
+  method and implements `cmp_display()` only if the type `T` of the particular 
+  instance implements `Display` and `PartialOrd`:
+@code rust
+  use std::fmt::Display;
+
+struct Pair<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Pair<T> {
+    fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
+  // conditional implementation
+impl<T: Display + PartialOrd> Pair<T> {
+    fn cmp_display(&self) {
+        if self.x >= self.y {
+            println!("The largest member is x = {}", self.x);
+        } else {
+            println!("The largest member is y = {}", self.y);
+        }
+    }
+  }
+  @end
+  We can also conditionally implement a trait on a type that implements another 
+  trait. This is called a `blanket implementation`. 
+
+  For example, in the standard library, the `ToString` trait is implemented for 
+  all types that implement the `Display` trait.
+@code rust
+  impl<T: Display> ToString for T {
+    // --snip--
+  }
+  @end
+
+
+
+
+
+
+
+
+
+
+
+
+

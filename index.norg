@@ -69,9 +69,9 @@
 **** {:rust/errors:# Recoverable Errors with Result}[Recoverable Errors with Result]
 **** {:rust/errors:# To `panic!` or Not to `panic!`}[To panic! or Not to panic!]
 *** Generic Types, Traits, and Lifetimes
-**** Generic Data Types
-**** Traits: Defining Shared Behavior
-**** Validating References with Lifetimes
+**** {:rust/generic_types:}[Generic Data Types]
+**** {:rust/traits:}[Traits: Defining Shared Behavior]
+**** {:rust/lifetimes:}[Validating References with Lifetimes]
 
 ** Tracking
 *** {:tracking/2024:}[2024]
