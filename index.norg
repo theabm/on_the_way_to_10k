@@ -72,6 +72,10 @@
 **** {:rust/generic_types:}[Generic Data Types]
 **** {:rust/traits:}[Traits: Defining Shared Behavior]
 **** {:rust/lifetimes:}[Validating References with Lifetimes]
+*** Writing Automated Tests
+**** {:rust/writing_tests:}[How To Write Tests]
+**** {:rust/run_tests:}[Controlling How Tests Are Run]
+**** Tests Organization
 
 ** Tracking
 *** {:tracking/2024:}[2024]

@@ -1,0 +1,176 @@
+
+Writing Tests In Rust
+
+____
+
+Tests are a way to ensure that that our code is doing what we expect. 
+
+In its simplest form, tests are Rust functions annotated with the `test` 
+attribute. We add `#[test]` on the line before `fn`. Then, `cargo test` will 
+run all the tests and report if they pass or fail.
+
+* Anatomy Of A Test Function
+
+  If we create a library with cargo, it will create a test module for us. 
+  Suppose we have the following:
+@code bash
+$ cargo new adder --lib
+     Created library `adder` project
+$ cd adder
+  @end
+  Then, if we open `src/lib.rs`, the file should look like this:
+@code rust
+  #[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        let result = 2 + 2;
+        assert_eq!(result, 4);
+    }
+  }
+  @end
+  Skipping the first two lines, we can see we have defined a test `it_works`.
+
+  If we run `cargo test`, this will run the tests and we will see a lot of 
+  useful information such as what tests were run, their outcome, and 
+  a summary at the end which specifies how many tests were passed, failed, 
+  ignored, filtered, and measured (for benchmarks).
+
+  Furthermore, if we have a failing test, we will see detailed info of _where_
+  it failed (including the line number and the column!).
+
+  Lastly, we also see that the last section of `cargo test` concerns the docs 
+  tests, i.e. cargo can run all tests which are part of the documentation. This 
+  helps to keep the documentation and code in sync!
+
+  We will see later how to ignore, filter, and benchmark tests, as well as how 
+  to create doc tests.
+
+  Rust runs all tests on different threads and keeps track of which ones panic. 
+  A test that fails is a test that panics. 
+
+  Tests are put in an inner `test` module which has the usual rules of 
+  visibility. We can also write code that sets up things for other tests, as 
+  long as we dont forget not to mark them as `test`!
+
+* Checking Results With `assert!`, `assert_eq!`, `assert_ne!` Macros
+
+  The `assert!` macro is useful to evaluate conditions which are `bool`. It 
+  expects `true`, and if the value is `false`, it will call `panic!`, making 
+  the test fail.
+
+  The `assert_eq!` and `assert_ne!` macros are used to test for equality and 
+  inequality, respectively. Of course, one could achieve the same behavior 
+  using the `assert!` macro and a `==` or `!=` condition, however, the former options
+  are better since they print the left and right values, thus showing _why_ the 
+  test failed. On the other hand, `assert!` only says it got `false` instead 
+  of `true`.
+
+  We can optionally include a message that will get printed when the test fails 
+  by adding a last argument to the `assert!`, `assert_eq!`, and `assert_ne!` macros.
+  This looks something like this:
+@code rust
+      #[test]
+    fn greeting_contains_name() {
+        let result = greeting("Carol");
+        assert!(
+            result.contains("Carol"),
+            "Greeting did not contain name, value was `{}`",
+            result
+        );
+    }
+  @end
+* Tests That Should Panic
+  We can check that our code properly handles errors and panics when needed.
+  This can be done by placing the `#[should_panic]` attribute under `#[test]`.
+
+  However, `should_panic` tests are ambiguous because they will pass as long 
+  as the code panics, regardless of the reason. To be more specific, we can 
+  include an expected value of the error message that will occur when the 
+  code panics. In this way, the test harness will check that the error message 
+  is what we expect.
+  An example is shown below:
+@code rust
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 {
+            panic!(
+                "Guess value must be greater than or equal to 1, got {}.",
+                value
+            );
+        } else if value > 100 {
+            panic!(
+                "Guess value must be less than or equal to 100, got {}.",
+                value
+            );
+        }
+
+        Guess { value }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // note we only need to include a substring of the error message that
+    // can uniquely identify it.
+    #[test]
+    #[should_panic(expected = "less than or equal to 100")]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+  }
+  @end
+* Writing Tests With `Result<T,E>`
+
+  We can also write tests that return `Result<T,E>`. For example:
+@code rust
+  #[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() -> Result<(), String> {
+        if 2 + 2 == 4 {
+            Ok(())
+        } else {
+            Err(String::from("two plus two does not equal four"))
+        }
+    }
+  }
+  @end
+  This test returns `Ok()` if the result is what we expect and `Err()` if it isnt.
+  This is useful when we want to use the `?` operator inside the body of a test 
+  and see if any operation fails because it returns the `Err` variant.
+
+  However, if you want to test that a function _must_ return an `Err`, do not 
+  use `?`, use `assert!(value.is_err())` instead. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
