@@ -2,3 +2,60 @@
 How To Run Tests In Rust
 
 _____
+
+`cargo test` is the command used to run all tests in rust. The default behavior 
+is to run all tests in parallel and to capture all the output to make the 
+results easier to read.
+
+We can feed some command line options to `cargo test` and others to the testing 
+binary. The command line options for `cargo test` are specified right after it. The 
+command line options for the binary are specified after `--`.
+Ex: 
+- `cargo test --help` : lists the help menu for `cargo test`.
+- `cargo test -- --help`: lists the help menu for the test binary.
+
+* Running Tests In Parallel Or Consecutively
+
+  Since by default, the tests are run in parallel, we have to make sure the tests
+  do not depend on each other or have race conditions.
+  We can specify the number of threads to run the tests by using the 
+  `--test-threads` flag.
+
+  Ex: 
+  - `cargo test -- --test-threads=1`: Run the tests in serial.
+
+* Showing Output
+
+  By default, all output is captured. If we want to see it, we use the 
+  `--show-output` flag:
+  Ex: 
+  - `cargo test -- --show-output`
+
+* Running A Subset of Tests By Name
+
+** Running a Single Test
+
+   We can specify the name of the test we want to run to cargo. 
+   Ex: 
+   - `cargo test add_two`: Run the `add_two` test.
+     The output will show the remaining tests in the `filtered` category.
+    
+** Filtering to Run Multiple Tests
+
+   If we specify part of a test name, `cargo` will run all tests that contain 
+   that substring in the test name.
+   Ex: 
+   - `cargo test add` : run all tests that contain the string `add`.
+
+** Ignoring Some Tests Unless Specifically Requested
+   We can add the `#[ignore]` attribute to a test that is particularly expensive
+   or that we want to ignore for some reason.
+   If we run `cargo test` this will show in the `ignored` section.
+
+   If we want to run the *ignored* tests, we use the `--ignored` flag. If we 
+   want to run the *entire* test suite, we have to use the `include-ignored` 
+   flag.
+   Ex: 
+   - `cargo test -- --ignored`: run *only* ignored tests.
+   - `cargo test -- --include-ignored`: run *all* tests.
+
