@@ -1,0 +1,139 @@
+
+Test Organization
+
+______
+
+Rust divides tests into two categories:
+- Unit tests
+- Integration tests:
+
+$ Unit Tests
+Test "internal" aspects of our code. These tests reside inside the same file 
+where we are developing the library. They are prepended with the attribute 
+`#\[cfg(test)\]` to tell cargo that this module (mod test) should only be 
+compiled when running `cargo test` and not `cargo build`.
+For example:
+@code rust
+pub fn add_two(a: i32) -> i32 {
+    internal_adder(a, 2)
+}
+
+fn internal_adder(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+#[cfg(test)]
+mod tests {
+    // needed to bring parent module into scope
+    use super::*;
+
+    #[test]
+    fn internal() {
+        // note we can even test private functions!
+        // because rusts privacy rules allow us to do so.
+        assert_eq!(4, internal_adder(2, 2));
+    }
+}
+@end
+$ Integration Tests
+Used to test the external API of the module as if we were a user of the module.
+These tests have to be placed in a file in a directory called `test` at the 
+same level as `src`.
+Inside the file, we only need to write the tests with the `#\[tests\]` attribute.
+Since the file is a separate crate, we need to bring our library into scope. 
+For example:
+@code rust
+// Our library called "adder"
+use adder;
+
+// some integration tests. We can only test public API
+// Note, we dont need #[cfg(test)] since cargo will treat 
+// the tests directory in a special way
+#[test]
+fn it_adds_two() {
+    assert_eq!(4, adder::add_two(2));
+}
+@end
+The structure will look like this:
+@code txt
+project_name
+| src 
+|-- lib.rs
+| test
+|-- integration_test_1.rs
+|-- integration_test_2.rs
+@end
+When we run `cargo test` we will see three results: unit tests, integration tests, 
+and doc-tests.
+We can run a particular integration file test by using the `--test` flag 
+and specify also the name of the file:
+- `cargo test -- --test integration_test_1`
+
+* Submodules In Integration Tests
+
+  If we want to create many integration test files, we may also want to extract 
+  a file with some "common utlity" functions. If we do this, cargo will treat 
+  it as another integration test file, even if there are no tests! 
+
+  To avoid this we need to put the file in a subdirectory of the tests folder.
+  Any files in subdirectories of test will not be compiled as separate crates 
+  and will not have a section in the test output.
+
+  For example, if we have a "common.rs" file, we could put it under 
+  "test/common/mod.rs". However, in our integration tests, we will have to 
+  import these common utilities as a module - in this example we use 
+  "mod common".
+  For example:
+@code rust
+use adder;
+
+mod common;
+
+#[test]
+fn it_adds_two() {
+    common::setup();
+    assert_eq!(4, adder::add_two(2));
+}
+  @end
+* Integration Tests For Binary Crates
+
+  Integration tests can't be written for binary crates since they are not meant 
+  to expose any public API's and are meant to run on their own. Projects that 
+  have both a library and a binary crate usually test the API using integraton
+  tests and then use the library in the binary crate. In this way, the binary 
+  crate does not have to be tested!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

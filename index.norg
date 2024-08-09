@@ -75,7 +75,7 @@
 *** Writing Automated Tests
 **** {:rust/writing_tests:}[How To Write Tests]
 **** {:rust/run_tests:}[Controlling How Tests Are Run]
-**** Tests Organization
+**** {:rust/test_organization:}[Tests Organization]
 
 ** Tracking
 *** {:tracking/2024:}[2024]
