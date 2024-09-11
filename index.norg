@@ -77,6 +77,8 @@
 **** {:rust/run_tests:}[Controlling How Tests Are Run]
 **** {:rust/test_organization:}[Tests Organization]
 
+** {:dask/dask:}[Dask]
+
 ** Tracking
 *** {:tracking/2024:}[2024]
 
