@@ -78,6 +78,9 @@
 **** {:rust/test_organization:}[Tests Organization]
 
 ** {:dask/dask:}[Dask]
+*** {:dask/best-practices:}[Best Practices]
+*** {:dask/arrays:}[Arrays]
+
 
 ** Tracking
 *** {:tracking/2024:}[2024]
