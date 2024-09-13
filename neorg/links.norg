@@ -7,7 +7,7 @@ categories: [
     note-taking
 ]
 created: 2023-10-11T12:40:02+0100
-updated: 2023-10-11T12:40:28+0100
+updated: 2024-09-13T12:29:45+0100
 version: 1.1.1
 @end
 
@@ -47,7 +47,7 @@ colons. Clicking the link takes you to it.
 
 ** Pure inline links
 
-   A inline link to {*** How to specify links}
+   A inline link to {* How to specify links}
 
    Inline links are case and whitespace insensitive. However, they 
    are punctuation sensitive. 
@@ -58,7 +58,7 @@ colons. Clicking the link takes you to it.
 
 ** Custom inline link text
 
-   An inline {*** How to specify links}[link] with custom text is achieved by 
+   An inline {* How to specify links}[link] with custom text is achieved by 
    appending square bracks with the placeholder text after the link.
 
 * Anchors
