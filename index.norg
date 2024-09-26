@@ -21,6 +21,7 @@
   tools available for anyone in a similar path.
 
 * Table of contents
+
 ** {:docker/docker:}[Docker]
 
 ** {:dash/dash:}[Dash]
@@ -80,6 +81,14 @@
 ** {:dask/dask:}[Dask]
 *** {:dask/best-practices:}[Best Practices]
 *** {:dask/arrays:}[Arrays]
+
+
+** cmake 
+*** {:cmake/basics.norg:}[basics]
+
+** Nix Tutorial - Fernando Ayats
+*** {:nix/day1:}[Day1 - Language, Derivation, Library]
+
 
 
 ** Tracking
