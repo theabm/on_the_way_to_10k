@@ -76,6 +76,11 @@
 **** {:rust/writing_tests:}[How To Write Tests]
 **** {:rust/run_tests:}[Controlling How Tests Are Run]
 **** {:rust/test_organization:}[Tests Organization]
+*** Iterators and Closures
+**** {:rust/closures:}[Closures]
+**** {:rust/iterators:}[Iterators]
+
+
 
 ** Tracking
 *** {:tracking/2024:}[2024]
