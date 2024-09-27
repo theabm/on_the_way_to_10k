@@ -1,0 +1,202 @@
+
+ Dask Intro
+
+____
+
+Dask is a python library for parallel and distributed computing. 
+
+
+* API 
+
+  Dask offers the following API (structures):
+
+  $ Tasks 
+  Dask futures parallelize basic for loops.
+
+  $ DataFrames
+  Parallelized version of Pandas. 
+  One Dask dataframe is simply a collection of pandas dataframes on different 
+  computers.
+
+  $ Arrays
+  Parallelized version of Numpy.  One Dask array is simply a collection of 
+  Numpy arrays on different computers.
+
+  $ Bags
+  Parallelized version of lists.  One Dask bag is simply a collection of 
+  Python iterators processing in parallel on different computers.
+
+* Installation
+
+  Simply use `pip install dask[complete]`.
+
+* Deploy - Quick Start
+
+  Dask can be deployed locally, on the cloud, HPC clusters, or using Kubernetes.
+  We are more interested in the local and HPC settings. 
+
+  To deploy locally we use the `LocalCluster` module:
+
+  @code python
+  from dask.distributed import LocalCluster
+  cluster = LocalCluster()
+  client = cluster.get_client()
+
+  # Normal Dask work ...
+  @end
+  Otherwise, if you skip this and go straight to computation, dask will use the 
+  threads pool in your local process. 
+
+* 10 Min Summary
+
+  Dask operates on high level collections such as DataFrames, Arrays, Bags, 
+  Futures, and Delayed. 
+
+  We should always try to use these collections when using Dask. 
+
+  After we have specified the computations, Dask internally creates a task 
+  graph that is then submitted to the type of scheduler we have specified 
+  (HPC, cloud, Kubernetes, etc). The scheduler is then responsible for 
+  executing the tasks in the best way possible.
+
+  An interesting feature of Dask is that all of its computations are lazily 
+  evaluated, i.e. not computed until we explicitly require them. To require 
+  a computation we usually use the `.compute()` or `.result()` methods.
+
+  /_Note_/: All the collections mentioned so far follow similar APIs to Pandas, Numpy, 
+  and lists. Therefore, it should be quite natural to understand them.
+
+** Delayed and Futures
+
+   These are lower level directives for Dask that should be used whenever we 
+   have computation that is parallelizable but not a huge DataFrames or an 
+   Array.
+
+   $ Delayed: Lazy
+   Lets you wrap individual functions in lazily constructed task graph. 
+@code python
+   import dask
+
+   @dask.delayed
+   def inc(x):
+   return x + 1
+
+   @dask.delayed
+   def add(x, y):
+   return x + y
+
+   a = inc(1)       # no work has happened yet
+   b = inc(2)       # no work has happened yet
+   c = add(a, b)    # no work has happened yet
+
+   c = c.compute()  # This triggers all of the above computations
+   @end
+   $ Futures: Immediate
+   Futures are eager. Computation starts as soon as the function is submitted.
+@code python
+   from dask.distributed import Client
+
+   client = Client()
+
+   def inc(x):
+   return x + 1
+
+   def add(x, y):
+   return x + y
+
+   a = client.submit(inc, 1)     # work starts immediately
+   b = client.submit(inc, 2)     # work starts immediately
+   c = client.submit(add, a, b)  # work starts immediately
+
+   c = c.result()                # block until work finishes, then gather result
+   @end
+
+** Scheduling
+
+   If you want to have more control over the scheduler, use the 
+   /distributed scheduler/ which is just a fancier way of saying 
+   "advanced scheduler. It is not actually distributed!
+
+** Diagnostics
+
+   When using a cluster, Dash has a diagnostics dashboard that can be used 
+   to visualize tasks as they are exectuted.
+
+* Deploying
+   
+** Python API
+
+*** Client
+
+    You can create a `dask.distributed` client (which includes the scheduler)
+    by importing and creating a `Client` with no arguments. 
+
+    Then we can navigate to /http://localhost:8787/status/ to see the 
+    diagnostics dashboard (needs bokeh python package).
+
+    @code python
+    from dask.distributed import Client
+    client = Client()
+    @end
+
+    *This sets up a scheduler in your local process along with a number of 
+    workers and threads per worker related to the number of cores in your 
+    machine.*
+
+    If you want to run workers in the same process then pass `processes=false` 
+    when creating the client. *This is sometimes preferable if you want to 
+    avoid inter-worker communication and your computations release the {https://realpython.com/python-gil/}[GIL]. 
+    This is common when primarily using NumPy or Dask Array.*
+
+*** Local Cluster
+
+    The `Client()` call above is a shorthand for creating a `LocalCluster` and 
+    passing it to your client.
+@code python
+    from dask.distributed import Client, LocalCluster
+    cluster = LocalCluster()
+    client = Client(cluster)
+    @end
+    However, this offers more control as we can pass more options to the 
+    cluster. See the documentation for options.
+** HPC
+** CLI
+** Kubernetes
+** Cloud
+
+* Additional Information
+
+** Adaptive Deployment
+
+   Most Dask deployments are static and fix the number of workers. 
+
+   This can be wasteful in two ways:
+   ~ We may not be using all the resources all the time.
+   ~ We may actually need more workers than we initially asked for.
+
+   To solve this, Dask offers adaptive deployments. 
+@code python
+   from dask_kubernetes import KubeCluster
+
+   cluster = KubeCluster()
+   cluster.adapt(minimum=0, maximum=100)  # scale between 0 and 100 workers
+   @end
+   The call above allows Dask to decide how to scale up or down workers based 
+   on the workload. During periods of inactivity it might only allocate one or 
+   zero workers while for periods of high computation, it might allocate all 
+   of them.
+
+   *Note:* The scheduler does not know how to launch workers, so it needs to 
+   rely on external resource managers like SLURM, Kubernetes, etc. 
+   This connection is created when deploying a specific type of cluster.
+
+
+
+
+
+
+
+
+
+
+

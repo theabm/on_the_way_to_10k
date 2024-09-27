@@ -1,0 +1,40 @@
+
+                                    CMAKE BASICS
+
+_____
+
+*TIP: Always be on the root folder (where the cmakelists.txt) is contained. *
+
+From here, you can use the proper flags to tell cmake to create the directories you need. 
+These will usually be build/ and install/.
+
+As a first step, you run cmake. Usually you will have some flags - some important ones:
+- CMAKE_INSTALL_PATH: the path where the installed binaries will be put - usually the created 
+install/ directory.
+- CMAKE_PREFIX_PATH: The prefix path where your dependencies live. So, for example if your 
+dependencies are in another directory (think Melissa that depends on ADIOS), you need to 
+tell cmake where to look (the prefix) to find the dependencies.
+
+An example:
+@code shell
+// the -S flag tells cmake where the source directory is. Since we are in the root, we 
+// write "."
+// However, this will not create the build directory. To tell cmake to create the build 
+// directory, we use the -B flag. 
+$ cmake -CMAKE_INSTALL_PATH="home/project/root/install" -S .
+// This tells cmake to create the build directory called build/
+$ cmake -CMAKE_INSTALL_PATH="home/project/root/install" -S . -B build
+@end
+*TIP2: when make fails, you can use `ccmake` which has a nice interface and see what 
+variables are set and which arent. If you press `t` to toggle the advanced features, you 
+can see all the variables that cmake is looking at and you can even modify them!*
+
+Once we have run cmake without problems, we then use make. From the root directory, 
+we can write:
+@code shell
+// this tells make to run "make" in the build directory.
+$ make -C build 
+// this tells make to run "make install" (it will use the CMAKE_INSTALL_PATH that I defined.)
+$ make -C build install
+@end
+

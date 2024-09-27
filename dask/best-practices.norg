@@ -1,0 +1,116 @@
+
+Dask Best Practices
+
+____
+
+* Common
+
+  We focus on some good practices that apply to *all* the APIs we want to use. 
+  Consult API-specific best practices as well.
+
+** Start Small
+
+   Parallelism can cause more problems. Before using Dask, consider:
+   ~ Use better algorithms/data structures from efficient libraries.
+   ~ Use better file formats. See {# Store Data Efficiently}
+   ~ Compile your python code with Numba or Cython.
+   ~ Sample from your data. You might not need all your data - by sampling 
+     intelligently, you might be able to gain the same insights as the entire 
+     data set.
+   ~ Profile your code - understand why it's slow before adopting parallelism.
+
+** Use The Dashboard
+
+   The dashboard gives insights into the state of your workers. In parallel 
+   workflows, our intuition might be wrong.
+
+** Avoid Large Partitions
+    
+   Your data should be split into chunks small enough so that so that many of 
+   them fit inside the memory of a worker. Dask will most likely operate on as 
+   many chunks in parallel as you have cores. 
+
+   A good rule of thumb is to split chunks so that each worker fit 4-10 chunks 
+   in memory. This will make sure Dask will always have things to do.
+
+   However, we want to avoid chunks that are too small. 
+   See {# Avoid Very Large Graphs}.
+
+** Avoid Very Large Graphs
+
+   Dask workloads are composed of tasks. Whenever you do an operation on a 
+   collection, you will have at least as many tasks as chunks/partitions.
+
+   Tasks cause an overhead of approximately $200 * 10^-6$ seconds.
+
+   So, if we have $1000$ tasks, this is negligible ($< 1$ second of overhead).
+   But if we have millions of tasks, this can cause minutes to hours of 
+   overhead.
+
+   To build smaller graphs:
+   ~ Use larger chunksizes.
+   ~ Fuse operations together: If you have a complex operation composed of many 
+     suboperations, try packing it into a single python function and use 
+     `da.map_blocks` or `dd.map_partitions` which map generic functions over 
+     chunks/partitions.
+   ~ Break up your computation if needed.
+
+** Learn Techniques For Customization
+
+   Many Python workloads are complex and may require operations that are not 
+   included in the high level APIs.
+
+   Options to support custom workloads:
+   ~ All collections have a `map_partitions` or `map_blocks` function that map 
+     functions across the chunks/partitions.
+   ~ More complex `map_*` functions that allow more complex communications 
+     between partitions.
+   ~ For even more comple operations, you can arrange collections in blocks 
+     which can be rearranged as we like using Dask Delayed.
+
+** Store Data Efficiently
+
+   As we do more computing, we often find that IO starts to be a bottleneck.
+   Use more efficient file formats.
+
+    Tips: 
+   - For compression: lz4, snappy, and Z-Standard.
+   - Storage formats: Parquet, ORC, Zarr, HDF5, and GeoTIFF.
+   - Be mindful of how your partitioning plays with your application (access 
+     patterns or most common queries/operations.)
+
+** Processes And Threads
+
+   If you’re doing mostly numeric work with Numpy, pandas, Scikit-learn, Numba, 
+   and other libraries that release the GIL, then use mostly threads. If 
+   you’re doing work on text data or Python collections like lists and dicts 
+   then use mostly processes.
+
+   If using a machine with lots of threads, use processes regardless as python 
+   does not scale well with a lot of threads ($> 10$).
+
+** Load Data With Dask
+
+   A common anti-pattern is people creating large Python objects like a 
+   DataFrame or an Array on the client (i.e. their local machine) outside of 
+   Dask and then embedding them into the computation. This means that Dask has 
+   to send these objects over the network multiple times instead of just passing 
+   pointers to the data.
+
+   This slows down Dask quite significantly.
+
+   To avoid this use Dask methods to load data since they are optimized for these
+   operations.
+
+** Avoid Calling Compute Repeatedly
+
+   `.compute()` blocks computation until the result is obtained. Therefore, 
+   calls this method inside for-loops or iterative sequences effectively make 
+   the program serial (Dask is not able to parallelize).
+
+   The solution is to call `.compute()` outside of the for-loop or at the end 
+   of the iterative sequence.
+
+
+
+    

@@ -1,0 +1,230 @@
+
+                Day1 - Language, Derivations, Library
+
+Tutorial Series By: *Fernando Ayats*
+Covered in his {https://ayats.org/blog/nix-tuto-1}[Blog Post]
+
+______
+
+* What is Nix?
+  - Package manager: it can be installed on any distribution.
+  - Purely functional: no side effects
+
+  In nix everything is an expression. To evaluate expressions, we use 
+  `nix eval --expr "1"`
+  We can also use `nix eval -f file_name` to evaluate a file that contains a nix 
+  expression.
+
+* Language
+** Types
+*** Strings
+
+    - Using double quotes:
+    "hahaa" - this is a string
+
+    - Using double single quotes:
+    ''
+    hahahaha
+    ''
+
+*** Booleans
+
+   true or false
+
+*** Null
+
+    Used mainly for modules.
+
+*** Numbers
+
+    ints, floats, etc.
+
+*** Lists
+    
+    Between brackets:
+    [
+        1
+        4
+        2
+    ]
+
+*** Attribute Sets
+    Key-value maps (uniquely defined):
+
+    {
+    key_name = key_value;
+    another_key = key_value_2;
+    "foo" = 3;
+    }
+
+    Short hand:
+    {
+        a.b = 4;
+    }
+    is equivalent to:
+@code nix
+    {
+    a = {
+        b=4;
+        };
+    }
+    @end
+
+*** Functions
+
+    Functions in nix take one argument and return one single thing.
+
+    The syntax is input:output.
+
+    So when we write a = x: x+1 it means a is a function that takes x and returns
+    x+1.
+
+    To evaluate a function in nix, we use the space.
+
+    What about multiple arguments? We can pass a single attribute set which has 
+    more than one key-value.
+    f = x : x.first + x.second;
+
+    Another way is to decompose an attribute set 
+@code nix
+    f = {first, second} : first + second;
+    @end
+    Another way is to do currying:
+    f = first: second: first + second
+
+    In this way, we are defining a function that returns another function 
+    that is partially applied.
+
+** Let-in Syntax
+
+   Used to bind variables. It is itself an expression (i.e. what is after "in"
+   needs to be an expression.)
+   Ex:
+@code nix
+   let 
+    x = if true then "true" else "false";
+   in
+    x
+   @end
+* Builtins
+  In nix we have a global variable called builtins. It is an attribute set 
+  that contains a lot of useful functions.
+
+  Ex:
+
+    builtins.trace val val
+
+  This will print the first value and the second. It is used mainly for debugging.
+  @code nix
+  let val = true;
+
+  x = if builtins.trace val val
+            then "true";
+            else "false";
+  in 
+    x
+  @end
+
+* Iterative procedures
+  We dont have for or while loops, we have `map` `filter` `foldl`
+  Ex:
+
+@code nix
+  builtins.map (x: x+1) [2 3]
+  @end
+  To reduce a list we can use `fold` or more specifically `foldl`
+
+** import builtin
+   import file_path 
+
+   It takes a path that contains an expression, evaluates the expression, 
+   and returns the value it evaluated to.
+
+   If we type `<nixpkgs>` in the nix repl, it will print the path in the nix store 
+   that contains nixpkgs.
+
+   We can type `pkgs = import <nixpkgs> {}` to bring nixpkgs into scope.
+
+   Remember that this is just an attribute set!
+
+*** lib
+
+    After we import pkgs (look above), we can look at the attribute "lib".
+    (i.e. pkgs.lib) which is a libray in nixpkgs that has a lot of other 
+    additional functions.
+
+    Useful functions:
+
+    lib.concatStrings ["happy" "sad"] and returns "happysad".
+
+    Use noogle.dev to find a lot of functions in nix (builtins and lib).
+
+    In nix repl, use :p to do deep printing.
+
+    Useful functions 2:
+    lib.attrsToList
+    lib.listToAttrs
+    lib.flatten
+    lib.makeLibraryPath ["" "/usr"] - > "/lib:/usr/lib"
+
+* Derivations
+  to find stuff on nixpkgs, you can use nix repl, import pkgs and use tab to 
+  autocomplete and explore the structure. 
+
+  Use `builtins.derivation` - this a type!
+  For every derivation, I will get a path in nix store. 
+@code nix
+  let 
+      pkg = builtins.derivation {
+      system = "x86_64-linux";
+      builder = "/bin/sh";
+      name = "foo";
+      args = [
+          "-c"
+          ''
+            echo foo > $out
+          ''
+        ];
+      };
+  in 
+  pkg
+
+  @end
+
+  To build a derivation, use nix build. If you use nix eval it will just say 
+  its a derivation and thats it.
+
+  Derivations are not really another type, they are an attribute set which has 
+  a ".type" attribute which says its a derivation.
+
+  string interpolation of a package will force its evaluation.
+  This is the most fundamental way to declare dependencies between packages.
+  to query all package dependencies use 
+  `nix path-info -rsSh ./result`(result of a build)
+  `$out` - this is the nix store path of the derivation that will be built.
+  all derivations run in a sandbox where nothing from my home directory exists. 
+  This is done for reproducibility.
+  you cant even use curl (so no internet) in the sandbox. So how do we download 
+  packages within builtins.derivation.
+  to use the network I need to provide a hash of the results. this ensure of the 
+  reproducibility.
+  so you need to put 
+  outputHAshMode = "flat";
+  outputHashAlgo = "sha256";
+  outputHash = "";(run and then paste the hash it shows as an error.).
+  if your nix expression outputs many derivations, you can speicfy it with 
+  nix build -f file attrname
+
+  However, this is not what is commonly used. We always use the higher level 
+  `pkgs.stdenv.mkDerivation`.
+  In this function, all attributes that are not special are exported as 
+  environment variables to the builder.
+
+  even higher level derivation is pkgs.fetchFromGitHub which allows internet access
+  by default (only to fetch github repos).
+
+  to get a shell with the derivation we use nix develop 
+
+
+
+
