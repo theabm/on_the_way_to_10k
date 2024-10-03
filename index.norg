@@ -81,8 +81,6 @@
 **** {:rust/closures:}[Closures]
 **** {:rust/iterators:}[Iterators]
 
-
-
 ** {:dask/dask:}[Dask]
 *** {:dask/best-practices:}[Best Practices]
 *** {:dask/arrays:}[Arrays]
@@ -93,8 +91,6 @@
 
 ** Nix Tutorial - Fernando Ayats
 *** {:nix/day1:}[Day1 - Language, Derivation, Library]
-
-
 
 ** Tracking
 *** {:tracking/2024:}[2024]

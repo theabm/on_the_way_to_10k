@@ -1,0 +1,15 @@
+
+                        Agenix Tutorial
+
+Notes: 28/09/2024
+Location: Nix Hacking Weekend
+
+____________
+
+Agenix is one of the Nix tools for secret deployment. The other tool that is 
+often used is called Sops-Nix.
+
+* The Problem And The Solution
+
+  Currently, there is no "good" way to share secrets in NixOS. We can't store 
+  *secrets* in plain text, as these would be visible to anyone that sees it. 
