@@ -1,5 +1,5 @@
 
-Common Collections - Vectors
+                    Common Collections - Vectors
 
 ___
 
@@ -13,7 +13,7 @@ ___
 @code rust
 let v: Vec<i32> =  Vec::new();
 @end
-    Note that we have to add a type annotation here because we are not inserting 
+  Note that we have to add a type annotation here because we are not inserting 
   any data and the compiler needs to know all types at compile time. 
   Vectors are implemented using "generics" which are covered later. 
 
@@ -25,7 +25,6 @@ let v: Vec<i32> =  Vec::new();
 @code rust
 let v = vec![1,2,3];
   @end
-
 * Updating a Vector
 
    To create a vector and then add elements we can use the `push` method. 
@@ -34,25 +33,21 @@ let mut v =  Vec::new();
 v.push(5);
 v.push(6);
    @end
-
-
 * Reading Elements of Vectors
   To reference a value stored in a vector we can use 
   - indexing 
   - the `get` method.
-
 @code rust
-      let v = vec![1, 2, 3, 4, 5];
+  let v = vec![1, 2, 3, 4, 5];
 
-    let third: &i32 = &v[2];
-    println!("The third element is {third}");
+  let third: &i32 = &v[2];
+  println!("The third element is {third}");
 
-    let third: Option<&i32> = v.get(2);
-    match third {
-        Some(third) => println!("The third element is {third}"),
-        None => println!("There is no third element."),
-    }
-
+  let third: Option<&i32> = v.get(2);
+  match third {
+  Some(third) => println!("The third element is {third}"),
+  None => println!("There is no third element."),
+  }
   @end
 
   We can use `&` and `[]` to obtain a reference to the element at the index value. 
@@ -90,23 +85,22 @@ v.push(6);
   We can access each element of a vector using a `for` loop while creating *immutable*
   references to the elements in the vector:
 @code rust
-      let v = vec![100, 32, 57];
-    for n_ref in &v {
-        // n_ref has type &i32
-        let n_plus_one: i32 = *n_ref + 1;
-        println!("{n_plus_one}");
-    }
-
+  let v = vec![100, 32, 57];
+  for n_ref in &v {
+  // n_ref has type &i32
+  let n_plus_one: i32 = *n_ref + 1;
+  println!("{n_plus_one}");
+  }
   @end
 
   We can also iterate over mutable references to each element in a mutable vector
   in order to change all the elements. 
 @code rust
-      let mut v = vec![100, 32, 57];
-    for n_ref in &mut v {
-        // n_ref has type &mut i32
-        *n_ref += 50;
-    }
+  let mut v = vec![100, 32, 57];
+  for n_ref in &mut v {
+  // n_ref has type &mut i32
+  *n_ref += 50;
+  }
   @end
 
 
@@ -140,13 +134,14 @@ v.push(6);
 
   Since iterators borrow the vector, if we have to do in-place operations, it 
   is better to create an iterator over the indexes of the vector using a Range:
+
 @code rust
   fn main() {
-use std::ops::Range; 
-let mut v: Vec<i32>        = vec![1, 2];
-let mut iter: Range<usize> = 0 .. v.len();
-let i1: usize              = iter.next().unwrap();
-let n1: &i32               = &v[i1];
+  use std::ops::Range; 
+  let mut v: Vec<i32>        = vec![1, 2];
+  let mut iter: Range<usize> = 0 .. v.len();
+  let i1: usize              = iter.next().unwrap();
+  let n1: &i32               = &v[i1];
   }
   @end
 
