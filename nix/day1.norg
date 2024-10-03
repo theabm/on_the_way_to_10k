@@ -1,5 +1,6 @@
+______
 
-                Day1 - Language, Derivations, Library
+                Part 1 - Language, Derivations, Library
 
 Tutorial Series By: *Fernando Ayats*
 Covered in his {https://ayats.org/blog/nix-tuto-1}[Blog Post]
@@ -7,223 +8,407 @@ Covered in his {https://ayats.org/blog/nix-tuto-1}[Blog Post]
 ______
 
 * What is Nix?
-  - Package manager: it can be installed on any distribution.
-  - Purely functional: no side effects
+  Nix is a purely functional package manager, that enables reproducible and 
+  declarative builds and deployments. 
 
-  In nix everything is an expression. To evaluate expressions, we use 
-  `nix eval --expr "1"`
-  We can also use `nix eval -f file_name` to evaluate a file that contains a nix 
-  expression.
+  Unpacking this definition:
 
+  - Package manager: it has the same role as apt or dnf in other distros. It 
+    organizes the sofware and dependencies in your system.
+  - Purely functional: Nix is also a lazy functional programming language. All 
+    packages are written with Nix.
+  - Reproducible: given certain fixed inputs, we will always obtain the same 
+    output. This idea is enforced in Nix by buiding packages in a sandbox and 
+    making use of a functional language.
+  - Declarative: Instead of running many commands, we write "recipes" that are 
+    used to build packages.
+
+  The nix package manager installs all packages in `/nix/store`. They are 
+  addressed by a cryptographic hash of their inputs and build procedure. 
+  Therfore, many packages of the same name but with different build 
+  procedures can coexist. *There is no concept of global library*.
+
+  In nix everything is an expression. To evaluate expressions, we can use:
+
+  `nix eval --expr "somenixexpression`
+
+  Or
+
+  `nix eval -f file_name`
+
+  provided that `file_name` contains a valid nix expression.
+  For example:
+  @code bash
+  $ nix-eval --expr "2"
+  $ 2
+  $ echo 2 >> mynixexpr.nix
+  $ nix-eval -f mynixexpr.nix
+  $ 2
+  @end
 * Language
+
+  We give a very brief intro to the nix language:
+
 ** Types
-*** Strings
-
-    - Using double quotes:
-    "hahaa" - this is a string
-
-    - Using double single quotes:
-    ''
-    hahahaha
-    ''
+        
+   Nix is very basic and doesn't have many types. Below we give a brief 
+   overview.
 
 *** Booleans
 
-   true or false
+    Nix has boolean types: simply `true` or `false`.
 
 *** Null
 
-    Used mainly for modules.
+    The `null` type is used mainly for modules and should be avoided.
 
 *** Numbers
 
-    ints, floats, etc.
+    Nix has various types for what we commonly think of as "numbers".
+    These are `ints`, `floats`, etc.
 
-*** Lists
-    
-    Between brackets:
-    [
-        1
-        4
-        2
-    ]
+*** Strings
 
-*** Attribute Sets
-    Key-value maps (uniquely defined):
+    Strings are very ubiquitous. There are two ways to instantiate a string:
+    - Using double quotes: "hahaa"
+    - Using double single quotes:
+      ''
+      hahahaha
+      ''
+      The latter is more flexible and allows double quotes inside of it. 
 
+    Strings also allow "string interpolation", which is a very useful operation 
+    in Nix. String interpolation is the act of getting the value of a type 
+    inside a string, and its syntax is: `${variable}`.
+    For example:
+    @code nix
     {
-    key_name = key_value;
-    another_key = key_value_2;
-    "foo" = 3;
-    }
-
-    Short hand:
-    {
-        a.b = 4;
-    }
-    is equivalent to:
-@code nix
-    {
-    a = {
-        b=4;
-        };
+        a = 2;
+        b = "my value of a is ${a}";
     }
     @end
+    Will evaluate to the following {# Attribute Sets}[attribute set]:
+    @code nix
+    {
+        a = 2;
+        b = "my value of a is 2"
+    }
+    @end
+
+    Some special types in Nix have particular string interpolations, as we will 
+    see later. For example, the interpolation of a derivation will evaluate to 
+    its location in the nix store.
+
+*** Composite types
+
+**** Lists
+
+     Lists contain a sequence of values of the same type. Their syntax is shown 
+     below:
+     @code nix
+     [ 1 4 2 ]
+     @end
+**** Attribute Sets
+
+     These are key-value mappings where they key must be uniquely defined. 
+     However the values do not have to be of the same type as in the case of 
+     lists. Due to this flexibility, this type is quite popular in Nix. The 
+     syntax is shown below:
+     @code nix
+     {
+         key_name = key_value;
+         another_key = key_value_2;
+         "foo" = 3;
+     }
+     @end
+
+     There is also a shorthand, which uses the `.` operator. With the shorthand,
+     @code nix
+     {
+         a.b = 4;
+     }
+     @end
+     Is equivalent to:
+     @code nix
+     {
+         a = {
+             b=4;
+         };
+     }
+     @end
+
+     We can also define attributes recursively, but to do so, we must prepend the 
+     attribute set with the word *rec*.
+
+     In other words, this is allowed:
+     @code nix
+     {
+         a = 2;
+         b = a+1;
+     }
+     @end
+
+     Lastly, it is important to remember that nix is lazily evaluated. So it 
+     will only evaluate things that are explicitly required. Other things that 
+     *may* give an error could never be evaluated!!
 
 *** Functions
 
-    Functions in nix take one argument and return one single thing.
+    Functions in Nix take one argument and return one output.
 
-    The syntax is input:output.
+    The syntax is `input: output`. Therefore, whenever you encounter colons,
+    this means you are faced with a function.
 
-    So when we write a = x: x+1 it means a is a function that takes x and returns
-    x+1.
+    So, when we write `a = x: x+1` it means `a` is a function that takes `x` 
+    and returns `x+1`.
 
-    To evaluate a function in nix, we use the space.
+    Since Nix language is functional, functions are first class citizens, 
+    therfore, to make the syntax light, function application is doesnt require 
+    parenthesis or anything else. We separate the function name and the inputs 
+    with a space and we are done.
+
+    So, `a 3` will result in `4`.
 
     What about multiple arguments? We can pass a single attribute set which has 
-    more than one key-value.
+    more than one key.
+    @code nix
     f = x : x.first + x.second;
-
-    Another way is to decompose an attribute set 
+    @end
+    Another way is to decompose an attribute set:
 @code nix
     f = {first, second} : first + second;
     @end
-    Another way is to do currying:
-    f = first: second: first + second
+    Note that we are still passing a single argument! We are just able to use 
+    some syntactic sugar to make our life easier.
 
-    In this way, we are defining a function that returns another function 
-    that is partially applied.
+    Another way to have functions with multiple arguments is currying:
+    @code nix
+    f = first: second: first + second
+    @end
+    In this way, we are defining a function that returns another function. 
+    Sequential applications yield partially applied functions. In other words, 
+    `f 3` implictly yields a function that could be defined like this: 
+    `second: 3 + second`. Then, when we pass the second argument, we apply 
+    the resulting function to it.
+
+*** Conclusions
+
+   Nix has some additional advanced types (derivations) which we will see later.
+   However, derivations require an understanding of the basic types.
+
+   As we can see, it is quite "basic" and "barebone".
 
 ** Let-in Syntax
 
-   Used to bind variables. It is itself an expression (i.e. what is after "in"
-   needs to be an expression.)
-   Ex:
-@code nix
+   The let-in syntax is used to bind variables. 
+
+   It is itself an expression (i.e. what is after "in" needs to be an 
+   expression.)
+
+   As an example:
+   @code nix
    let 
-    x = if true then "true" else "false";
+       x = if true then "true" else "false";
    in
-    x
+       x
    @end
-* Builtins
-  In nix we have a global variable called builtins. It is an attribute set 
-  that contains a lot of useful functions.
+   The let-in expressions are recursive. So it will evaluate all bindings until 
+   they are all defined.
 
-  Ex:
+** Builtins
 
-    builtins.trace val val
+   In Nix we have a global variable called *builtins*. It is an attribute set 
+   that contains a lot of useful functions. For example:
+   @code nix
+   builtins.trace val1 val2
+   @end
+   This will print the value of val1 and return the value of val2. Usually, 
+   we give it the same value (to print and return the value).
 
-  This will print the first value and the second. It is used mainly for debugging.
-  @code nix
-  let val = true;
+   It is used mainly for debugging purposes. Ex:
+   @code nix
+   let val = true;
 
-  x = if builtins.trace val val
-            then "true";
-            else "false";
-  in 
-    x
-  @end
+       x = if builtins.trace val val
+           then "true";
+       else "false";
+   in 
+       x
+   @end
+** Iterative procedures
 
-* Iterative procedures
-  We dont have for or while loops, we have `map` `filter` `foldl`
-  Ex:
+   In Nix, there are no for or while loops. Instead, we use `map` `filter` `foldl`
 
-@code nix
-  builtins.map (x: x+1) [2 3]
-  @end
-  To reduce a list we can use `fold` or more specifically `foldl`
+   For example:
+   @code nix
+   builtins.map (x: x+1) [2 3]
+   @end
+   This maps a function that increases an element over all the elements of a 
+   list. You can think of this as the equivalent of a for loop.
 
-** import builtin
-   import file_path 
+   To "reduce" a list we can use the `fold` paradigm, or more specifically in 
+   Nix, `builtins.foldl'`. This is a classic technique from functional 
+   programming. The idea is that we define an operation, an accumulator, and 
+   the data. For example, to sum, we can do:
+   @code nix
+   builtins.foldl' (x: y: x+y) 0 [1 2 3 4 5]
+   @end
+** The `import` keyword
 
-   It takes a path that contains an expression, evaluates the expression, 
-   and returns the value it evaluated to.
+   In Nix, there is a keyword `import` (*not* to be confused with `imports` which 
+   is very common and used by the module system). The syntax is:
 
-   If we type `<nixpkgs>` in the nix repl, it will print the path in the nix store 
-   that contains nixpkgs.
+   `import file_path`
 
-   We can type `pkgs = import <nixpkgs> {}` to bring nixpkgs into scope.
+   It takes a path that contains an valid Nix expression, evaluates the 
+   expression, and returns the value it evaluated to. This is very useful for 
+   modularity reasons. For example, if we type `<nixpkgs>` in the nix repl, 
+   it will print the path in the nix store that contains nixpkgs. We can type 
+   `pkgs = import <nixpkgs> {}` to bring nixpkgs into scope.
 
-   Remember that this is just an attribute set!
+   Now, all the attributes of nixpkgs will be available in our local scope by 
+   prefixing it with `pkgs.`, isn't that great?!
 
-*** lib
+   Furthermore, `pkgs` is just an attribute set, so we can do our usual 
+   operations with it.
 
-    After we import pkgs (look above), we can look at the attribute "lib".
-    (i.e. pkgs.lib) which is a libray in nixpkgs that has a lot of other 
-    additional functions.
+** A useful library! - `pkgs.lib`
 
-    Useful functions:
+   In many Nix programs, after we import pkgs as shown in the example above, 
+   we can look at the attribute `pkgs.lib`, which is itself an attribute set of 
+   other additional functions. Some of these are:
+   @code nix
+   $ nix repl
+   nix-repl> lib.concatStrings ["happy" "sad"]
+   nix-repl> "happysad"
+   nix-repl> lib.makeLibraryPath ["" "/usr"]
+   nix-repl> "lib:/usr/lib"
+   @end
+   Other useful functions:
+   - lib.attrsToList`
+   - `lib.listToAttrs`
+   - `lib.flatten`
 
-    lib.concatStrings ["happy" "sad"] and returns "happysad".
+   *Tip*: Use noogle.dev to find a lot of functions in Nix 
+   (`builtins` and `pkgs.lib`).
 
-    Use noogle.dev to find a lot of functions in nix (builtins and lib).
+   *Tip*: When exploring the nix language in the nix repl, use :p to do deep 
+   printing!
 
-    In nix repl, use :p to do deep printing.
+   *Tip*: To find packages/functions on nixpkgs, you can use the `nix repl`. This 
+   will always be more complete than searching on {https://search.nixos.org/packages}[NixOs]. 
+   To do this, import nixpkgs by `:l <nixpkgs>` and use tab to autocomplete and 
+   explore the structure!
+   ----
 
-    Useful functions 2:
-    lib.attrsToList
-    lib.listToAttrs
-    lib.flatten
-    lib.makeLibraryPath ["" "/usr"] - > "/lib:/usr/lib"
+
+_________________
+
+                            Part 2: Derivations
+
+_______________
 
 * Derivations
-  to find stuff on nixpkgs, you can use nix repl, import pkgs and use tab to 
-  autocomplete and explore the structure. 
 
-  Use `builtins.derivation` - this a type!
-  For every derivation, I will get a path in nix store. 
-@code nix
+  Derivations are just another "type" (`builtins.derivation`) in Nix. They are 
+  "recipes" for how to do something. A derivation can be a package, a 
+  configuration file, a set of packages that constitute a development 
+  environment, and much more. It is essentially an instruction for something 
+  that will be build by nix and placed in the Nix store.
+
+  Every derivation that is build by Nix gets a corresponding unique path in 
+  the Nix store which is identified by a cryptographic hash of its inputs and 
+  build procedure. For example:
+  @code nix
   let 
       pkg = builtins.derivation {
-      system = "x86_64-linux";
-      builder = "/bin/sh";
-      name = "foo";
-      args = [
-          "-c"
-          ''
-            echo foo > $out
-          ''
-        ];
+          system = "x86_64-linux";
+          builder = "/bin/sh";
+          name = "foo";
+          args = [
+              "-c"
+              ''
+                echo foo > $out
+              ''
+          ];
       };
   in 
-  pkg
-
+      pkg
   @end
+  The above snippet builds a derivation named `foo` for a specific system. It 
+  uses a `sh` builder which will get some args `-c` (for commands) followed 
+  by `echo foo > $out` which is the command to run. Note there is `$out`, we 
+  will explain what this is shortly!
 
-  To build a derivation, use nix build. If you use nix eval it will just say 
-  its a derivation and thats it.
+  To build this derivation, use `nix build`, which will build the derivation 
+  in a sandbox where nothing from the home directory exists. This is what 
+  ensures reproducibility! You cant even use curl (so no internet) in this 
+  sandbox (ouch!)
 
-  Derivations are not really another type, they are an attribute set which has 
-  a ".type" attribute which says its a derivation.
+  So how do we download the source code within a derivation? How do we have 
+  access to other packages? To use the network, I need to provide a hash 
+  of the location I want to access. This ensures that, in the future, if the hash 
+  has changed, the build will fail, making it reproducible.
 
-  string interpolation of a package will force its evaluation.
-  This is the most fundamental way to declare dependencies between packages.
-  to query all package dependencies use 
-  `nix path-info -rsSh ./result`(result of a build)
-  `$out` - this is the nix store path of the derivation that will be built.
-  all derivations run in a sandbox where nothing from my home directory exists. 
-  This is done for reproducibility.
-  you cant even use curl (so no internet) in the sandbox. So how do we download 
-  packages within builtins.derivation.
-  to use the network I need to provide a hash of the results. this ensure of the 
-  reproducibility.
-  so you need to put 
+  In practice, this means we include the following snippet every time we use 
+  the network:
+  @code nix
   outputHAshMode = "flat";
   outputHashAlgo = "sha256";
-  outputHash = "";(run and then paste the hash it shows as an error.).
-  if your nix expression outputs many derivations, you can speicfy it with 
-  nix build -f file attrname
+  outputHash = "";
+  @end
+  Note that outputHash is empty in the beginning, so it will error out, giving 
+  the correct hash in the error message.
 
-  However, this is not what is commonly used. We always use the higher level 
+  The building process consists of various phases, but more on that later.
+
+  *Tip*: If your nix expression outputs many derivations, you can speicfy it with 
+  `nix build -f file attributeNameOfDerivation`
+
+  Once the build is complete Nix will store the results in a locally created 
+  `result` directory. 
+  If we explore this directory, we will see it is just full of symlinks to the 
+  nixstore. For an application, we can naviagate to `./result/bin` to find the 
+  binary file! 
+
+  However, if we use `nix eval` instead it nix will just note that it is a 
+  derivation and do nothing else. 
+
+  Derivations are not really another type, they are just an attribute set which 
+  has a "type" attribute which says it's a derivation.
+
+  *Important*: String interpolation of a derivation will force its evaluation.
+  This is the most fundamental way to declare dependencies between packages in 
+  Nix. In other words, by simply including the name of another derivation in 
+  the current one, we force its evaluation at build time, creating a dependency.
+
+  *Tip*: To query all the dependencies of a derivation/package we can use
+  `nix path-info -rsSh ./result`
+
+** Nix magic - `$out`
+
+   Earlier we mentioned that there was a strange `$out` in our derivation. 
+
+   So what is it? 
+
+   `$out` is the nix store path of the derivation that will be built.
+
+* Derivations - For Real
+
+  Above, we saw how to use `builtins.derivation`. While it is useful to build a 
+  basic understanding, in practice we use the higher level 
   `pkgs.stdenv.mkDerivation`.
-  In this function, all attributes that are not special are exported as 
+
+  Within this function, all attributes that are not "special" are exported as 
   environment variables to the builder.
 
-  even higher level derivation is pkgs.fetchFromGitHub which allows internet access
-  by default (only to fetch github repos).
+  Some other higher level functions to build derivations is 
+  pkgs.fetchFromGitHub which allows internet access by default 
+  (but only to fetch github repos). We still have to specify some stuff, like 
+  the owner of the repo, the name of the project, the specific revision or 
+  commit tag we want to fetch, and other things.
 
-  to get a shell with the derivation we use nix develop 
+  *Tip*: To get a shell with the derivation use `nix develop`
 
 
 
