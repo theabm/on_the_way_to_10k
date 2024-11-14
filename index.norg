@@ -85,6 +85,13 @@
 *** {:dask/best-practices:}[Best Practices]
 *** {:dask/arrays:}[Arrays]
 
+** Ray
+*** {:ray/core/intro:}[Ray Core]
+***** {:ray/core/tasks:}[Tasks]
+***** {:ray/core/actors:}[Actors]
+***** {:ray/core/objects:}[Objects]
+***** {:ray/core/scheduling:}[Scheduling]
+
 
 ** cmake 
 *** {:cmake/basics.norg:}[basics]
