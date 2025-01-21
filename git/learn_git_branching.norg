@@ -1,0 +1,510 @@
+____
+
+                        Git Tutorial 
+
+                    Based on: {https://learngitbranching.js.org/}[Learn Git Branching]
+
+____
+
+* Git commits
+
+  A Git commit records a snapshot of tracked files, efficiently storing changes 
+  as lightweight deltas rather than copying everything. This allows for quick 
+  switching between commits while maintaining a detailed history of changes, 
+  aiding collaboration.
+
+  *Whenever we make a commit, git stores the changes (delta). Each commit 
+  has a parent commit from which it was based on*
+
+  Associated commands:
+  @code
+  $ git commit filename
+  @end
+* Git Branches
+
+  Git branches are a zero-cost pointer to commits. They are useful to organize 
+  work coherently.
+
+** Creation
+
+  Branches in Git are lightweight pointers to specific commits. Since there is 
+  no storage / memory overhead with making many branches, it's easier to 
+  logically divide up your work than have big bbranches.  
+
+  *Since branches are zero-cost: "Branch early and branch often"*
+
+   Associated commands:
+   @code bash
+   # create a new branch but stay in current branch
+   $ git branch branchname
+
+   # switch to branchname 
+   $ git switch branchname 
+   # or
+   $ git checkout branchname
+
+   # create AND switch to branchname
+   $ git checkout -b branchname
+
+   # (Advanced) Create local branch that tracks another branch (usually remote)
+   $ git branch branchname otherbranchname
+  @end
+   *note*: `git switch` is a new command that has been introduced since 
+   `git checkout` is too overloaded. However, it is still experimental and the 
+   syntax may change. It should still be preferred.
+
+** Switching
+
+   By default, git creates a *main* branch for us. We create or switch to any 
+   other branches. Whatever branch we are "*on*" will be used as the parent of 
+   any new commit.
+
+   We can see what branch we are "*on*" by looking at where the asterisk "*\**" is 
+   when we run `git branch`.
+
+   Associated commands:
+   @code bash
+   # switch to branchname
+   $ git switch branchname
+   # or
+   $ git checkout branchname
+
+   # list local branches
+   $ git branch
+   # list all branches (including remotes -- more on this later)
+   $ git branch -a 
+  @end
+   *note*: If we make a new commit while we are on a branch, the branch will be 
+   moved "up" to point to this new commit.
+
+* Combining Work Together
+
+   We know how to branch, develop some feature, and commit. How do we combine 
+   two branches together so that new features can be incorporated?
+
+** Merging
+
+    The first method is known as *merging*. This creates a special commit that 
+    takes *two* parent commits and "combines" the work from both. However, if two 
+    branches have written different things on the same places, we will encounter
+    a "*conflict*". Before merging, all conflicts must be "*resolved*".
+
+    Example: 
+    Setting - Two branches *main* and *branchname* each with some unique commits.
+
+    If we are on *main* branch, and we `git merge branchname`, 
+    a new commit will be created that has as parents *branchname* and *main*. 
+    Then, *main* will be moved to point to this new commit. Now, *main* contains
+    all the work of both parents. 
+    *note*: now, if we `git checkout branchname` and `git merge main`, *branchname* 
+    will simply be moved to point to the merge commit (the same place as *main*).
+    This is because *branchname* is a parent of *main*.
+
+    Associated commands:
+    @code bash
+    # switch to main
+    $ git switch main
+
+    # merge branchname into main
+    $ git merge branchname
+    @end
+** Rebasing
+
+    The second way of combining work together from different branches 
+   is *rebasing*. Rebasing essentially takes a set of commits, "_*copies*_" 
+   them, and plops them down somewhere else. Then, it moves the branch to 
+   point to the the newest commit that was copied.
+
+    Pros: 
+    - Used to make a nice linear sequence of commits. 
+    - Make git logs/history much cleaner.
+    Cons: 
+    - Changes the history in some way.
+
+    Example: 
+    Setting - Two branches *main* and *branchname* each with some unique commits.
+
+   If we are on *branchname* and we `git rebase main`, we  "copy" the work 
+    from *branchname* _onto_ *main*, by creating a new commit with *main* as the 
+    parent and moving *branchname* to this new commit. If we then 
+    `git checkout main` (which is one commit behind *branchname*) and 
+    `git rebase branchname`, *main* will be moved to point to the same commit 
+    as *branchname* since its an ancestor of *branchname*.
+
+    *_Important Note_*: notice that *merging* is a "into" operation while 
+    *rebasing* is an "onto" operation. In other words, if we are on *branchname* 
+    and we `git merge main`, we merge *main* _into_ *branchname* and create a commit 
+    with two parents. On the other hand, if we `git rebase main`, we rebase 
+    *branchname* _onto_ *main* creating a new commit (with a single parent) on top of 
+    *main* (and moving *branchname* to point to the new commit).
+* Moving Around in Git
+
+  Let's see how to move around our commit tree which represents our project.
+
+** *HEAD*
+
+   *HEAD* is a symbolic name for the currently checked out commit i.e. what 
+   commit you're working on top of. 
+
+   If we are on *branchname*, *HEAD* will point to the *branchname*. 
+   This is indicated with *HEAD -> branchname* when running `git log`.
+
+   If we make a new commit, the *branchname* is moved "up" to point to the new
+   commit and *HEAD* moves with it (since it points to *branchname*). 
+
+*** Detached *HEAD*
+
+   If we check out a commit instead of a branch, *HEAD* will point to that 
+   commit. If this happens, we will be in *detached HEAD mode*. 
+
+   An alternative way to explain it, is that *detached HEAD mode* happens 
+   when *HEAD* points to a commit rather than a branch.
+
+    *note*: When in *detached HEAD mode* we can only explore the tree - we can't do any 
+   work or create new commits. To do this, we need to create a branch at the 
+   desired commit we want to work off of.
+
+   @code bash
+   # show all commits
+   $ git log 
+   # checkout a specific commit by using its hash
+   $ git checkout commit-hash
+   @end
+** Relative Refs
+
+   Specifying hashes can be a bit cumbersome. So git allows "relative" 
+   movement from *HEAD* and branches (or specific commits, if you really want).
+   - Use *^* to move up one commit at a time. 
+    Ex: 
+   @code
+   # checkout one commit above current HEAD (note HEAD will then move)
+   $ git checkout HEAD^
+   @end
+   *note*: *^* optionally accepts a parameter after it. This is used when we want to 
+   go up from a merge commit which has 2 parents. *^* will go to the parent
+   directly above the merge (where we merged from), while *^2* will 
+   go to other parent (what we merged).
+
+   - Use *~\[num\]* to move up *num* commits.
+     Ex:
+   @code
+   # checkout three commits above branchname (note HEAD will move)
+   $ git checkout branchname~3
+   @end
+*** Chaining 
+
+    We can chain modifiers together in a single command.
+
+    Example: 
+    @code bash
+    # long form
+    git checkout HEAD~; git checkout HEAD^2; git checkout HEAD~2
+
+    # chained form
+    git checkout HEAD~^2~2
+    @end
+* Branch Forcing
+
+  One of the most useful ways to use relative refs is to move branches around. 
+
+  You can directly reassign a branch to a commit with the `-f` option.
+
+  Example:
+  @code bash
+  # move by force the main branch to three parents behind HEAD
+  $ git branch -f main HEAD~3
+  @end
+  *note*: we can only do this for branches we are _not_ currently in. So if 
+  we try to execute the above command while we are on *main*, it will not allow 
+  this operation.
+
+  *note 2*: be careful when moving branches around because you can lose parts 
+  of your project if you no longer have a way to refer to it (unless you know 
+  the commit hash).
+
+* Reversing Changes
+
+  There are two main ways to reverse changes in git: `git reset` and 
+  `git revert`. We focus on how the changes are actually reversed rather 
+  than the low level aspects.
+
+** *Reset*
+
+   Reset reverses changes by moving a branch reference backwards in time to an 
+   older commit. 
+
+   Associated commands:
+   @code bash
+   # switch to main
+   $ git checkout main
+
+   # reset main to one commit before HEAD
+   $ git reset HEAD~1
+   @end
+   Notice, we can achieve the same thing by branch forcing - the difference is 
+   that we can be currently checked out on main and do a *reset*.
+
+** *Revert*
+
+   Resetting is good for local branches in our machine. But it doesnt work for 
+   remote branches that others are using (more on remote branches later).
+
+   In order to reverse a commited change and _share_ those reversed changes with others, 
+   we do a `git revert`.
+
+   The difference is that *revert* will create a new commit that undoes 
+   a commit. So the reversion is actually part of the commit history, 
+   unlike resetting where it's kind of like the commit never happened.
+
+   We can only revert one commit at a time.
+
+   Associated commands:
+   @code bash
+   # switch to main
+   $ git checkout main
+
+   # revert the last commit (HEAD)
+   # effectively, it goes back to one commit before
+   $ git revert HEAD
+   @end
+   *note*: the command above creates a new commit which undoes the HEAD commit. 
+
+   *note 2*: Note that the syntax is `git revert commit-we-want-to-revert` and 
+   not `git revert commit-we-want-to-go-back-to`. To revert backwards more 
+   than one step, we have to do multiple git reverts, creating a new commit each 
+   time (`git revert commit1 commit2 commit3 ...` will do this with one command)
+
+* Moving Work Around
+
+  So far, we have seen committing, branching, and moving around the tree.
+  This is good for 90% of tasks. 
+
+  Now we cover the case where we want to move work around to specific places.
+
+** *Cherry Picking*
+
+   Cherry picking allows us to copy a series of commits (in the specified order)
+   below *HEAD*. Then *HEAD* (and the branch) is moved to the last commit we 
+   copied.
+
+   Syntax:
+   @code bash
+   # copy commit1, commit2, ... , commitX below HEAD
+   # after this operation, HEAD will point to commitX
+   $ git cherry-pick commit1 commit2 ... commitX
+   @end
+   In other words, it is similar to *rebase* but with _into_ semantics, ie you 
+   cherry pick commits _into_ *HEAD*. 
+
+   The big advtange of cherry picking over a normal rebase is that you can 
+   pick commits across different branches. This "commit" centric view makes 
+   it super flexible, easy to understand, and powerful.
+
+** *Interactive Rebase*
+
+   Cherry picking is useful when we know the hashes of the commits. But what if 
+   this is not the case? This is where interactive rebasing comes in handy. 
+
+   Interactive rebasing is a *rebase* with the `-i` flag. It opens a UI (in vim)
+   where you can reorder, drop, squash, and move commits. 
+
+   Example: 
+   If we run `git rebase -i HEAD~4`, this will open a UI which will allow us to 
+   rebase our work interactively _onto_ the commit indicated by `HEAD~4`. Since 
+   `HEAD~4` is 4 commits behind *HEAD*, we can basically play around with the 
+   previous 3 commits from *HEAD*. Of course, as usual, the rebase will create 
+   new commits and move *HEAD* to the latest one.
+
+* Mixed Techniques
+
+** Locally Stacked Commits: Debugging Tricks
+
+   Sometimes you want to debug your code so you insert a ton of print/debug
+   statements in your code base. These changes should live in their own branches.
+   *Remember* branches are zero-cost!
+
+   Once we find the bug, we also create a branch for the solution *bugFix*.
+   We would like to bring these changes into *main* without also having the 
+   various print/debug statements.
+
+   How can we do this?
+
+   Easy! We just cherry-pick *bugFix* into *main* or do an interactive rebase 
+   and drop the debug commits, keeping *bugFix*.
+
+   Associated commands:
+  @code bash
+  # assume we have checked out main
+  $ git cherry-pick bugFix
+  # or (assuming we are checked out into bugFix)
+  $ git rebase -i main # drop debug commits and keep bugFix
+  @end
+
+** Juggling Commits: Useful for changing old work!
+
+   Sometimes we need to slightly change a commit that is far back in history. 
+   We could create a new commit, but it's such a small change that it's not 
+   worth it. What can we do? 
+
+   If the commit was newest one, we could do a `git commit --amend`, which would 
+   allow what we want. But our commit isn't the newest one! Well, we can 
+   reorder using an interactive rebase, put the commit that needs amending to 
+   the front, amend it, and reorder again using the interactive rebase.
+
+   *Note*: dont forget that each time we do a rebase, we make a copy of the 
+   commmits. Amending also changes the hash of the commit (effectively making 
+   a new one).
+
+   Associated commands:
+   @code bash
+   # Assume 
+   # --- main
+   # |
+   # |  -- Commit we want to modify
+   # |  |        
+   # |  |        -- HEAD
+   # |  |        |
+   # C4 C3 C2 C1 C0
+   #
+   $ git rebase -i HEAD~4 # then reorder as: C2, C1, C0, C3
+   # or
+   $ git rebase -i main # then reorder as: C2, C1, C0, C3
+   $ git commit --amend # ammend C3 
+   $ git rebase HEAD~4 # then reorder as: C3, C2, C1, C0
+   @end
+
+   Pros: 
+   - Easy!
+   Cons:
+   - All the reordering can introduce conflicts.
+
+** Juggling Commits 2: Using Cherry Picking
+
+   An easier solution to avoid reorder conflics is to use cherry-picking. 
+
+   First, we checkout the commit _before_ the commit we want to modify. Then, 
+   we cherry-pick the commit we want to modify. We amend it. And then, we 
+   cherry-pick all the commits that follow the one we wanted to modify.
+
+   In this way, we follow the original order of committing and avoid 
+   any conflicts due to reordering. In practice, this is the best solution.
+
+   Associated commands:
+   @code bash
+   # Assume
+   # --- main
+   # |
+   # |  -- Commit we want to modify
+   # |  |        
+   # |  |        -- HEAD
+   # |  |        |
+   # C4 C3 C2 C1 C0
+   #
+   $ git checkout main 
+   $ git cherry-pick C3 # copy C3 on top of main 
+   $ git commit --amend # amend C3
+   $ git cherry-pick C2 C1 C0 # copy over rest of commits
+   @end
+* Tagging
+
+  As you have seen, branches and commits can be easily copied, moved, changed, 
+  etc. Often, they are temporary, and should be treated as so. 
+
+  So how can we permanently mark important moments - releases, big merges, etc.
+  in our repository?
+
+  The answer is git tags. They are similar to branches in that they point to a 
+  commit, but they are *never* moved as new commits are created - unlike 
+  branches.
+
+  Associated commands:
+  @code bash
+  # tag HEAD as v1 -- this creates a tag "v1" at HEAD
+  $ git tag v1
+  # tag commit CX as v2 -- this creates a tag "v2" at CX
+  $ git tag v2 CX
+  @end
+  *note*: we can checkout a tag, but we will be in *detached HEAD mode*, so we can't 
+  commit any new work into the tag!
+
+** Describing
+
+   Since tags serve as strong reference points in our tree, git has a command 
+   `git describe` which tells you where you are relative to the closest tag.
+
+   This is useful to get a better sense of where you are in the repository.
+
+   The syntax is: `git describe <ref>` where `<ref>` is anything git can resolve 
+   into a commit. If nothing is specified, it will use *HEAD*.
+
+   The ouput is of the form: `<tag>_<numCommits>_g<hash>` where `<tag>` is the 
+   closes ancestor tag, `<numCommits>` is how many commits away that tag is, 
+   and `g<hash>` is the hash of the commit being described.
+
+   Associated commands:
+   @code bash
+   # describe HEAD
+   $ git describe
+   # described branch bugFix
+   $ git describe bugFix
+   # described commit CY
+   $ git describe CY
+   @end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
