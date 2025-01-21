@@ -86,6 +86,13 @@
 *** {:dask/arrays:}[Arrays]
 *** {:dask/thoughts:}[Thoughts]
 
+** Ray
+*** {:ray/core/intro:}[Ray Core]
+***** {:ray/core/tasks:}[Tasks]
+***** {:ray/core/actors:}[Actors]
+***** {:ray/core/objects:}[Objects]
+***** {:ray/core/scheduling:}[Scheduling]
+
 
 ** cmake 
 *** {:cmake/basics.norg:}[basics]
