@@ -84,6 +84,7 @@
 ** {:dask/dask:}[Dask]
 *** {:dask/best-practices:}[Best Practices]
 *** {:dask/arrays:}[Arrays]
+*** {:dask/thoughts:}[Thoughts]
 
 
 ** cmake 
@@ -94,11 +95,14 @@
 
 ** Tracking
 *** {:tracking/2024:}[2024]
+*** {:tracking/2025:}[2025]
 
 ** Git and Github
-*** {:git/beginner:}[Beginner Concepts]
-*** {:git/intermediate:}[Intermediate Concepts]
-*** {:git/advanced:}[Advanced Concepts]
+*** FreeCode Camp
+**** {:git/beginner:}[Beginner Concepts]
+**** {:git/intermediate:}[Intermediate Concepts]
+**** {:git/advanced:}[Advanced Concepts]
+*** {:git/learn_git_branching:}[Learn Git Branching]
 
 ** Missing semester of CS
 *** {:missingcs/l1:}[Lecture 1]
@@ -132,6 +136,7 @@
 ** {:profiling/profiling:}[Profiling]
 
 ** {:resources/resources:}[Resources]
+** {:ecoe3-notes:}[ecoe3-notes]
 
 
 
