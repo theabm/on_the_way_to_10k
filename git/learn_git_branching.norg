@@ -160,9 +160,10 @@ ____
    An alternative way to explain it, is that *detached HEAD mode* happens 
    when *HEAD* points to a commit rather than a branch.
 
-    *note*: When in *detached HEAD mode* we can only explore the tree - we can't do any 
-   work or create new commits. To do this, we need to create a branch at the 
-   desired commit we want to work off of.
+   *note*: When in *detached HEAD mode* any new commits we make will not update 
+   any branch. That means that if we lose reference to the commit hashes, the 
+   changes will be lost. To make the changes more permanent, create a branch 
+   with `git switch -c branchname`.
 
    @code bash
    # show all commits
@@ -450,7 +451,60 @@ ____
    # described commit CY
    $ git describe CY
    @end
+* The World Of Remotes
 
+  So far, all we have discusses is relevant to *local* git repositories. As we 
+  have seen, it's super easy to play around with your tree.
+
+  However, you will usually need to store your local work in a remote location 
+  either for backup or for sharing the work with others.
+
+  Git remotes are just copies of your repository on another computer. 
+
+** Cloning
+
+   The command `git clone repo-url` will create a local copy of the remote 
+   repository stored somewhere like Github. Nothing magical.
+
+   However, if we run `git branch -a` to list all branches, we will find a branch 
+   named *origin/main*. This type of branch is a /remote/ branch (but they are 
+   still local to our system!). These are special branches that reflect the 
+   state of the remote repositorie since you last exchanged information with it.
+
+   They also have the special property that if you check them out, you are put 
+   in *detached HEAD mode* - you can't work directly on these branches (new 
+   commits will not update any branches).
+   You should do your work on normal branches and then share your work with the
+   remote repository, which will then update the our local remote branch. 
+
+   The naming convention is *<remote name>/<branch name>*. Usually, the main 
+   remote is named *origin* which is what git does by default.
+
+   *Note*: We stress again, /remote/ branchs are still local. They reflect the 
+   state of /remote/ repositories.
+
+** Fetching
+
+   As mentioned, /remote/ branches are special branches that serve to reflect 
+   the state of a remote repository since we last exchanged information with it.
+
+   To update the view of the remote repository, we should do a `git fetch`.
+   This will update the /remote/ branches and make them reflect the latest 
+   changes in the remote repository that we may not have!
+
+   For example, if the remote repo is two commits ahead of *main*, doing a 
+   `git fetch` will update *origin/main* to reflect this, putting it two 
+   commits ahead of *main*.
+
+   So, `git fetch` does two things:
+   ~ Download commits that the remote has but are not present in our local repo.
+   ~ Update where remote branches point.
+
+   It essentially synchronizes our local representation of the remote 
+   repository with what is actually in the remote repository.
+
+   `git fetch` does /not/ change anything about our /local/ state though. It will 
+   not update the *main* branch or change anything about our file system.
 
 
 
