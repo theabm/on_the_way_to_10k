@@ -21,11 +21,57 @@
   tools available for anyone in a similar path.
 
 * Table of contents
-
-** {:docker/docker:}[Docker]
-
+** AI
+*** Deep Learning
+** Cmake 
+*** {:cmake/basics.norg:}[basics]
 ** {:dash/dash:}[Dash]
-
+** {:dask/dask:}[Dask]
+*** {:dask/best-practices:}[Best Practices]
+*** {:dask/arrays:}[Arrays]
+*** {:dask/thoughts:}[Thoughts]
+** {:docker/docker:}[Docker]
+** {:ecoe3-notes:}[Ecoe3 Notes]
+** Git and Github
+*** FreeCode Camp
+**** {:git/beginner:}[Beginner Concepts]
+**** {:git/intermediate:}[Intermediate Concepts]
+**** {:git/advanced:}[Advanced Concepts]
+*** {:git/learn_git_branching:}[Learn Git Branching]
+** {:haskell/haskell:}[Haskell]
+** HPC
+*** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
+*** {:hpc/openmp/openmp:}[OpenMP]
+** {:linux/linux:}[Linux]
+** Missing semester of CS
+*** {:missingcs/l1:}[Lecture 1]
+*** {:missingcs/l1:}[Lecture 2]
+*** {:missingcs/l1:}[Lecture 3]
+*** {:missingcs/l1:}[Lecture 4]
+*** {:missingcs/l1:}[Lecture 5]
+*** {:missingcs/l1:}[Lecture 6]
+*** {:missingcs/l1:}[Lecture 7]
+*** {:missingcs/l1:}[Lecture 8]
+*** {:missingcs/l1:}[Lecture 9]
+** {:neorg/neorg:}[Neorg] 
+*** {:neorg/introduction:}[Introduction]
+*** {:neorg/modules:}[Modules]
+*** {:neorg/commands:}[Commands]
+*** {:neorg/syntax:}[Syntax]
+*** {:neorg/links:}[Links]
+*** {:neorg/todo:}[To-Do Items]
+*** {:neorg/journals_summaries:}[Journals And Summaries]
+*** {:neorg/automation:}[Automation]
+** Nix
+*** {:nix/day1:}[Day1 - Language, Derivation, Library]
+** {:profiling/profiling:}[Profiling]
+** Ray
+*** {:ray/core/intro:}[Ray Core]
+***** {:ray/core/tasks:}[Tasks]
+***** {:ray/core/actors:}[Actors]
+***** {:ray/core/objects:}[Objects]
+***** {:ray/core/scheduling:}[Scheduling]
+** {:resources/resources:}[Resources]
 ** {:rust/rust:}[Rust]
 *** {:rust/getting_started:}[Getting Started]
 **** {:rust/getting_started:# Installing}[Installing]
@@ -80,70 +126,9 @@
 *** Iterators and Closures
 **** {:rust/closures:}[Closures]
 **** {:rust/iterators:}[Iterators]
-
-** {:dask/dask:}[Dask]
-*** {:dask/best-practices:}[Best Practices]
-*** {:dask/arrays:}[Arrays]
-*** {:dask/thoughts:}[Thoughts]
-
-** Ray
-*** {:ray/core/intro:}[Ray Core]
-***** {:ray/core/tasks:}[Tasks]
-***** {:ray/core/actors:}[Actors]
-***** {:ray/core/objects:}[Objects]
-***** {:ray/core/scheduling:}[Scheduling]
-
-
-** cmake 
-*** {:cmake/basics.norg:}[basics]
-
-** Nix Tutorial - Fernando Ayats
-*** {:nix/day1:}[Day1 - Language, Derivation, Library]
-
 ** Tracking
 *** {:tracking/2024:}[2024]
 *** {:tracking/2025:}[2025]
-
-** Git and Github
-*** FreeCode Camp
-**** {:git/beginner:}[Beginner Concepts]
-**** {:git/intermediate:}[Intermediate Concepts]
-**** {:git/advanced:}[Advanced Concepts]
-*** {:git/learn_git_branching:}[Learn Git Branching]
-
-** Missing semester of CS
-*** {:missingcs/l1:}[Lecture 1]
-*** {:missingcs/l1:}[Lecture 2]
-*** {:missingcs/l1:}[Lecture 3]
-*** {:missingcs/l1:}[Lecture 4]
-*** {:missingcs/l1:}[Lecture 5]
-*** {:missingcs/l1:}[Lecture 6]
-*** {:missingcs/l1:}[Lecture 7]
-*** {:missingcs/l1:}[Lecture 8]
-*** {:missingcs/l1:}[Lecture 9]
-
-** {:haskell/haskell:}[Haskell]
-
-** {:neorg/neorg:}[Neorg] 
-*** {:neorg/introduction:}[Introduction]
-*** {:neorg/modules:}[Modules]
-*** {:neorg/commands:}[Commands]
-*** {:neorg/syntax:}[Syntax]
-*** {:neorg/links:}[Links]
-*** {:neorg/todo:}[To-Do Items]
-*** {:neorg/journals_summaries:}[Journals And Summaries]
-*** {:neorg/automation:}[Automation]
-
-** {:linux/linux:}[Linux]
-
-** HPC
-*** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
-*** {:hpc/openmp/openmp:}[OpenMP]
-
-** {:profiling/profiling:}[Profiling]
-
-** {:resources/resources:}[Resources]
-** {:ecoe3-notes:}[ecoe3-notes]
 
 
 
