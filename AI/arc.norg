@@ -1,0 +1,69 @@
+_____
+
+                ARG-AGI Kaggle Competition 2024
+
+_____
+Compilation of Notes
+
+* Summary
+
+  The Omni-ARC approach for the 2024 Abstraction and Reasoning Challenge (ARC) 
+  leverages a transformer model trained with multi-task learning, including 
+  output prediction and input distribution tasks, achieving a top-three finish 
+  on the public leaderboard. The solution also explores enhancing reasoning 
+  capabilities through test-time fine-tuning and output verification.
+
+* ARC Challenge
+
+  The ARC challenge requires learning transformation rules from pairs of 
+  high-dimensional input-output images (up to 30x30 pixels with 10 color 
+  options per pixel), which are simpler than real-world images but still complex 
+  due to their size.
+
+* Insight
+
+  Develop additional tasks to foster good representation of the ARC tasks.
+
+** Possible Additional Tasks (Multi-task approach)
+
+   ~ Examples + Input -> Output (classic case) 
+   ~ Inputs of Examples -> Input of task (learn the input distribution) 
+   ~ Outputs of Examples -> Output (learn the input distribution) 
+   ~ Examples (inputs + outputs) -> Code that solves task (learn to represent the examples) 
+   ~ Code that generates distribution -> Inputs (learn to represent the inputs) 
+   ~ Code that solves examples + Input -> Output (represent examples with code) 
+   ~ Inputs -> Code that generates distribution (represent inputs with code) 
+
+* Prior Work
+
+** MindsAI
+
+   Main contributions are: 
+   ~ Fine-tune models on synthetic and augmented data.
+   ~~ Synthetic data vs augmented data: synthetic data is *totally* new data 
+      that is generated. Augmented data is applying transformations to old data 
+      to obtain a more diverse test set.
+   ~ Test-time fine-tuning: do the fine-tuning at test time as well!
+   ~ AIRV (augment, inference, reverse augmentation, and vote) 
+   ~~ Analogous to test-time augmentation.
+   ~~ Idea: transform data, generate prediction, reverse the transformation, 
+      and do this for many transformations. At the end, pick the most popular 
+      ouput.
+
+** Ryan Greenblatt
+
+   Able to reach 50% on ARC public test set by having GPT-4o generate about 
+   8k python programs for every task and selecting the correct programs.
+   Additional methods are used to avoid just randomly sampling 8k programs.
+   ~ Few shot prompts which do meticulous step-by-step reasoning.
+   ~ Have GPT revise implementations after seeing what they actual output on 
+     the provided examples.
+   ~ Feature engineering on the ARC grid to give better representation.
+
+
+* References
+  ~ {https://lab42.global/community-interview-jack-cole/}[Interview] with Jack Cole (MindsAI)
+  ~ 
+
+
+
