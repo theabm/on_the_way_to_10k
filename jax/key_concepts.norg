@@ -1,0 +1,53 @@
+___
+
+                                JAX
+                            Key Concepts
+
+____
+
+* Arrays
+** Creation
+   The fundamental object is `jax.Array`, however, we usually create it through
+   Jax API functions such as `jax.numpy`.
+    @code python
+    import jax
+    import jax.numpy as jnp
+
+    x = jnp.arange(5)
+    assert isinstance(x, jax.Array)
+   @end
+** Devices
+   Jax arrays have a `devices` attribute which indicate where they live. 
+
+   Arrays may be sharded across multiple devices. We can inspect this with the 
+   `sharding` attribute.
+    @code python
+    x.devices() 
+    # -> {CpuDevice(id=0)}
+
+    x.sharding 
+    # -> SingleDeviceSharding(device=CpuDevice(id=0), memory_kind=unpinned_host)
+    @end
+* Transformations
+    
+  Jax transformations operate on other Jax functions to produce new ones.
+  ~ jax.jit(): jit compile the function.
+  ~ jax.vmap(): automatic vectorization of the function.
+  ~ jax.grad(): gradient transform of the function for automatic diff.
+
+  And others. They all accept a Jax function as an argument and return a 
+  new transformed one.
+  Ex:
+  @code python
+  # optionally we can use @jax.jit
+  def selu(x, alpha=1.67, lambda_=1.05):
+    return lambda_ * jnp.where(x > 0, x, alpha * jnp.exp(x) - alpha)
+
+  # How to jit a function
+  selu_jit = jax.jit(selu)
+  @end
+
+* Tracing
+
+
+
