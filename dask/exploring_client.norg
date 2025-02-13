@@ -1,0 +1,28 @@
+______________
+
+                Dask Exploration Of Source Code
+                            Client.py
+
+__________________
+
+* Future Class
+
+  Class responsible for all of Dask Future interface (i.e. the underlying 
+  object).
+
+  $ Definition
+  A Future is a local proxy to a result running on a remote worker.  A user
+  manages future objects in the local Python process to determine what
+  happens in the larger cluster.
+
+  Key terms: *local* and *proxy*. The future is local to our process, but is 
+  used to reference and manage remote computations.
+
+  /Important/ Parameters:
+  ~ *key*: str|tuple - the key of the remote data to which this future refers.
+  ~ *client*: Client - that owns the future. 
+  ~ *state*: FutureState - state of the future.
+
+
+
+

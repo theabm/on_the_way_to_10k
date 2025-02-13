@@ -32,6 +32,8 @@
 *** {:dask/best-practices:}[Best Practices]
 *** {:dask/arrays:}[Arrays]
 *** {:dask/thoughts:}[Thoughts]
+*** Exploring
+**** {:dask/exploring_client:}[Client]
 ** {:docker/docker:}[Docker]
 ** {:ecoe3-notes:}[Ecoe3 Notes]
 ** Git and Github
