@@ -45,6 +45,7 @@
 *** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
 *** {:hpc/openmp/openmp:}[OpenMP]
 ** Jax
+*** {:jax/getting_started:}[Getting Started]
 *** {:jax/key_concepts:}[Key Concepts]
 ** {:linux/linux:}[Linux]
 ** Missing semester of CS
