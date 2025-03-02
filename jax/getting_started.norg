@@ -1,0 +1,16 @@
+_________
+
+                                Getting Started
+                                      JAX
+
+________
+
+JAX is a library for array-oriented numerical computations. It supports:
+
+~ An interface similar to NumPy.
+~ Automatic Differentiation.
+~ JIT compilation through OPEN XLA.
+~ CPU,GPU,TPU support.
+~ Automatic vectorization of functions to map them over arrays.
+
+* JAX as NumPy

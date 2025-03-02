@@ -32,6 +32,8 @@
 *** {:dask/best-practices:}[Best Practices]
 *** {:dask/arrays:}[Arrays]
 *** {:dask/thoughts:}[Thoughts]
+*** Exploring
+**** {:dask/exploring_client:}[Client]
 ** {:docker/docker:}[Docker]
 ** {:ecoe3-notes:}[Ecoe3 Notes]
 ** Git and Github
@@ -44,6 +46,9 @@
 ** HPC
 *** {:hpc/single_core_optimization/single_core_optimization:}[Single Core Optimization]
 *** {:hpc/openmp/openmp:}[OpenMP]
+** Jax
+*** {:jax/getting_started:}[Getting Started]
+*** {:jax/key_concepts:}[Key Concepts]
 ** {:linux/linux:}[Linux]
 ** Missing semester of CS
 *** {:missingcs/l1:}[Lecture 1]

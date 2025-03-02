@@ -1,0 +1,156 @@
+___
+
+                                JAX
+                            Key Concepts
+
+____
+
+* Arrays
+
+** Creation
+
+   The fundamental object is `jax.Array`, however, we usually create it through
+   Jax API functions such as `jax.numpy`.
+    @code python
+    import jax
+    import jax.numpy as jnp
+
+    x = jnp.arange(5)
+    assert isinstance(x, jax.Array)
+   @end
+** Devices
+   Jax arrays have a `devices` attribute which indicate where they live. 
+
+   Arrays may be sharded across multiple devices. We can inspect this with the 
+   `sharding` attribute.
+    @code python
+    x.devices() 
+    # -> {CpuDevice(id=0)}
+
+    x.sharding 
+    # -> SingleDeviceSharding(device=CpuDevice(id=0), memory_kind=unpinned_host)
+    @end
+* Transformations
+    
+  Jax transformations operate on other Jax functions to produce new ones.
+  ~ *jax.jit()*: jit compile the function.
+  ~ *jax.vmap()*: automatic vectorization of the function.
+  ~ *jax.grad()*: gradient transform of the function for automatic diff.
+
+  And others. They all accept a Jax function as an argument and return a 
+  new transformed one.
+  Ex:
+  @code python
+  # optionally we can use @jax.jit
+  def selu(x, alpha=1.67, lambda_=1.05):
+    return lambda_ * jnp.where(x > 0, x, alpha * jnp.exp(x) - alpha)
+
+  # How to jit a function
+  selu_jit = jax.jit(selu)
+  @end
+
+* Tracing
+
+  The magic behind transformations in Jax is the Tracer object. 
+
+  $ Tracer
+  Abstract stand-in for an array that encode essential information about the it.
+  By executing the function with traced values, JAX can determine the sequence 
+  of operations encoded by the function before those operations are actually 
+  executed. Transformations like jit, vmap, and grad can then transform these 
+  operations. 
+
+* JaxExprs
+
+  JAX has its own intermediate representation for sequences of operations, 
+  known as a jaxpr. A jaxpr (short for JAX exPRession) is a simple 
+  representation of a functional program, comprising a sequence of primitive 
+  operations.
+
+  For example:
+@code python
+    def selu(x, alpha=1.67, lambda_=1.05):
+        return lambda_ * jnp.where(x > 0, x, alpha * jnp.exp(x) - alpha)
+    x = jnp.arange(5.0)
+    jax.make_jaxpr(selu)(x)
+  @end
+  Will yield:
+  @code
+  {lambda ; a:f32[5]. let
+    b:bool[5] = gt a 0.0
+    c:f32[5] = exp a
+    d:f32[5] = mul 1.6699999570846558 c
+    e:f32[5] = sub d 1.6699999570846558
+    f:f32[5] = pjit[
+      name=_where
+      jaxpr={ lambda ; g:bool[5] h:f32[5] i:f32[5]. let
+          j:f32[5] = select_n g i h
+        in (j,) }
+    ] b a e
+    k:f32[5] = mul 1.0499999523162842 f
+  in (k,) }
+  @end
+
+* Pytrees
+
+  JAX functions and transformations fundamentally operate on arrays, but in 
+  practice it is convenient to write code that works with collection of arrays:
+  an NN might organize its parameters in a dictionary of arrays.
+  Rather than handle such structures on a case-by-case basis, JAX relies
+  on the pytree abstraction to treat such collections in a uniform manner.
+
+  For example: 
+  @code python
+  # (nested) list of parameters
+  params = [1, 2, (jnp.arange(3), jnp.ones(2))]
+
+  print(jax.tree.structure(params))
+  print(jax.tree.leaves(params))
+  @end
+  Yields:
+  @code
+  PyTreeDef([*, *, (*, *)])
+  [1, 2, Array([0, 1, 2], dtype=int32), Array([1., 1.], dtype=float32)]
+  @end
+  Jax has functions to work with Pytrees. For example:
+  ~ *jax.tree.map()*: map a function on every leaf of tree.
+  ~ *jax.tree.reduce()*: reduction operation on leaves of tree.
+
+* Pseudorandom Generators
+
+  Jax differs from numpy in generating random numbers. Numpy does it by setting 
+  a global state *np.random.seed()*, but this works poorly in Jax's compute 
+  model. It makes it hard to be reproducible across threads and devices.
+  For this reason, Jax tracks state explicitly via a random *key* which is 
+  passed around to each random function. 
+
+  /Functions consume the key, but do not change it (unlike numpy)./
+
+  Therefore, unless we want identical outputs, never reuse a key!
+  @code python
+  from jax import random
+
+  key = random.key(43)
+
+  # yields the same results!
+  print(random.normal(key))
+  print(random.normal(key))
+  @end
+  To create more psuedo-random numbers, we need to *split* the key before using 
+  it. Splitting returns two keys, one for consumption, and the other for 
+  the next splitting.
+  @code python
+  for i in range(3):
+      new_key, subkey = random.split(key)
+  del key  # The old key is consumed by split() -- we must never use it again.
+
+  val = random.normal(subkey)
+  del subkey  # The subkey is consumed by normal().
+
+  print(f"draw {i}: {val}")
+  key = new_key  # new_key is safe to use in the next iteration.
+  @end
+  This approach is thread safe since it relies on local random states.
+  The *random.split* function is deterministic in how it creates the split, 
+  so you will have reproducible results.
+
