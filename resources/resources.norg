@@ -18,9 +18,8 @@
 ** Questions
    - (x) {https://unix.stackexchange.com/questions/3192/what-is-meant-by-mounting-a-device-in-linux}[What is meant by mounting a device in linux?]
 * Programming
-  - ( ) {https://bernsteinbear.com/pl-resources/}[Programming Language Resources]
-  -- Talks about compilers, Lisp, Runtime and Runtime Optimization, Jit, Assembly. 
-  - ( ) {https://austinhenley.com/blog/challengingprojects.html}[Challenging Projects Every Programmer Should Try]
+** {https://bernsteinbear.com/pl-resources/}[Programming Language Resources]
+** {https://austinhenley.com/blog/challengingprojects.html}[Challenging Projects Every Programmer Should Try]
 ** C
    - ( ) {https://www.assemblyai.com/blog/deepminds-alphatensor-explained/}[What Every C Programmer Should Know About Undefined Behavior]
    - ( ) {https://blog.regehr.org/archives/213}[A Guide TO Undefined Behavior in C and C++, Part 1]
@@ -49,12 +48,12 @@
    - ( ) {https://cheats.rs/#language-sugar}[Rust Cheat Sheet]
    - ( ) {https://practice.course.rs/}[Rust By Practice]
 ** Nix
-   - (-) {https://nixos.org/manual/nix/stable/}[Nix Manual]
-   - (-) {https://nixos.org/manual/nixpkgs/stable/}[NixPkgs Manual]
-   - (-) {https://nixos.org/manual/nixos/stable/}[NixOS Manual]
+   - (x) {https://nixos.org/manual/nix/stable/}[Nix Manual]
+   - (x) {https://nixos.org/manual/nixpkgs/stable/}[NixPkgs Manual]
+   - (x) {https://nixos.org/manual/nixos/stable/}[NixOS Manual]
    - (-) {https://nix.dev/}[Nix Dev]
    - (-) {https://nixos.org/guides/nix-pills/}[Nix Pills]
-   - (-) {https://noogle.dev/}[Noogle - Find Nix Functions]
+   - (x) {https://noogle.dev/}[Noogle - Find Nix Functions]
    - (-) {https://flakm.com/posts/nixos_rust/01_start/}[Measure Twice Cut Once with NixOS] - Using NixOS to build a federated blogging platform. 
    - (-) {https://tonyfinn.com/blog/nix-from-first-principles-flake-edition/}[Nix from First Principles - Flake Edition]
    - (-) {https://nixos.asia/en/nix-first}[First Steps with Nix]
@@ -65,8 +64,8 @@
 ** ATS Programming Language
    - {https://www.cs.bu.edu/~hwxi/atslangweb/}[The ATS Programming Language]
 ** Haskell
-   - (-) {https://www.youtube.com/playlist?list=PLF1Z-APd9zK7usPMx3LGMZEHrECUGodd3}[Functional Programming In Haskell]
-   - (-) {https://www.youtube.com/playlist?list=PLF1Z-APd9zK5uFc8FKr_di9bfsYv8-lbc}[Advanced Functional Programming In Haskell]
+   - (x) {https://www.youtube.com/playlist?list=PLF1Z-APd9zK7usPMx3LGMZEHrECUGodd3}[Functional Programming In Haskell]
+   - (x) {https://www.youtube.com/playlist?list=PLF1Z-APd9zK5uFc8FKr_di9bfsYv8-lbc}[Advanced Functional Programming In Haskell]
    - (-) {http://learnyouahaskell.com/}[Learn You a Haskell For Greater Good]
    - ( ) {https://www.cs.nott.ac.uk/~pszgmh/fold.pdf}[A Tutorial On The Universality And Expressiveness Of Fold]
    - ( ) {http://learn.hfm.io/}[Learning Haskell]
@@ -82,9 +81,6 @@
    - ( ) {https://punkx.org/overflow/}[Projekt Overflow]
 ** x86
    - {https://www.youtube.com/watch?v=KrksBdWcZgQ}[Breaking the x86 Instruction set]
-** Advent Of Code
-   - ( ) {https://adventofcode.com/}[Advent of Code]
-   - ( ) {https://fasterthanli.me/series/advent-of-code-2022}[Amos Advent Of Code In Rust]
 ** Mixing Programming Languages
    - ( ) {https://blog.frankel.ch/rust-from-python/}[Calling Rust From Python]
 * Tools
@@ -99,10 +95,6 @@
    - ( ) {https://ohmygit.org/}[An Open Source Game to Learn Git]
 * Vim
    - ( ) {https://www.barbarianmeetscoding.com/boost-your-coding-fu-with-vscode-and-vim/dedication}[Boost Your Coding Fu with VsCode and VIM]
-** LaTeX in Vim
-   - {https://www.ejmastnak.com/tutorials/vim-latex/prerequisites/}[Suggested Prerequisites For Writing LaTeX in Vim]
-   - {https://castel.dev/post/lecture-notes-1/}[How I'm Able To Take Notes In Mathematics Lectures Using LaTeX and Vim]
-   - {http://www.benbrastmckie.com/tools#access}[Tools For Academic Writing]
 * Server Stuff
   -- {https://www.cuttingcords.com/home/ultimate-server/getting-started}[Ultimate Server Part 1]
   -- {https://selfhosted-survey-2023.deployn.de/apps}[Most used services in hosting]
@@ -112,12 +104,11 @@
   -- {https://www.cyber.gov.au/protect-yourself/resources-protect-yourself/personal-security-guides/personal-cyber-security-first-steps}[Personal Cyber Security: First Steps]
   -- {https://anonymousplanet.org/guide.html}[The Hitchhiker’s Guide to Online Anonymity]
 * Blogs
-  -- (+) [Amos's Blog] - A blog discussing Rust and how computers work.
-  -- (+) [Julia Evans]{https://jvns.ca/} - A blog for exploring interesting topics
-  -- (+) [Patrick Kidger]{https://kidger.site/thoughts/just-know-stuff/} - Insane guy that talks about things you should know for a 
-         PhD in ML. Hopefully in a few years I can finish this list.
-  -- (+) [Sebastian Mestre]{https://sebmestre.blogspot.com/2023/11/en-writing-compiler-is-surprisingly.html?m=1} - Writing a Compiler Is Suprisingly Easy.
-  -- (+) [Xe]{https://xeiaso.net/blog/} - Blog by Xe on a bit of everything.
+  -- (+) [Amos's Blog]
+  -- (+) [Julia Evans]{https://jvns.ca/}
+  -- (+) [Patrick Kidger]{https://kidger.site/thoughts/just-know-stuff/} 
+  -- (+) [Sebastian Mestre]{https://sebmestre.blogspot.com/2023/11/en-writing-compiler-is-surprisingly.html?m=1}
+  -- (+) [Xe]{https://xeiaso.net/blog/}
 * Misc 
 ** Blue Blocking Glasses
    - (x) {https://optimizeyourbiology.com/blue-blocker-database}[Find The Best Blue Blocking Glasses]
